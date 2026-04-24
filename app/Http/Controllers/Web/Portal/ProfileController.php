@@ -44,14 +44,15 @@ final class ProfileController extends PortalController
                 ->where('reported_by', $user->getKey())
                 ->where('building_id', $profileBuilding->getKey());
 
+            $counts = (clone $ticketQuery)
+                ->selectRaw('status, COUNT(*) as aggregate')
+                ->groupBy('status')
+                ->pluck('aggregate', 'status');
+
             $ticketStats = [
-                'active' => (clone $ticketQuery)
-                    ->whereIn('status', [TicketStatus::New->value, TicketStatus::InProgress->value])
-                    ->count(),
-                'resolved' => (clone $ticketQuery)
-                    ->where('status', TicketStatus::Resolved->value)
-                    ->count(),
-                'total' => (clone $ticketQuery)->count(),
+                'active'   => (int) (($counts[TicketStatus::New->value] ?? 0) + ($counts[TicketStatus::InProgress->value] ?? 0)),
+                'resolved' => (int) ($counts[TicketStatus::Resolved->value] ?? 0),
+                'total'    => (int) $counts->sum(),
             ];
 
             $recentTicket = (clone $ticketQuery)

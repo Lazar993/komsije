@@ -9,11 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['building_id', 'author_id', 'title', 'content', 'published_at'])]
 class Announcement extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     public function building(): BelongsTo
     {

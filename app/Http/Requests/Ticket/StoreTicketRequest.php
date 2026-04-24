@@ -46,7 +46,7 @@ final class StoreTicketRequest extends FormRequest
             'apartment_id' => ['nullable', 'integer'],
             'assigned_to' => ['nullable', 'integer', Rule::exists('users', 'id')],
             'attachments' => ['nullable', 'array'],
-            'attachments.*' => ['file', 'image', 'max:5120'],
+            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,gif,webp,pdf,mp4,mov,doc,docx,xls,xlsx', 'max:10240'],
             'building_id' => ['required', 'integer'],
             'description' => ['required', 'string', 'max:5000'],
             'priority' => ['required', Rule::enum(TicketPriority::class)],

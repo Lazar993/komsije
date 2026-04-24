@@ -68,7 +68,10 @@
                                 </div>
 
                                 <div>
-                                    <label for="password" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Password') }}</label>
+                                    <div class="mb-2 flex items-center justify-between gap-2">
+                                        <label for="password" class="block text-sm font-medium text-slate-700">{{ __('Password') }}</label>
+                                        <a href="{{ route('password.request') }}" class="text-xs font-medium text-[var(--komsije-primary)] hover:underline">{{ __('Forgot password?') }}</a>
+                                    </div>
                                     <input id="password" name="password" type="password" required class="komsije-input w-full rounded-2xl px-4 py-3 text-slate-950 transition">
                                     @error('password')
                                         <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>

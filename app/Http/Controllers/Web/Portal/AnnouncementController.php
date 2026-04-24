@@ -8,9 +8,11 @@ use App\Http\Requests\Announcement\StoreAnnouncementRequest;
 use App\Http\Requests\Announcement\UpdateAnnouncementRequest;
 use App\Models\Announcement;
 use App\Services\AnnouncementService;
+use App\Support\Cache\CacheKey;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 final class AnnouncementController extends PortalController
@@ -85,6 +87,11 @@ final class AnnouncementController extends PortalController
         if ($request->user()->can('markAsRead', $announcement)) {
             $this->announcementService->markAsRead($announcement, $request->user());
             $announcement->loadCount('reads');
+
+            Cache::forget(CacheKey::userUnreadAnnouncements(
+                (int) $request->user()->getKey(),
+                (int) $announcement->building_id,
+            ));
         }
 
         return $this->portalView($request, 'portal.announcements.show', [

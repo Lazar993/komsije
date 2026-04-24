@@ -42,8 +42,13 @@
                     <div class="mb-8 flex items-start justify-between gap-4">
                         <div>
                             <p class="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-800">{{ __('Invite Registration') }}</p>
-                            <h2 class="mt-3 text-3xl font-semibold text-slate-950">{{ __('Kreirajte svoj nalog') }}</h2>
-                            <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+                            @if ($hasExistingAccount)
+                                <h2 class="mt-3 text-3xl font-semibold text-slate-950">{{ __('Accept invite') }}</h2>
+                                <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('An account already exists for :email. Enter your current password to accept the invite and link this building to your existing account.', ['email' => $invite->email]) }}</p>
+                            @else
+                                <h2 class="mt-3 text-3xl font-semibold text-slate-950">{{ __('Kreirajte svoj nalog') }}</h2>
+                                <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+                            @endif
                         </div>
 
                         @include('partials.language-switcher')
@@ -52,13 +57,15 @@
                     <form method="POST" action="{{ route('invite.store', $invite->token) }}" class="space-y-5">
                         @csrf
 
-                        <div>
-                            <label for="name" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Name') }}</label>
-                            <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
-                            @error('name')
-                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @unless ($hasExistingAccount)
+                            <div>
+                                <label for="name" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Name') }}</label>
+                                <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
+                                @error('name')
+                                    <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        @endunless
 
                         <div>
                             <label for="email" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Email') }}</label>
@@ -69,19 +76,28 @@
                         </div>
 
                         <div>
-                            <label for="password" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Password') }}</label>
+                            <label for="password" class="mb-2 block text-sm font-medium text-slate-700">
+                                {{ $hasExistingAccount ? __('Your current password') : __('Password') }}
+                            </label>
                             <input id="password" name="password" type="password" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
                             @error('password')
                                 <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div>
-                            <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm password') }}</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
-                        </div>
+                        @unless ($hasExistingAccount)
+                            <div>
+                                <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm password') }}</label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
+                            </div>
+                        @else
+                            {{-- For existing users the password is not "confirmed" — submit the same value as confirmation --}}
+                            <input type="hidden" name="password_confirmation" value="">
+                        @endunless
 
-                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-900">{{ __('Join building') }}</button>
+                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-900">
+                            {{ $hasExistingAccount ? __('Accept invite') : __('Join building') }}
+                        </button>
                     </form>
 
                     <div class="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950">

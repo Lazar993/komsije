@@ -7,10 +7,12 @@ namespace App\Http\Controllers\Web\Portal;
 use App\Models\Announcement;
 use App\Models\Building;
 use App\Models\User;
+use App\Support\Cache\CacheKey;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 abstract class PortalController
@@ -24,14 +26,21 @@ abstract class PortalController
         $unreadAnnouncementsCount = 0;
 
         if ($currentBuilding !== null) {
-            $unreadAnnouncementsCount = Announcement::query()
-                ->where('building_id', $currentBuilding->getKey())
-                ->whereNotNull('published_at')
-                ->whereDoesntHave(
-                    'reads',
-                    fn (Builder $query): Builder => $query->where('user_id', $request->user()->getKey()),
-                )
-                ->count();
+            $userId = (int) $request->user()->getKey();
+            $buildingId = (int) $currentBuilding->getKey();
+
+            $unreadAnnouncementsCount = Cache::remember(
+                CacheKey::userUnreadAnnouncements($userId, $buildingId),
+                now()->addMinutes(2),
+                fn (): int => (int) Announcement::query()
+                    ->where('building_id', $buildingId)
+                    ->whereNotNull('published_at')
+                    ->whereDoesntHave(
+                        'reads',
+                        fn (Builder $query): Builder => $query->where('user_id', $userId),
+                    )
+                    ->count(),
+            );
         }
 
         return view($view, array_merge($data, [

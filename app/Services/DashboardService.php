@@ -96,15 +96,25 @@ final class DashboardService
      */
     private function mergeRecentTickets(array &$buildings, array $buildingIds, bool $includeAllTickets, User $user): void
     {
+        if ($buildingIds === []) {
+            return;
+        }
+
+        // Fetch all relevant tickets in a single query, then group in PHP.
+        // The result is cached at the caller level, so this runs at most once per cache miss.
+        $allTickets = $this->ticketQuery($buildingIds, $includeAllTickets, $user)
+            ->with(['reporter:id,name', 'assignee:id,name', 'apartment:id,building_id,number'])
+            ->latest()
+            ->get();
+
+        $grouped = $allTickets->groupBy('building_id');
+
         foreach ($buildingIds as $buildingId) {
-            $buildings[$buildingId]['recent_tickets'] = $this->ticketQuery([$buildingId], $includeAllTickets, $user)
-                ->with(['reporter:id,name', 'assignee:id,name', 'apartment:id,building_id,number'])
-                ->latest()
-                ->limit(5)
-                ->get()
+            $buildings[$buildingId]['recent_tickets'] = ($grouped->get($buildingId) ?? collect())
+                ->take(5)
                 ->map(fn (Ticket $ticket): array => $this->serializeTicket($ticket))
-                    ->values()
-                    ->all();
+                ->values()
+                ->all();
         }
     }
 

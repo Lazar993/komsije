@@ -6,6 +6,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\Ticket;
 use App\Models\TicketComment;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface TicketRepositoryInterface
@@ -14,6 +15,11 @@ interface TicketRepositoryInterface
      * @param array<string, mixed> $filters
      */
     public function paginateForBuilding(int $buildingId, array $filters, int $perPage = 15): LengthAwarePaginator;
+
+    /**
+     * @param array<string, mixed> $filters
+     */
+    public function paginateForBuildingAndUser(int $buildingId, User $user, array $filters, int $perPage = 10): LengthAwarePaginator;
 
     /**
      * @param array<string, mixed> $data

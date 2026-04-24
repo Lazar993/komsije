@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\InviteRegistrationController;
+use App\Http\Controllers\Web\Auth\NewPasswordController;
+use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\SetSiteLocaleController;
 use App\Http\Controllers\Web\Portal\AnnouncementController;
 use App\Http\Controllers\Web\Portal\BuildingContextController;
@@ -24,9 +26,13 @@ Route::post('locale', SetSiteLocaleController::class)->name('locale.update');
 
 Route::middleware('guest')->group(function (): void {
 	Route::get('invite/{token}', [InviteRegistrationController::class, 'show'])->name('invite.show');
-	Route::post('invite/{token}', [InviteRegistrationController::class, 'store'])->name('invite.store');
+	Route::post('invite/{token}', [InviteRegistrationController::class, 'store'])->middleware('throttle:10,1')->name('invite.store');
 	Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
-	Route::post('login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+	Route::post('login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:10,1')->name('login.store');
+	Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+	Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('throttle:5,1')->name('password.email');
+	Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+	Route::post('reset-password', [NewPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.update');
 });
 
 Route::middleware('auth')->group(function (): void {

@@ -122,18 +122,18 @@
                 @error('priority')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
             </div>
 
-            @if ($isBuildingAdmin)
-                <div>
-                    <label for="assigned_to" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Assign to manager') }}</label>
-                    <select id="assigned_to" name="assigned_to" class="komsije-input w-full rounded-2xl px-4 py-3">
-                        <option value="">{{ __('Unassigned') }}</option>
-                        @foreach ($managerOptions as $managerId => $managerName)
-                            <option value="{{ $managerId }}" @selected((string) old('assigned_to', $ticket->assigned_to ?? '') === (string) $managerId)>{{ $managerName }}</option>
-                        @endforeach
-                    </select>
-                    @error('assigned_to')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
-                </div>
+            <div>
+                <label for="assigned_to" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Assigned manager') }}</label>
+                <select id="assigned_to" name="assigned_to" class="komsije-input w-full rounded-2xl px-4 py-3">
+                    <option value="">{{ __('Unassigned') }}</option>
+                    @foreach ($managerOptions as $managerId => $managerName)
+                        <option value="{{ $managerId }}" @selected((string) old('assigned_to', $ticket->assigned_to ?? '') === (string) $managerId)>{{ $managerName }}</option>
+                    @endforeach
+                </select>
+                @error('assigned_to')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+            </div>
 
+            @if ($isBuildingAdmin)
                 <div>
                     <label for="status" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Status') }}</label>
                     <select id="status" name="status" class="komsije-input w-full rounded-2xl px-4 py-3">

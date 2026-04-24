@@ -12,11 +12,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['name', 'address', 'created_by', 'billing_customer_reference'])]
 class Building extends Model
 {
     use HasFactory;
+    use SoftDeletes;
+
+    protected static function booted(): void
+    {
+        static::deleting(static function (Building $building): void {
+            if (! $building->isForceDeleting()) {
+                $building->tickets()->update(['deleted_at' => now()]);
+                $building->announcements()->update(['deleted_at' => now()]);
+            }
+        });
+    }
 
     public function creator(): BelongsTo
     {

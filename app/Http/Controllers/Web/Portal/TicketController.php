@@ -11,6 +11,7 @@ use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Requests\Ticket\UpdateTicketRequest;
 use App\Models\Apartment;
 use App\Models\Ticket;
+use App\Repositories\Contracts\TicketRepositoryInterface;
 use App\Services\TicketService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,6 +23,7 @@ final class TicketController extends PortalController
 {
     public function __construct(
         private readonly TicketService $ticketService,
+        private readonly TicketRepositoryInterface $tickets,
         private readonly TenantContext $tenantContext,
     ) {
     }
@@ -33,25 +35,13 @@ final class TicketController extends PortalController
         $building = $this->tenantContext->building();
         $user = $request->user();
 
-        $tickets = Ticket::query()
-            ->where('building_id', $building->getKey())
-            ->with(['apartment', 'reporter', 'assignee'])
-            ->when($request->filled('status'), fn (Builder $query): Builder => $query->where('status', $request->string('status')->value()))
-            ->when($request->filled('priority'), fn (Builder $query): Builder => $query->where('priority', $request->string('priority')->value()))
-            ->when($request->filled('assigned_to'), fn (Builder $query): Builder => $query->where('assigned_to', (int) $request->integer('assigned_to')))
-            ->when(
-                ! $user->isBuildingAdmin($building->getKey()),
-                function (Builder $query) use ($user): Builder {
-                    return $query->where(function (Builder $scopedQuery) use ($user): void {
-                        $scopedQuery
-                            ->where('reported_by', $user->getKey())
-                            ->orWhereHas('apartment.tenants', fn (Builder $tenantQuery): Builder => $tenantQuery->whereKey($user->getKey()));
-                    });
-                },
-            )
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        $filters = $request->only(['status', 'priority', 'assigned_to']);
+
+        $tickets = $this->tickets->paginateForBuildingAndUser(
+            (int) $building->getKey(),
+            $user,
+            $filters,
+        )->withQueryString();
 
         $managerOptions = $building->managers()->orderBy('name')->pluck('name', 'users.id');
 
@@ -130,6 +120,11 @@ final class TicketController extends PortalController
         $this->authorize('update', $ticket);
 
         $data = array_merge($request->validated(), ['building_id' => $this->tenantContext->buildingId()]);
+
+        // Tenants who are the reporter (non-admin) may only update the title and description.
+        if (! $request->user()->isBuildingAdmin((int) $this->tenantContext->buildingId())) {
+            unset($data['assigned_to'], $data['status'], $data['priority']);
+        }
 
         $ticket = $this->ticketService->update($ticket->load('building'), $request->user(), $data);
 

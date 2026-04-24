@@ -98,9 +98,9 @@
                                 <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $entry->created_at->translatedFormat('M j, Y H:i') }}</p>
                             </div>
                             <p class="mt-3 text-sm text-slate-700">{{ $entry->from_status?->label() ?? __('None') }} → {{ $entry->to_status?->label() ?? __('None') }}</p>
-                            @if ($entry->note)
+                            {{-- @if ($entry->note)
                                 <p class="mt-2 text-sm leading-7 text-slate-600">{{ $entry->note }}</p>
-                            @endif
+                            @endif --}}
                         </div>
                     @empty
                         <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No status changes have been recorded yet.') }}</p>

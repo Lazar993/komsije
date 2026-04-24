@@ -20,4 +20,9 @@ final class CacheKey
     {
         return "building:{$buildingId}:announcements";
     }
+
+    public static function userUnreadAnnouncements(int $userId, int $buildingId): string
+    {
+        return "user:{$userId}:building:{$buildingId}:unread_announcements";
+    }
 }

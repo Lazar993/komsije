@@ -9,8 +9,25 @@ services:
       - ./:/var/www
     depends_on:
       - db
+      - redis
     networks:
-    - upravnik_network
+      - upravnik_network
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: upravnik_worker
+    working_dir: /var/www
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    networks:
+      - upravnik_network
 
   nginx:
     image: nginx:latest
@@ -23,7 +40,7 @@ services:
     depends_on:
       - app
     networks:
-    - upravnik_network
+      - upravnik_network
 
   db:
     image: mysql:8.0
@@ -39,7 +56,16 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     networks:
-    - upravnik_network
+      - upravnik_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: upravnik_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - upravnik_network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -53,7 +79,7 @@ services:
     depends_on:
       - db
     networks:
-    - upravnik_network
+      - upravnik_network
 
 volumes:
   dbdata:

@@ -13,6 +13,7 @@ use App\Notifications\TenantInviteNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -113,12 +114,29 @@ final class InviteService
                 ]);
             }
 
-            $user = User::query()->create([
-                'email' => $normalizedEmail,
-                'locale' => 'sr',
-                'name' => trim((string) $data['name']),
-                'password' => (string) $data['password'],
-            ]);
+            $existingUser = User::query()->where('email', $normalizedEmail)->first();
+
+            if ($existingUser !== null) {
+                // Verify the caller's password to confirm identity before linking.
+                if (! Hash::check((string) $data['password'], $existingUser->password)) {
+                    throw ValidationException::withMessages([
+                        'password' => [__('The provided password is incorrect.')],
+                    ]);
+                }
+                $user = $existingUser;
+            } else {
+                if (empty(trim((string) ($data['name'] ?? '')))) {
+                    throw ValidationException::withMessages([
+                        'name' => [__('The name field is required.')],
+                    ]);
+                }
+                $user = User::query()->create([
+                    'email' => $normalizedEmail,
+                    'locale' => 'sr',
+                    'name' => trim((string) $data['name']),
+                    'password' => (string) $data['password'],
+                ]);
+            }
 
             $this->apartments->assignTenant($lockedInvite->apartment, $user);
             $lockedInvite->markAsUsed();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Auth;
 
 use App\Http\Requests\Auth\AcceptInviteRequest;
+use App\Models\User;
 use App\Services\InviteService;
 use App\Support\Localization\SiteLocale;
 use Illuminate\Contracts\View\View;
@@ -29,8 +30,11 @@ final class InviteRegistrationController
             ], $invite === null ? 404 : 410);
         }
 
+        $hasExistingAccount = User::query()->where('email', $invite->email)->exists();
+
         return view('auth.invite-register', [
             'invite' => $invite,
+            'hasExistingAccount' => $hasExistingAccount,
         ]);
     }
 

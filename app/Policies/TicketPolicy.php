@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Enums\BuildingRole;
+use App\Enums\TicketStatus;
 use App\Models\Building;
 use App\Models\Ticket;
 use App\Models\User;
@@ -40,7 +41,11 @@ final class TicketPolicy
 
     public function update(User $user, Ticket $ticket): bool
     {
-        return $user->isBuildingAdmin($ticket->building_id);
+        if ($user->isBuildingAdmin($ticket->building_id)) {
+            return true;
+        }
+
+        return $ticket->reported_by === $user->getKey() && $ticket->status === TicketStatus::New;
     }
 
     public function comment(User $user, Ticket $ticket): bool
