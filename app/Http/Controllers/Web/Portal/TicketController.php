@@ -50,7 +50,7 @@ final class TicketController extends PortalController
                 },
             )
             ->latest()
-            ->paginate(12)
+            ->paginate(10)
             ->withQueryString();
 
         $managerOptions = $building->managers()->orderBy('name')->pluck('name', 'users.id');

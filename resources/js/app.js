@@ -9,22 +9,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyStandaloneMode();
     upgradeImagesForPerformance();
     setupTicketFilters();
+    setupAnnouncementPagination();
     setupInstallPrompt();
     await registerServiceWorker();
 });
 
 function setupTicketFilters() {
-    const form = document.querySelector('[data-ticket-filters]');
-    const results = document.querySelector('[data-ticket-results]');
+    setupAsyncListing({
+        formSelector: '[data-ticket-filters]',
+        resultsSelector: '[data-ticket-results]',
+        resetSelector: '[data-ticket-filters-reset]',
+    });
+}
 
-    if (!form || !results) {
+function setupAnnouncementPagination() {
+    setupAsyncListing({
+        resultsSelector: '[data-announcement-results]',
+    });
+}
+
+function setupAsyncListing({ formSelector = null, resultsSelector, resetSelector = null }) {
+    const form = formSelector ? document.querySelector(formSelector) : null;
+    const results = document.querySelector(resultsSelector);
+
+    if (!results || (formSelector && !form)) {
         return;
     }
 
-    const resetLink = document.querySelector('[data-ticket-filters-reset]');
+    const baseUrl = form instanceof HTMLFormElement
+        ? new URL(form.action, window.location.origin)
+        : new URL(window.location.href, window.location.origin);
+    const resetLink = resetSelector ? document.querySelector(resetSelector) : null;
     let activeRequest = null;
 
     const syncFormWithUrl = (url) => {
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
         const searchParams = new URL(url, window.location.origin).searchParams;
 
         form.querySelectorAll('select[name], input[name]').forEach((field) => {
@@ -58,7 +80,7 @@ function setupTicketFilters() {
             });
 
             if (!response.ok) {
-                throw new Error(`Ticket filter request failed with status ${response.status}`);
+                throw new Error(`Async listing request failed with status ${response.status}`);
             }
 
             results.innerHTML = await response.text();
@@ -75,7 +97,11 @@ function setupTicketFilters() {
         }
     };
 
-    const buildFilterUrl = () => {
+    const buildFormUrl = () => {
+        if (!(form instanceof HTMLFormElement)) {
+            return baseUrl.toString();
+        }
+
         const url = new URL(form.action, window.location.origin);
         const formData = new FormData(form);
 
@@ -90,18 +116,22 @@ function setupTicketFilters() {
         return url.toString();
     };
 
-    form.addEventListener('submit', (event) => {
+    form?.addEventListener('submit', (event) => {
         event.preventDefault();
-        void requestResults(buildFilterUrl());
+        void requestResults(buildFormUrl());
     });
 
-    form.querySelectorAll('select').forEach((field) => {
+    form?.querySelectorAll('select').forEach((field) => {
         field.addEventListener('change', () => {
-            void requestResults(buildFilterUrl());
+            void requestResults(buildFormUrl());
         });
     });
 
     resetLink?.addEventListener('click', (event) => {
+        if (!(form instanceof HTMLFormElement)) {
+            return;
+        }
+
         event.preventDefault();
         form.reset();
         void requestResults(resetLink.href);
@@ -116,7 +146,7 @@ function setupTicketFilters() {
 
         const url = new URL(link.href, window.location.origin);
 
-        if (url.origin !== window.location.origin || url.pathname !== new URL(form.action, window.location.origin).pathname) {
+        if (url.origin !== window.location.origin || url.pathname !== baseUrl.pathname) {
             return;
         }
 
@@ -125,6 +155,10 @@ function setupTicketFilters() {
     });
 
     window.addEventListener('popstate', () => {
+        if (window.location.pathname !== baseUrl.pathname) {
+            return;
+        }
+
         syncFormWithUrl(window.location.href);
         void requestResults(window.location.href, { replace: true });
     });

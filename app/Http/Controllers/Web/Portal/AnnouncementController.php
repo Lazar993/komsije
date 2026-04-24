@@ -38,7 +38,15 @@ final class AnnouncementController extends PortalController
             ->when(! $includeDrafts, fn ($query) => $query->whereNotNull('published_at'))
             ->latest('published_at')
             ->latest('created_at')
-            ->paginate(12);
+            ->paginate(10)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return view('portal.announcements.partials.results', [
+                'announcements' => $announcements,
+                'currentBuilding' => $building,
+            ]);
+        }
 
         return $this->portalView($request, 'portal.announcements.index', [
             'announcements' => $announcements,
