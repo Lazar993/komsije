@@ -41,6 +41,13 @@
         </svg>
         @break
 
+    @case('admin')
+        <svg {{ $attributes->merge(['class' => $class, 'viewBox' => '0 0 24 24', 'fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '1.8', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round']) }}>
+            <path d="M12 3l6.25 2.5v5.75c0 4.2-2.54 8.08-6.25 9.75-3.71-1.67-6.25-5.55-6.25-9.75V5.5L12 3Z" />
+            <path d="M9.5 12.25 11.25 14 14.75 10.5" />
+        </svg>
+        @break
+
     @case('plus')
         <svg {{ $attributes->merge(['class' => $class, 'viewBox' => '0 0 24 24', 'fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '1.8', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round']) }}>
             <path d="M12 5v14" />

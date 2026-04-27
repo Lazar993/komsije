@@ -48,6 +48,10 @@
                                 </a>
 
                                 @if ($user?->isSuperAdmin() || $user?->isBuildingAdmin())
+                                    <a href="/admin" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--komsije-dark)] text-white transition hover:bg-slate-800 sm:hidden" aria-label="{{ __('Admin') }}" title="{{ __('Admin') }}">
+                                        <x-portal.app-icon name="admin" class="h-4 w-4" />
+                                    </a>
+
                                     <a href="/admin" class="hidden rounded-2xl bg-[var(--komsije-dark)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 sm:inline-flex">{{ __('Admin') }}</a>
                                 @endif
                             </div>
@@ -90,12 +94,12 @@
                                     </div>
                                 </a>
 
-                                <div class="flex items-center gap-3 self-end sm:self-auto">
-                                    @include('partials.language-switcher', ['compact' => true])
+                                <div class="flex items-center justify-end gap-2 self-end sm:gap-3 sm:self-auto">
+                                    @include('partials.language-switcher', ['compact' => true, 'mobileLabelHidden' => true])
 
                                     <form method="POST" action="{{ route('logout') }}" class="shrink-0">
                                         @csrf
-                                        <button type="submit" class="whitespace-nowrap rounded-2xl border border-[var(--komsije-border)] bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]">{{ __('Odjava') }}</button>
+                                        <button type="submit" class="whitespace-nowrap rounded-2xl border border-[var(--komsije-border)] bg-white px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)] sm:px-4 sm:py-3 sm:text-sm">{{ __('Odjava') }}</button>
                                     </form>
                                 </div>
                             </div>
