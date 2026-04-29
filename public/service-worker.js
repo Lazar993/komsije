@@ -1,4 +1,4 @@
-const VERSION = 'komsije-v6';
+const VERSION = 'komsije-v7';
 const STATIC_CACHE = `${VERSION}-static`;
 const DYNAMIC_CACHE = `${VERSION}-dynamic`;
 const API_CACHE = `${VERSION}-api`;

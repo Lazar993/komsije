@@ -16,6 +16,11 @@ export function initPushNotifications() {
         return;
     }
 
+    // Self-heal: remove any legacy FCM service worker registered at root scope.
+    // Older versions registered firebase-messaging-sw.js with no scope, which
+    // caused it to compete with the main app shell SW and trigger a reload loop.
+    void cleanupLegacyFcmRegistration();
+
     const config = readFirebaseConfig();
 
     if (!config) {
@@ -107,11 +112,12 @@ export async function enablePush(configOverride = null) {
     }
 
     const { messaging, getToken, onMessage } = await loadFirebase(config);
-    const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-    // Forward the public web config to the FCM SW so it can handle background pushes.
-    swRegistration.active?.postMessage({ type: 'FIREBASE_CONFIG', config });
-    navigator.serviceWorker.controller?.postMessage({ type: 'FIREBASE_CONFIG', config });
+    // Register the FCM SW under a dedicated scope so it can never conflict
+    // with the main app shell service worker at the root scope.
+    const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/firebase-cloud-messaging-push-scope/',
+    });
 
     const token = await getToken(messaging, {
         vapidKey: config.vapidKey,
@@ -177,6 +183,34 @@ function detectDeviceType() {
     if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
     if (/android/i.test(ua)) return 'android';
     return 'web';
+}
+
+async function cleanupLegacyFcmRegistration() {
+    try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+
+        for (const registration of registrations) {
+            const scriptUrl = registration.active?.scriptURL
+                || registration.installing?.scriptURL
+                || registration.waiting?.scriptURL
+                || '';
+
+            if (!scriptUrl.endsWith('/firebase-messaging-sw.js')) {
+                continue;
+            }
+
+            // The new FCM SW lives under /firebase-cloud-messaging-push-scope/.
+            // Anything else is the legacy root-scoped registration that fights
+            // with the main app SW; unregister it.
+            if (registration.scope.endsWith('/firebase-cloud-messaging-push-scope/')) {
+                continue;
+            }
+
+            await registration.unregister();
+        }
+    } catch (error) {
+        console.warn('Legacy FCM SW cleanup failed', error);
+    }
 }
 
 async function loadFirebase(config) {
