@@ -94,12 +94,15 @@ final class ApartmentService
     {
         $apartment->tenants()->syncWithoutDetaching([$user->getKey()]);
 
-        if (! $building->users()->whereKey($user->getKey())->exists()) {
+        $hasTenantRow = $building->users()
+            ->wherePivot('role', BuildingRole::Tenant->value)
+            ->whereKey($user->getKey())
+            ->exists();
+
+        if (! $hasTenantRow) {
             $building->users()->attach($user->getKey(), ['role' => BuildingRole::Tenant->value]);
         }
 
-        if (! $user->isBuildingAdmin($building->getKey())) {
-            $user->syncBuildingRole($building->getKey(), BuildingRole::Tenant->permissionRoleName());
-        }
+        $user->syncBuildingRole($building->getKey());
     }
 }

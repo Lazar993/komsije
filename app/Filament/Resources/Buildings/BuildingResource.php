@@ -48,8 +48,6 @@ class BuildingResource extends Resource
                 TextInput::make('address')
                     ->required()
                     ->maxLength(255),
-                TextInput::make('billing_customer_reference')
-                    ->maxLength(255),
                 Select::make('manager_ids')
                     ->label('Building admins')
                     ->multiple()

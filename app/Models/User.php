@@ -201,11 +201,26 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
             return BuildingRole::Tenant;
         }
 
-        $role = $this->buildings()
+        $pivotRoles = $this->buildings()
             ->whereKey($buildingId)
-            ->first()?->pivot?->role;
+            ->get()
+            ->map(function ($building): ?string {
+                $role = $building->pivot?->role;
 
-        return $role instanceof BuildingRole ? $role : ($role !== null ? BuildingRole::from($role) : null);
+                return $role instanceof BuildingRole ? $role->value : $role;
+            })
+            ->filter()
+            ->all();
+
+        if (in_array(BuildingRole::PropertyManager->value, $pivotRoles, true)) {
+            return BuildingRole::PropertyManager;
+        }
+
+        if (in_array(BuildingRole::Tenant->value, $pivotRoles, true)) {
+            return BuildingRole::Tenant;
+        }
+
+        return null;
     }
 
     public function hasGlobalRole(string $role): bool
@@ -233,16 +248,31 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         $this->forceFill(['is_super_admin' => $shouldBeSuperAdmin])->saveQuietly();
     }
 
-    public function syncBuildingRole(int $buildingId, ?string $role): void
+    /**
+     * Synchronise the user's Spatie team roles for a building so they mirror
+     * every pivot row currently present in `building_user`. The optional
+     * `$role` argument is accepted for backward compatibility but ignored –
+     * the pivot table is the source of truth, which lets a single user hold
+     * multiple roles (e.g. property manager and tenant) in the same building.
+     */
+    public function syncBuildingRole(int $buildingId, ?string $role = null): void
     {
-        $this->usingPermissionTeam($buildingId, function () use ($role): void {
-            if ($role === null) {
-                $this->syncRoles([]);
+        $roles = $this->buildings()
+            ->whereKey($buildingId)
+            ->get()
+            ->map(function ($building): ?string {
+                $pivotRole = $building->pivot?->role;
+                $value = $pivotRole instanceof BuildingRole ? $pivotRole->value : $pivotRole;
 
-                return;
-            }
+                return $value !== null ? BuildingRole::from($value)->permissionRoleName() : null;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
 
-            $this->syncRoles([$role]);
+        $this->usingPermissionTeam($buildingId, function () use ($roles): void {
+            $this->syncRoles($roles);
         });
     }
 

@@ -210,7 +210,6 @@ class UserResource extends Resource
     public static function syncRelationships(User $user, array $data): void
     {
         $actor = Auth::user();
-        $existingBuildingIds = $user->buildings()->pluck('buildings.id')->map(fn ($id): int => (int) $id)->all();
         $managerBuildingIds = collect($data['manager_building_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique();
         $tenantBuildingIds = collect($data['tenant_building_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique();
         $apartmentIds = collect($data['apartment_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique()->values();
@@ -229,26 +228,55 @@ class UserResource extends Resource
             Apartment::query()->whereIn('id', $apartmentIds)->pluck('building_id')->map(fn ($id): int => (int) $id),
         )->unique();
 
-        $syncData = [];
+        // Build the desired set of (building_id, role) pairs. A user may hold
+        // both the manager and tenant role in the same building.
+        $desired = collect();
 
         foreach ($tenantBuildingIds as $buildingId) {
-            $syncData[(int) $buildingId] = ['role' => BuildingRole::Tenant->value];
+            $desired->push([(int) $buildingId, BuildingRole::Tenant->value]);
         }
 
         foreach ($managerBuildingIds as $buildingId) {
-            $syncData[(int) $buildingId] = ['role' => BuildingRole::PropertyManager->value];
+            $desired->push([(int) $buildingId, BuildingRole::PropertyManager->value]);
         }
 
-        $user->buildings()->sync($syncData);
+        $existing = $user->buildings()
+            ->get()
+            ->map(function (Building $building): array {
+                $role = $building->pivot?->role;
+                $value = $role instanceof BuildingRole ? $role->value : $role;
+
+                return [(int) $building->getKey(), $value];
+            });
+
+        $existingKeys = $existing->map(fn (array $pair): string => $pair[0] . '|' . $pair[1])->all();
+        $desiredKeys = $desired->map(fn (array $pair): string => $pair[0] . '|' . $pair[1])->all();
+
+        $toAttach = array_values(array_diff($desiredKeys, $existingKeys));
+        $toDetach = array_values(array_diff($existingKeys, $desiredKeys));
+
+        foreach ($toAttach as $key) {
+            [$buildingId, $role] = explode('|', $key, 2);
+            $user->buildings()->attach((int) $buildingId, ['role' => $role]);
+        }
+
+        foreach ($toDetach as $key) {
+            [$buildingId, $role] = explode('|', $key, 2);
+            $user->buildings()->newPivotStatement()
+                ->where('user_id', $user->getKey())
+                ->where('building_id', (int) $buildingId)
+                ->where('role', $role)
+                ->delete();
+        }
+
         $user->apartments()->sync($apartmentIds->all());
 
-        foreach (array_unique(array_merge($existingBuildingIds, array_keys($syncData))) as $buildingId) {
-            $role = $syncData[$buildingId]['role'] ?? null;
+        $affectedBuildingIds = collect($toAttach)->merge($toDetach)
+            ->map(fn (string $key): int => (int) explode('|', $key, 2)[0])
+            ->unique();
 
-            $user->syncBuildingRole(
-                $buildingId,
-                $role !== null ? BuildingRole::from($role)->permissionRoleName() : null,
-            );
+        foreach ($affectedBuildingIds as $buildingId) {
+            $user->syncBuildingRole($buildingId);
         }
 
         $user->syncGlobalRoles($user->is_super_admin ? ['super_admin'] : []);

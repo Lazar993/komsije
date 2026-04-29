@@ -103,28 +103,29 @@ final class BuildingService
         $managerIds = array_values(array_unique($managerIds));
         $existingManagerIds = $building->managers()->pluck('users.id')->map(fn ($id): int => (int) $id)->all();
 
-        foreach ($managerIds as $managerId) {
-            $user = User::query()->find($managerId);
+        $toAttach = array_values(array_diff($managerIds, $existingManagerIds));
+        $toDetach = array_values(array_diff($existingManagerIds, $managerIds));
 
-            if ($building->users()->whereKey($managerId)->exists()) {
-                $building->users()->updateExistingPivot($managerId, ['role' => BuildingRole::PropertyManager->value]);
-
-                $user?->syncBuildingRole($building->getKey(), BuildingRole::PropertyManager->permissionRoleName());
-
-                continue;
-            }
-
+        foreach ($toAttach as $managerId) {
             $building->users()->attach($managerId, ['role' => BuildingRole::PropertyManager->value]);
-            $user?->syncBuildingRole($building->getKey(), BuildingRole::PropertyManager->permissionRoleName());
         }
-
-        $toDetach = array_diff($existingManagerIds, $managerIds);
 
         if ($toDetach !== []) {
-            User::query()->whereIn('id', $toDetach)->get()->each(function (User $user) use ($building): void {
-                $user->syncBuildingRole($building->getKey(), null);
-            });
-            $building->users()->detach($toDetach);
+            $building->users()->newPivotStatement()
+                ->where('building_id', $building->getKey())
+                ->whereIn('user_id', $toDetach)
+                ->where('role', BuildingRole::PropertyManager->value)
+                ->delete();
         }
+
+        $affected = array_values(array_unique(array_merge($toAttach, $toDetach)));
+
+        if ($affected === []) {
+            return;
+        }
+
+        User::query()->whereIn('id', $affected)->get()->each(function (User $user) use ($building): void {
+            $user->syncBuildingRole($building->getKey());
+        });
     }
 }
