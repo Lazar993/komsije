@@ -21,11 +21,9 @@
                 ['label' => __('Obaveštenja'), 'route' => route('portal.announcements.index'), 'icon' => 'announcements', 'active' => str_starts_with((string) $currentRoute, 'portal.announcements.')],
                 ['label' => __('Profil'), 'route' => route('portal.profile.show'), 'icon' => 'profile', 'active' => str_starts_with((string) $currentRoute, 'portal.profile.')],
             ];
-            $primaryMobileNavItems = array_slice($navItems, 0, 2);
-            $secondaryMobileNavItems = array_slice($navItems, 2);
         @endphp
 
-        <div class="relative isolate min-h-screen overflow-x-hidden pb-30 md:pb-8">
+        <div class="relative isolate min-h-screen overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] md:pb-8">
             <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_58%)]"></div>
             <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <header class="komsije-surface mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
@@ -118,43 +116,43 @@
 
             @include('partials.install-prompt')
 
-            <nav class="fixed inset-x-4 bottom-4 z-30 md:hidden">
-                <div class="komsije-surface grid {{ $showQuickReportCta ? 'grid-cols-5' : 'grid-cols-4' }} rounded-[1.75rem] px-2 py-2">
-                    @if ($showQuickReportCta)
-                        @foreach ($primaryMobileNavItems as $item)
-                            <a href="{{ $item['route'] }}" class="relative flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition {{ $item['active'] ? 'bg-blue-50 text-[var(--komsije-primary)]' : 'text-slate-500' }}">
-                                <x-portal.app-icon :name="$item['icon']" class="h-5 w-5" />
-                                <span>{{ $item['label'] }}</span>
-                            </a>
-                        @endforeach
+            <nav
+                class="fixed inset-x-3 z-30 md:hidden"
+                style="bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);"
+                aria-label="{{ __('Glavna navigacija') }}"
+            >
+                @if ($showQuickReportCta)
+                    <a
+                        href="{{ route('portal.tickets.create') }}"
+                        class="absolute left-1/2 -top-7 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-[11px] font-semibold text-[var(--komsije-primary)] transition active:scale-95"
+                        aria-label="{{ __('Prijavi kvar') }}"
+                    >
+                        <span class="inline-flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-[var(--komsije-primary)] text-white shadow-[0_20px_36px_-12px_rgba(37,99,235,0.9)] ring-4 ring-[var(--komsije-background)] transition active:shadow-[0_10px_24px_-12px_rgba(37,99,235,0.9)]">
+                            <x-portal.app-icon name="plus" class="h-6 w-6" />
+                        </span>
+                    </a>
+                @endif
 
-                        <a href="{{ route('portal.tickets.create') }}" class="relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 pb-2 text-[11px] font-medium text-[var(--komsije-primary)]">
-                            <span class="inline-flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-[var(--komsije-primary)] text-white shadow-[0_20px_36px_-18px_rgba(37,99,235,0.9)]">
-                                <x-portal.app-icon name="plus" class="h-6 w-6" />
-                            </span>
-                            <span>{{ __('Prijavi') }}</span>
+                <div class="komsije-surface grid {{ $showQuickReportCta ? 'grid-cols-5 pt-3' : 'grid-cols-4' }} rounded-[1.75rem] px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+                    @foreach ($navItems as $index => $item)
+                        @if ($showQuickReportCta && $index === 2)
+                            <span aria-hidden="true" class="pointer-events-none"></span>
+                        @endif
+
+                        <a
+                            href="{{ $item['route'] }}"
+                            @if ($item['active']) aria-current="page" @endif
+                            class="relative flex min-h-[3.25rem] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[11px] font-medium transition active:scale-95 {{ $item['active'] ? 'bg-blue-50 text-[var(--komsije-primary)]' : 'text-slate-500 hover:text-[var(--komsije-primary)]' }}"
+                        >
+                            <x-portal.app-icon :name="$item['icon']" class="h-5 w-5 shrink-0" />
+                            <span class="max-w-full truncate">{{ $item['label'] }}</span>
+                            @if ($item['icon'] === 'announcements' && ($unreadAnnouncementsCount ?? 0) > 0)
+                                <span class="absolute right-2 top-1 inline-flex min-h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-[var(--komsije-primary)] px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-white">
+                                    {{ min($unreadAnnouncementsCount, 9) }}{{ $unreadAnnouncementsCount > 9 ? '+' : '' }}
+                                </span>
+                            @endif
                         </a>
-
-                        @foreach ($secondaryMobileNavItems as $item)
-                            <a href="{{ $item['route'] }}" class="relative flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition {{ $item['active'] ? 'bg-blue-50 text-[var(--komsije-primary)]' : 'text-slate-500' }}">
-                                <x-portal.app-icon :name="$item['icon']" class="h-5 w-5" />
-                                <span>{{ $item['label'] }}</span>
-                                @if ($item['icon'] === 'announcements' && ($unreadAnnouncementsCount ?? 0) > 0)
-                                    <span class="absolute right-4 top-1 inline-flex h-2.5 w-2.5 rounded-full bg-[var(--komsije-primary)]"></span>
-                                @endif
-                            </a>
-                        @endforeach
-                    @else
-                        @foreach ($navItems as $item)
-                            <a href="{{ $item['route'] }}" class="relative flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-medium transition {{ $item['active'] ? 'bg-blue-50 text-[var(--komsije-primary)]' : 'text-slate-500' }}">
-                                <x-portal.app-icon :name="$item['icon']" class="h-5 w-5" />
-                                <span>{{ $item['label'] }}</span>
-                                @if ($item['icon'] === 'announcements' && ($unreadAnnouncementsCount ?? 0) > 0)
-                                    <span class="absolute right-4 top-1 inline-flex h-2.5 w-2.5 rounded-full bg-[var(--komsije-primary)]"></span>
-                                @endif
-                            </a>
-                        @endforeach
-                    @endif
+                    @endforeach
                 </div>
             </nav>
         </div>
