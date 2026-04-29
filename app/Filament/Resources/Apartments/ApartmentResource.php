@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Apartments;
 
-use App\Enums\BuildingRole;
 use App\Filament\Resources\Apartments\Pages\CreateApartment;
 use App\Filament\Resources\Apartments\Pages\EditApartment;
 use App\Filament\Resources\Apartments\Pages\ListApartments;
@@ -59,9 +58,9 @@ class ApartmentResource extends Resource
                     ->maxLength(50),
                 TextInput::make('floor')
                     ->maxLength(50),
-                Toggle::make('available_for_marketplace'),
-                TextInput::make('marketplace_listing_reference')
-                    ->maxLength(255),
+                // Toggle::make('available_for_marketplace'),
+                // TextInput::make('marketplace_listing_reference')
+                //     ->maxLength(255),
                 Select::make('tenant_ids')
                     ->label('Tenants')
                     ->multiple()
@@ -157,9 +156,10 @@ class ApartmentResource extends Resource
             ->orderBy('name');
 
         if ($buildingId !== null && $buildingId !== '') {
+            // Include every user attached to the building (tenants and managers)
+            // so a manager can also be assigned as a tenant of an apartment.
             $query->whereHas('buildings', fn (Builder $builder): Builder => $builder
-                ->where('buildings.id', (int) $buildingId)
-                ->where('building_user.role', BuildingRole::Tenant->value));
+                ->where('buildings.id', (int) $buildingId));
         }
 
         return $query->pluck('name', 'id')->all();
