@@ -8,11 +8,21 @@ const TOKEN_CACHE_KEY = 'komsije-fcm-token';
 const PROMPT_DEFER_KEY = 'komsije-push-prompt-deferred-until';
 const PROMPT_DECLINED_KEY = 'komsije-push-prompt-declined';
 const FIREBASE_SDK_VERSION = '10.13.2';
+const STATUS_EVENT = 'komsije:push-status';
+
+// Possible status values broadcast on document via STATUS_EVENT and returned by getPushStatus():
+//   'unsupported'   – browser has no Notification/PushManager/SW APIs (or insecure context)
+//   'no-config'     – Firebase config meta tag missing (server-side disabled)
+//   'needs-install' – iOS Safari tab; push only works after "Add to Home Screen"
+//   'denied'        – user explicitly blocked notifications in this browser
+//   'default'       – never asked yet, can be enabled
+//   'granted'       – enabled, token synced with backend
 
 let firebaseAppPromise = null;
 
 export function initPushNotifications() {
     if (!isPushSupported()) {
+        emitStatus('unsupported');
         return;
     }
 
@@ -24,6 +34,15 @@ export function initPushNotifications() {
     const config = readFirebaseConfig();
 
     if (!config) {
+        emitStatus('no-config');
+        return;
+    }
+
+    // iOS Safari outside a home-screen PWA cannot deliver web push at all and
+    // returns 'denied' from requestPermission() without showing a UI. Treat that
+    // as a separate 'needs-install' state so we never persist a false decline.
+    if (isIosNonStandalone()) {
+        emitStatus('needs-install');
         return;
     }
 
@@ -34,10 +53,73 @@ export function initPushNotifications() {
     }
 
     if (Notification.permission === 'denied') {
+        emitStatus('denied');
         return;
     }
 
+    emitStatus('default');
     schedulePermissionPrompt(config);
+}
+
+export function getPushStatus() {
+    if (!isPushSupported()) return 'unsupported';
+    if (!readFirebaseConfig()) return 'no-config';
+    if (isIosNonStandalone()) return 'needs-install';
+    if (Notification.permission === 'granted') return 'granted';
+    if (Notification.permission === 'denied') return 'denied';
+    return 'default';
+}
+
+export async function disablePush() {
+    const cachedToken = window.localStorage.getItem(TOKEN_CACHE_KEY);
+
+    if (cachedToken) {
+        try {
+            await deleteTokenOnBackend(cachedToken);
+        } catch (error) {
+            console.warn('Push token unregistration failed', error);
+        }
+    }
+
+    window.localStorage.removeItem(TOKEN_CACHE_KEY);
+    window.localStorage.setItem(PROMPT_DECLINED_KEY, 'true');
+
+    try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const reg of registrations) {
+            const url = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || '';
+            if (url.endsWith('/firebase-messaging-sw.js')) {
+                await reg.unregister();
+            }
+        }
+    } catch (error) {
+        console.warn('FCM SW cleanup on disable failed', error);
+    }
+
+    emitStatus(getPushStatus());
+}
+
+function emitStatus(status) {
+    try {
+        document.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { status } }));
+    } catch {
+        // CustomEvent unavailable (very old browsers) — safe to ignore.
+    }
+}
+
+function isStandalone() {
+    return (
+        window.matchMedia?.('(display-mode: standalone)')?.matches === true ||
+        window.navigator.standalone === true
+    );
+}
+
+function isIos() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
+function isIosNonStandalone() {
+    return isIos() && !isStandalone();
 }
 
 function isPushSupported() {
@@ -96,17 +178,31 @@ export async function enablePush(configOverride = null) {
     const config = configOverride || readFirebaseConfig();
 
     if (!config || !isPushSupported()) {
+        emitStatus(getPushStatus());
         return null;
     }
+
+    // On iOS Safari outside a PWA, requestPermission() resolves to 'denied'
+    // immediately without any UI. Refuse to ask, so we don't poison localStorage.
+    if (isIosNonStandalone()) {
+        emitStatus('needs-install');
+        return null;
+    }
+
+    // User explicitly opted back in — clear any prior soft-declines/back-offs.
+    window.localStorage.removeItem(PROMPT_DECLINED_KEY);
+    window.localStorage.removeItem(PROMPT_DEFER_KEY);
 
     const permission = await Notification.requestPermission();
 
     if (permission !== 'granted') {
         if (permission === 'denied') {
             window.localStorage.setItem(PROMPT_DECLINED_KEY, 'true');
+            emitStatus('denied');
         } else {
             // "default" = user dismissed; back off for 24h.
             window.localStorage.setItem(PROMPT_DEFER_KEY, String(Date.now() + 24 * 60 * 60 * 1000));
+            emitStatus('default');
         }
         return null;
     }
@@ -151,7 +247,28 @@ export async function enablePush(configOverride = null) {
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
     window.localStorage.removeItem(PROMPT_DECLINED_KEY);
 
+    emitStatus('granted');
     return token;
+}
+
+async function deleteTokenOnBackend(token) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    const response = await fetch('/device-tokens', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
+        },
+        body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Token unregistration failed (${response.status})`);
+    }
 }
 
 async function syncTokenWithBackend(token) {

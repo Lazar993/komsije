@@ -108,6 +108,10 @@
         </article>
     </section>
 
+    <section class="mt-6">
+        @include('partials.push-settings', ['variant' => 'card'])
+    </section>
+
     <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">

@@ -10,6 +10,8 @@
             <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">{{ __('Add the user to at least one building from the admin area, then return to the portal. The same account can belong to multiple buildings and switch between them here.') }}</p>
         </section>
     @else
+        @include('partials.push-settings', ['variant' => 'banner'])
+
         <section class="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_24rem]">
             <article class="overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
                 <div class="flex flex-col gap-6">

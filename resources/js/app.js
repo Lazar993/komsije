@@ -5,7 +5,10 @@ let deferredInstallPrompt = null;
 let serviceWorkerRegistration = null;
 let refreshing = false;
 
-import { initPushNotifications } from './push.js';
+import { initPushNotifications, enablePush, disablePush, getPushStatus } from './push.js';
+
+// Expose for inline UI hooks (e.g. "Enable notifications" buttons).
+window.komsijePush = { enablePush, disablePush, getPushStatus };
 
 document.addEventListener('DOMContentLoaded', async () => {
     applyStandaloneMode();
@@ -13,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTicketFilters();
     setupAnnouncementPagination();
     setupInstallPrompt();
+    setupPushSettings();
     await registerServiceWorker();
     initPushNotifications();
 });
@@ -301,6 +305,84 @@ function setupInstallPrompt() {
 function setInstallPromptVisibility(element, visible) {
     element.hidden = !visible;
     element.dataset.visible = String(visible);
+}
+
+function setupPushSettings() {
+    const elements = document.querySelectorAll('[data-push-settings]');
+
+    if (elements.length === 0) {
+        return;
+    }
+
+    const apply = (status) => {
+        elements.forEach((element) => {
+            element.dataset.pushStatus = status;
+
+            element.querySelectorAll('[data-push-state]').forEach((node) => {
+                node.hidden = node.dataset.pushState !== status;
+            });
+
+            // Banners are hidden by default in the markup; only reveal them for
+            // actionable states and only if the user hasn't dismissed them.
+            if (element.hasAttribute('data-push-banner')) {
+                const dismissed = (() => {
+                    try { return window.localStorage.getItem('komsije-push-banner-dismissed') === 'true'; }
+                    catch { return false; }
+                })();
+
+                const actionable = status === 'default' || status === 'needs-install';
+                element.hidden = !actionable || dismissed;
+            }
+        });
+    };
+
+    elements.forEach((element) => {
+        element.addEventListener('click', async (event) => {
+            const enableBtn = event.target.closest('[data-push-action="enable"]');
+            const disableBtn = event.target.closest('[data-push-action="disable"]');
+            const dismissBtn = event.target.closest('[data-push-action="dismiss"]');
+
+            if (enableBtn) {
+                event.preventDefault();
+                enableBtn.disabled = true;
+                try {
+                    await window.komsijePush.enablePush();
+                } finally {
+                    enableBtn.disabled = false;
+                    apply(window.komsijePush.getPushStatus());
+                }
+                return;
+            }
+
+            if (disableBtn) {
+                event.preventDefault();
+                disableBtn.disabled = true;
+                try {
+                    await window.komsijePush.disablePush();
+                } finally {
+                    disableBtn.disabled = false;
+                    apply(window.komsijePush.getPushStatus());
+                }
+                return;
+            }
+
+            if (dismissBtn) {
+                event.preventDefault();
+                if (element.hasAttribute('data-push-banner')) {
+                    element.hidden = true;
+                    try {
+                        window.localStorage.setItem('komsije-push-banner-dismissed', 'true');
+                    } catch { /* ignore */ }
+                }
+            }
+        });
+    });
+
+    document.addEventListener('komsije:push-status', (event) => {
+        apply(event.detail?.status || window.komsijePush.getPushStatus());
+    });
+
+    apply(window.komsijePush.getPushStatus());
 }
 
 function applyStandaloneMode() {
