@@ -7,6 +7,7 @@
 const TOKEN_CACHE_KEY = 'komsije-fcm-token';
 const PROMPT_DEFER_KEY = 'komsije-push-prompt-deferred-until';
 const PROMPT_DECLINED_KEY = 'komsije-push-prompt-declined';
+const USER_DISABLED_KEY = 'komsije-push-user-disabled';
 const FIREBASE_SDK_VERSION = '10.13.2';
 const STATUS_EVENT = 'komsije:push-status';
 
@@ -46,8 +47,14 @@ export function initPushNotifications() {
         return;
     }
 
-    // Already granted: silently sync the token (refresh-safe).
+    // Already granted in the browser. The user might have explicitly turned
+    // notifications off from our UI on this device — in which case we keep the
+    // token unregistered and surface 'default' so they can opt back in.
     if (Notification.permission === 'granted') {
+        if (isUserDisabled()) {
+            emitStatus('default');
+            return;
+        }
         void enablePush(config).catch(() => { });
         return;
     }
@@ -65,9 +72,17 @@ export function getPushStatus() {
     if (!isPushSupported()) return 'unsupported';
     if (!readFirebaseConfig()) return 'no-config';
     if (isIosNonStandalone()) return 'needs-install';
-    if (Notification.permission === 'granted') return 'granted';
     if (Notification.permission === 'denied') return 'denied';
+    if (Notification.permission === 'granted' && !isUserDisabled()) return 'granted';
     return 'default';
+}
+
+function isUserDisabled() {
+    try {
+        return window.localStorage.getItem(USER_DISABLED_KEY) === 'true';
+    } catch {
+        return false;
+    }
 }
 
 export async function disablePush() {
@@ -83,6 +98,7 @@ export async function disablePush() {
 
     window.localStorage.removeItem(TOKEN_CACHE_KEY);
     window.localStorage.setItem(PROMPT_DECLINED_KEY, 'true');
+    window.localStorage.setItem(USER_DISABLED_KEY, 'true');
 
     try {
         const registrations = await navigator.serviceWorker.getRegistrations();
@@ -192,6 +208,7 @@ export async function enablePush(configOverride = null) {
     // User explicitly opted back in — clear any prior soft-declines/back-offs.
     window.localStorage.removeItem(PROMPT_DECLINED_KEY);
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
+    window.localStorage.removeItem(USER_DISABLED_KEY);
 
     const permission = await Notification.requestPermission();
 
@@ -246,6 +263,7 @@ export async function enablePush(configOverride = null) {
 
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
     window.localStorage.removeItem(PROMPT_DECLINED_KEY);
+    window.localStorage.removeItem(USER_DISABLED_KEY);
 
     emitStatus('granted');
     return token;
