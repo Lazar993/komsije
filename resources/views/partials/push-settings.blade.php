@@ -106,8 +106,17 @@
                     <span class="mt-0.5 inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500"></span>
                     <div>
                         <p class="font-semibold text-rose-900">{{ __('Notifications are blocked in your browser.') }}</p>
-                        <p class="mt-1 text-rose-800">{{ __('To re-enable them, follow the steps below for your device.') }}</p>
+                        <p class="mt-1 text-rose-800">{{ __('If you just allowed notifications in your device settings, tap Try again below. Otherwise, follow the steps for your device.') }}</p>
                     </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--komsije-primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700" data-push-action="enable">
+                        {{ __('Try again') }}
+                    </button>
+                    <button type="button" class="inline-flex min-h-11 items-center justify-center rounded-full border border-rose-200 bg-white px-4 py-2.5 text-sm font-medium text-rose-700 transition hover:bg-rose-50" onclick="window.location.reload()">
+                        {{ __('Reload page') }}
+                    </button>
                 </div>
 
                 <details class="group rounded-xl bg-white/60 px-3 py-2" @if ($isAndroid) open @endif>
@@ -131,6 +140,7 @@
                         <li>{{ __('Open the iPhone Settings app.') }}</li>
                         <li>{{ __('Go to Notifications → Komšije.') }}</li>
                         <li>{{ __('Turn on Allow Notifications.') }}</li>
+                        <li>{{ __('Return here and tap Try again. If it still does not work, fully close the app (swipe up) and reopen it from the Home Screen.') }}</li>
                     </ol>
                 </details>
 
