@@ -206,6 +206,8 @@
     "Cancelled": "Otkazano",
     "Forgot password": "Zaboravili ste lozinku",
     "Forgot password?": "Zaboravili ste lozinku?",
+    "Show password": "Prikaži lozinku",
+    "Hide password": "Sakrij lozinku",
     "Forgot your password?": "Zaboravili ste lozinku?",
     "Password reset": "Resetovanje lozinke",
     "Enter the email address associated with your account and we will send you a link to reset your password.": "Unesite email adresu kojom ste registrovani i poslaćemo vam link za resetovanje lozinke.",

@@ -49,8 +49,7 @@
 
                                 <div>
                                     <label for="password" class="mb-2 block text-sm font-medium text-slate-700">{{ __('New password') }}</label>
-                                    <input id="password" name="password" type="password" required
-                                        class="komsije-input w-full rounded-2xl px-4 py-3 text-slate-950 transition">
+                                    <x-password-input id="password" name="password" required autocomplete="new-password" />
                                     @error('password')
                                         <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
                                     @enderror
@@ -58,8 +57,7 @@
 
                                 <div>
                                     <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm new password') }}</label>
-                                    <input id="password_confirmation" name="password_confirmation" type="password" required
-                                        class="komsije-input w-full rounded-2xl px-4 py-3 text-slate-950 transition">
+                                    <x-password-input id="password_confirmation" name="password_confirmation" required autocomplete="new-password" />
                                 </div>
 
                                 <button type="submit"

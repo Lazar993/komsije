@@ -79,7 +79,7 @@
                             <label for="password" class="mb-2 block text-sm font-medium text-slate-700">
                                 {{ $hasExistingAccount ? __('Your current password') : __('Password') }}
                             </label>
-                            <input id="password" name="password" type="password" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
+                            <x-password-input id="password" name="password" required autocomplete="new-password" inputClass="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15" />
                             @error('password')
                                 <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
                             @enderror
@@ -88,7 +88,7 @@
                         @unless ($hasExistingAccount)
                             <div>
                                 <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm password') }}</label>
-                                <input id="password_confirmation" name="password_confirmation" type="password" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
+                                <x-password-input id="password_confirmation" name="password_confirmation" required autocomplete="new-password" inputClass="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15" />
                             </div>
                         @else
                             {{-- For existing users the password is not "confirmed" — submit the same value as confirmation --}}
