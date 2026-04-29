@@ -85,14 +85,6 @@
 
                                 <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--komsije-primary)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">{{ __('Open portal') }}</button>
                             </form>
-
-                            <div class="mt-6 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-5 py-4 text-sm leading-6 text-slate-700">
-                                <p class="font-semibold text-[var(--komsije-dark)]">{{ __('Demo accounts') }}</p>
-                                <p class="mt-2">admin@upravnik.test</p>
-                                <p>manager@upravnik.test</p>
-                                <p>tenant@upravnik.test</p>
-                                <p class="mt-2 font-medium text-[var(--komsije-primary)]">{{ __('Password: password') }}</p>
-                            </div>
                         </section>
                     </div>
                 </main>
