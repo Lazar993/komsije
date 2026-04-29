@@ -24,7 +24,7 @@ final class AnnouncementPublishedNotification extends Notification implements Sh
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database', 'mail', \App\Notifications\Channels\FcmChannel::class];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -47,6 +47,23 @@ final class AnnouncementPublishedNotification extends Notification implements Sh
             'message' => __('A new building announcement is available.'),
             'title' => $this->announcement->title,
             'type' => 'announcement_published',
+        ];
+    }
+
+    /**
+     * @return array{title: string, body: string, data: array<string, scalar|null>}
+     */
+    public function toFcm(object $notifiable): array
+    {
+        return [
+            'title' => __('New announcement'),
+            'body' => $this->announcement->title,
+            'data' => [
+                'type' => 'announcement_published',
+                'announcement_id' => $this->announcement->getKey(),
+                'building_id' => $this->announcement->building_id,
+                'url' => route('portal.announcements.show', $this->announcement, false),
+            ],
         ];
     }
 }

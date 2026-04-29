@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BuildingController;
 use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\DeviceTokenController;
 use App\Http\Middleware\EnsureBuildingContext;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,9 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    Route::post('device-tokens', [DeviceTokenController::class, 'store']);
+    Route::delete('device-tokens', [DeviceTokenController::class, 'destroy']);
+
     Route::get('buildings', [BuildingController::class, 'index']);
     Route::post('buildings', [BuildingController::class, 'store']);
     Route::get('buildings/{building}', [BuildingController::class, 'show']);

@@ -5,6 +5,8 @@ let deferredInstallPrompt = null;
 let serviceWorkerRegistration = null;
 let refreshing = false;
 
+import { initPushNotifications } from './push.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
     applyStandaloneMode();
     upgradeImagesForPerformance();
@@ -12,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAnnouncementPagination();
     setupInstallPrompt();
     await registerServiceWorker();
+    initPushNotifications();
 });
 
 function setupTicketFilters() {

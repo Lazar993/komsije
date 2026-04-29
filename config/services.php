@@ -42,4 +42,20 @@ return [
         ],
     ],
 
+    'fcm' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        // Either inline JSON (recommended for hosting platforms) or a path to the service-account JSON file.
+        'credentials_json' => env('FCM_CREDENTIALS_JSON'),
+        'credentials_path' => env('FCM_CREDENTIALS_PATH'),
+        // Public Web Push config used by the browser SDK. Exposed to JS via a meta tag.
+        'web' => [
+            'api_key' => env('FCM_WEB_API_KEY'),
+            'auth_domain' => env('FCM_WEB_AUTH_DOMAIN'),
+            'project_id' => env('FCM_PROJECT_ID'),
+            'messaging_sender_id' => env('FCM_WEB_MESSAGING_SENDER_ID'),
+            'app_id' => env('FCM_WEB_APP_ID'),
+            'vapid_key' => env('FCM_WEB_VAPID_KEY'),
+        ],
+    ],
+
 ];

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\DeviceTokenController;
+use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\InviteRegistrationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
@@ -24,6 +26,10 @@ Route::get('/', function () {
 
 Route::post('locale', SetSiteLocaleController::class)->name('locale.update');
 
+// Public, unauthenticated route — Firebase Messaging requires the SW to live at site root.
+Route::get('firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
+    ->name('firebase-messaging-sw');
+
 Route::middleware('guest')->group(function (): void {
 	Route::get('invite/{token}', [InviteRegistrationController::class, 'show'])->name('invite.show');
 	Route::post('invite/{token}', [InviteRegistrationController::class, 'store'])->middleware('throttle:10,1')->name('invite.store');
@@ -37,6 +43,9 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware('auth')->group(function (): void {
 	Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+	Route::post('device-tokens', [DeviceTokenController::class, 'store'])->name('device-tokens.store');
+	Route::delete('device-tokens', [DeviceTokenController::class, 'destroy'])->name('device-tokens.destroy');
 
 	Route::prefix('portal')->name('portal.')->group(function (): void {
 		Route::get('/', DashboardController::class)->name('dashboard');

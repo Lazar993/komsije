@@ -1,4 +1,4 @@
-const VERSION = 'komsije-v4';
+const VERSION = 'komsije-v5';
 const STATIC_CACHE = `${VERSION}-static`;
 const DYNAMIC_CACHE = `${VERSION}-dynamic`;
 const API_CACHE = `${VERSION}-api`;
@@ -37,6 +37,59 @@ self.addEventListener('message', (event) => {
     if (event.data?.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
+});
+
+self.addEventListener('push', (event) => {
+    let payload = {};
+
+    if (event.data) {
+        try {
+            payload = event.data.json();
+        } catch {
+            payload = { notification: { title: 'Komšije', body: event.data.text() } };
+        }
+    }
+
+    const notification = payload.notification || {};
+    const data = payload.data || {};
+    const title = notification.title || data.title || 'Komšije';
+    const body = notification.body || data.body || '';
+
+    const options = {
+        body,
+        icon: notification.icon || '/icons/icon-192-v4.png',
+        badge: notification.badge || '/icons/favicon-32-v4.png',
+        tag: data.type ? `${data.type}-${data.ticket_id || data.announcement_id || ''}` : undefined,
+        data: {
+            url: data.url || data.click_action || '/',
+            ...data,
+        },
+        renotify: true,
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const targetUrl = event.notification.data?.url || '/';
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            for (const client of clientList) {
+                const clientUrl = new URL(client.url);
+                const wantedUrl = new URL(targetUrl, self.location.origin);
+
+                if (clientUrl.origin === wantedUrl.origin && 'focus' in client) {
+                    client.navigate(wantedUrl.toString()).catch(() => { });
+                    return client.focus();
+                }
+            }
+
+            return self.clients.openWindow(targetUrl);
+        })
+    );
 });
 
 self.addEventListener('fetch', (event) => {

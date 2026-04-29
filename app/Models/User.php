@@ -77,6 +77,21 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         return $this->hasMany(Invite::class, 'created_by');
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
+    /**
+     * Route notifications for the FCM channel.
+     *
+     * @return array<int, string>
+     */
+    public function routeNotificationForFcm(): array
+    {
+        return $this->deviceTokens()->pluck('token')->all();
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() !== 'admin') {

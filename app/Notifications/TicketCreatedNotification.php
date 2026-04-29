@@ -24,7 +24,7 @@ final class TicketCreatedNotification extends Notification implements ShouldQueu
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database', 'mail', \App\Notifications\Channels\FcmChannel::class];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -47,6 +47,23 @@ final class TicketCreatedNotification extends Notification implements ShouldQueu
             'ticket_id' => $this->ticket->getKey(),
             'title' => $this->ticket->title,
             'type' => 'ticket_created',
+        ];
+    }
+
+    /**
+     * @return array{title: string, body: string, data: array<string, scalar|null>}
+     */
+    public function toFcm(object $notifiable): array
+    {
+        return [
+            'title' => __('New maintenance ticket'),
+            'body' => $this->ticket->title,
+            'data' => [
+                'type' => 'ticket_created',
+                'ticket_id' => $this->ticket->getKey(),
+                'building_id' => $this->ticket->building_id,
+                'url' => route('portal.tickets.show', $this->ticket, false),
+            ],
         ];
     }
 }
