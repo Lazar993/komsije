@@ -57,7 +57,12 @@ final class BuildingService
     {
         return DB::transaction(function () use ($data, $actor): Building {
             $managerIds = collect($data['manager_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->all();
-            $managerIds[] = (int) $actor->getKey();
+
+            // The super admin always has implicit access to every building via
+            // Gate::before, so they must never be persisted to building_user.
+            if (! $actor->isSuperAdmin()) {
+                $managerIds[] = (int) $actor->getKey();
+            }
 
             $building = $this->buildings->create([
                 'address' => $data['address'],
@@ -100,7 +105,16 @@ final class BuildingService
      */
     private function syncManagers(Building $building, array $managerIds): void
     {
-        $managerIds = array_values(array_unique($managerIds));
+        // Super admins are managed exclusively via Gate::before and never
+        // recorded as per-building managers.
+        $superAdminIds = User::query()
+            ->whereIn('id', $managerIds)
+            ->where('is_super_admin', true)
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        $managerIds = array_values(array_unique(array_diff($managerIds, $superAdminIds)));
         $existingManagerIds = $building->managers()->pluck('users.id')->map(fn ($id): int => (int) $id)->all();
 
         $toAttach = array_values(array_diff($managerIds, $existingManagerIds));

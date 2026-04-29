@@ -65,6 +65,12 @@ final class ApartmentService
 
     public function assignTenant(Apartment $apartment, User $user): void
     {
+        if ($user->isSuperAdmin()) {
+            // Super admin is global by Gate::before and must never appear in
+            // the building/apartment pivot tables.
+            return;
+        }
+
         $building = $apartment->relationLoaded('building') && $apartment->building !== null
             ? $apartment->building
             : $apartment->building()->firstOrFail();
@@ -77,7 +83,21 @@ final class ApartmentService
      */
     private function syncTenants(Building $building, Apartment $apartment, array $tenantIds): void
     {
-        $tenantIds = collect($tenantIds)->map(fn (mixed $id): int => (int) $id)->unique()->values()->all();
+        $tenantIds = collect($tenantIds)
+            ->map(fn (mixed $id): int => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        // Strip super admin IDs out — they should never be apartment tenants.
+        $superAdminIds = User::query()
+            ->whereIn('id', $tenantIds)
+            ->where('is_super_admin', true)
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
+        $tenantIds = array_values(array_diff($tenantIds, $superAdminIds));
 
         $apartment->tenants()->sync($tenantIds);
 
@@ -92,6 +112,10 @@ final class ApartmentService
 
     private function syncTenantMembership(Building $building, Apartment $apartment, User $user): void
     {
+        if ($user->isSuperAdmin()) {
+            return;
+        }
+
         $apartment->tenants()->syncWithoutDetaching([$user->getKey()]);
 
         $hasTenantRow = $building->users()

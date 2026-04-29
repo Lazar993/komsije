@@ -61,25 +61,47 @@ class UserResource extends Resource
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Toggle::make('is_super_admin')
-                    ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false),
+                    ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false)
+                    ->helperText('Only one super admin is allowed.')
+                    ->rules([
+                        function (?User $record): \Closure {
+                            return function (string $attribute, mixed $value, \Closure $fail) use ($record): void {
+                                if (! $value) {
+                                    return;
+                                }
+
+                                $exists = User::query()
+                                    ->where('is_super_admin', true)
+                                    ->when($record !== null, fn ($query) => $query->where('id', '!=', $record->getKey()))
+                                    ->exists();
+
+                                if ($exists) {
+                                    $fail('Only one super admin is allowed.');
+                                }
+                            };
+                        },
+                    ]),
                 Select::make('manager_building_ids')
                     ->label('Admin buildings')
                     ->multiple()
                     ->preload()
                     ->searchable()
-                    ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false)
+                    ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => (Auth::user()?->isSuperAdmin() ?? false)
+                        && ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleBuildingOptions()),
                 Select::make('tenant_building_ids')
                     ->label('Tenant buildings')
                     ->multiple()
                     ->preload()
                     ->searchable()
+                    ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleBuildingOptions()),
                 Select::make('apartment_ids')
                     ->label('Apartments')
                     ->multiple()
                     ->preload()
                     ->searchable()
+                    ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleApartmentOptions()),
             ]),
         ]);
@@ -210,6 +232,28 @@ class UserResource extends Resource
     public static function syncRelationships(User $user, array $data): void
     {
         $actor = Auth::user();
+
+        // Super admins are global by Gate::before. They must never appear in
+        // building_user / apartment_user. Detach anything that may exist from
+        // before this rule was enforced and skip the rest.
+        if ($user->is_super_admin) {
+            $existingBuildingIds = $user->buildings()
+                ->pluck('buildings.id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+
+            $user->buildings()->detach();
+            $user->apartments()->detach();
+
+            foreach ($existingBuildingIds as $buildingId) {
+                $user->syncBuildingRole($buildingId);
+            }
+
+            $user->syncGlobalRoles(['super_admin']);
+
+            return;
+        }
+
         $managerBuildingIds = collect($data['manager_building_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique();
         $tenantBuildingIds = collect($data['tenant_building_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique();
         $apartmentIds = collect($data['apartment_ids'] ?? [])->map(fn (mixed $id): int => (int) $id)->unique()->values();
