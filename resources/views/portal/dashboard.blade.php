@@ -87,14 +87,14 @@
             </aside>
         </section>
 
-        <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+        <section class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <article class="komsije-surface overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Kvarovi') }}</p>
                         <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Nedavne prijave') }}</h2>
                     </div>
-                    <a href="{{ route('portal.tickets.index') }}" class="text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
+                    <a href="{{ route('portal.tickets.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
 
                 <div class="mt-5 space-y-3">
@@ -106,13 +106,13 @@
                 </div>
             </article>
 
-            <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+            <article class="komsije-surface overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Obaveštenja') }}</p>
                         <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Najnovije objave') }}</h2>
                     </div>
-                    <a href="{{ route('portal.announcements.index') }}" class="text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
+                    <a href="{{ route('portal.announcements.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
 
                 <div class="mt-5 space-y-3">
