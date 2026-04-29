@@ -198,6 +198,15 @@ async function registerServiceWorker() {
                 return;
             }
 
+            // Only reload if the new controller is OUR app shell SW.
+            // The Firebase messaging SW must never trigger a reload — that
+            // would cause an infinite loop with the main SW.
+            const controllerUrl = navigator.serviceWorker.controller?.scriptURL || '';
+
+            if (!controllerUrl.endsWith('/service-worker.js')) {
+                return;
+            }
+
             refreshing = true;
             window.location.reload();
         });

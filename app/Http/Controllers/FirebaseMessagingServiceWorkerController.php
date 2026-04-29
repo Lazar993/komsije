@@ -24,8 +24,7 @@ final class FirebaseMessagingServiceWorkerController extends Controller
         // worker so navigator.serviceWorker.register() still resolves cleanly.
         if (empty($config['apiKey']) || empty($config['projectId']) || empty($config['appId'])) {
             $body = "// FCM is not configured; this service worker is a no-op.\n"
-                . "self.addEventListener('install', () => self.skipWaiting());\n"
-                . "self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));\n";
+                . "self.addEventListener('install', () => self.skipWaiting());\n";
 
             return response($body, 200, [
                 'Content-Type' => 'application/javascript; charset=UTF-8',
@@ -42,7 +41,9 @@ final class FirebaseMessagingServiceWorkerController extends Controller
             importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
             self.addEventListener('install', () => self.skipWaiting());
-            self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+            // Intentionally NOT calling clients.claim() — this SW must not steal
+            // control of the page from the main service-worker.js (it would
+            // trigger controllerchange and a reload loop).
 
             firebase.initializeApp({$configJson});
             const messaging = firebase.messaging();
