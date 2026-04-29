@@ -62,19 +62,21 @@
                     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-[var(--komsije-primary)]">{{ now()->translatedFormat('d M') }}</span>
                 </div>
 
+                @php($latestTicket = $recentTickets->first())
+
                 <div class="mt-5 space-y-3">
-                    <div class="rounded-[1.5rem] bg-slate-50 p-4">
+                    <a href="{{ route('portal.announcements.index') }}" class="block rounded-[1.5rem] bg-slate-50 p-4 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--komsije-primary)]">
                         <p class="text-sm font-medium text-slate-500">{{ __('Nepročitana obaveštenja') }}</p>
                         <p class="mt-1 text-3xl font-semibold text-slate-950">{{ $unreadAnnouncementsCount ?? 0 }}</p>
-                    </div>
-                    <div class="rounded-[1.5rem] bg-slate-50 p-4">
+                    </a>
+                    <a href="{{ $latestTicket ? route('portal.tickets.show', $latestTicket->id) : route('portal.tickets.index') }}" class="block rounded-[1.5rem] bg-slate-50 p-4 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--komsije-primary)]">
                         <p class="text-sm font-medium text-slate-500">{{ __('Poslednja prijava') }}</p>
-                        <p class="mt-1 text-base font-semibold text-slate-950">{{ $recentTickets->first()?->title ?? __('Još nema prijava') }}</p>
-                        <p class="mt-1 text-sm text-slate-500">{{ $recentTickets->first()?->created_at?->diffForHumans() ?? __('Prijavite prvi kvar kad zatreba.') }}</p>
-                    </div>
+                        <p class="mt-1 text-base font-semibold text-slate-950">{{ $latestTicket?->title ?? __('Još nema prijava') }}</p>
+                        <p class="mt-1 text-sm text-slate-500">{{ $latestTicket?->created_at?->diffForHumans() ?? __('Prijavite prvi kvar kad zatreba.') }}</p>
+                    </a>
                 </div>
 
-                <div class="mt-5 rounded-[1.5rem] border border-[var(--komsije-border)] bg-white p-4">
+                <a href="{{ route('portal.profile.show') }}" class="mt-5 block rounded-[1.5rem] border border-[var(--komsije-border)] bg-white p-4 transition hover:border-blue-200 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--komsije-primary)]">
                     <p class="text-sm font-medium text-slate-500">{{ __('Vaš profil') }}</p>
                     <div class="mt-3 flex items-center gap-3">
                         <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-sm font-semibold text-[var(--komsije-primary)]">{{ \Illuminate\Support\Str::of(auth()->user()->name)->trim()->substr(0, 1)->upper() }}</span>
@@ -83,7 +85,7 @@
                             <p class="text-sm text-slate-500">{{ auth()->user()->email }}</p>
                         </div>
                     </div>
-                </div>
+                </a>
             </aside>
         </section>
 

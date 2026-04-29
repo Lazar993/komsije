@@ -319,5 +319,6 @@
     "This password reset link will expire in :count minutes.": "Ovaj link za resetovanje lozinke ističe za :count minuta.",
     "If you did not request a password reset, no further action is required.": "Ako niste zatražili resetovanje lozinke, ne morate preduzimati nikakve radnje.",
     "Ticket created.": "Prijava kreirana.",
-    "Ticket updated.": "Prijava ažurirana."
+    "Ticket updated.": "Prijava ažurirana.",
+    "Optional - if left blank, the description will be used.": "Opcionalno - ako ostane prazno, koristiće se opis."
 }

@@ -78,7 +78,7 @@ final class TicketController extends PortalController
         $data = array_merge($request->validated(), ['building_id' => $building->getKey()]);
 
         if (! $request->user()->isBuildingAdmin($building->getKey())) {
-            unset($data['assigned_to'], $data['status']);
+            unset($data['status']);
         }
 
         $ticket = $this->ticketService->create($building, $request->user(), $data);
@@ -121,9 +121,9 @@ final class TicketController extends PortalController
 
         $data = array_merge($request->validated(), ['building_id' => $this->tenantContext->buildingId()]);
 
-        // Tenants who are the reporter (non-admin) may only update the title and description.
+        // Tenants who are the reporter (non-admin) cannot change status; status notes are admin-only.
         if (! $request->user()->isBuildingAdmin((int) $this->tenantContext->buildingId())) {
-            unset($data['assigned_to'], $data['status'], $data['priority']);
+            unset($data['status'], $data['status_note']);
         }
 
         $ticket = $this->ticketService->update($ticket->load('building'), $request->user(), $data);

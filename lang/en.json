@@ -300,7 +300,6 @@
     "Invite Registration": "Invite Registration",
     "Secure onboarding": "Secure onboarding",
     "Tenant": "Tenant",
-    "Name": "Name",
     "N/A": "N/A",
     "Install": "Install",
     "No announcements are available for this building yet.": "No announcements are available for this building yet.",
@@ -311,5 +310,6 @@
     "This invitation is missing an apartment assignment.": "This invitation is missing an apartment assignment.",
     "This invitation is no longer valid.": "This invitation is no longer valid.",
     "Ticket created.": "Ticket created.",
-    "Ticket updated.": "Ticket updated."
+    "Ticket updated.": "Ticket updated.",
+    "Optional - if left blank, the description will be used.": "Optional - if left blank, the description will be used."
 }
