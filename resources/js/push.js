@@ -210,7 +210,15 @@ export async function enablePush(configOverride = null) {
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
     window.localStorage.removeItem(USER_DISABLED_KEY);
 
-    const permission = await Notification.requestPermission();
+    // Skip requestPermission() when permission was already granted. Calling it
+    // outside a user gesture (e.g. from the silent re-sync on page load) can
+    // resolve to 'denied' on iOS Safari standalone, which would then poison
+    // localStorage and surface a false "blocked" state on every revisit.
+    let permission = Notification.permission;
+
+    if (permission !== 'granted') {
+        permission = await Notification.requestPermission();
+    }
 
     if (permission !== 'granted') {
         if (permission === 'denied') {

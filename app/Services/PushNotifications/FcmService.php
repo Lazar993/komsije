@@ -65,21 +65,21 @@ final class FcmService
             $stringData[$key] = (string) $value;
         }
 
+        // Always include title/body inside the data payload so the service
+        // worker can render the notification. We deliberately do NOT send a
+        // top-level `notification` block: that would make FCM auto-display the
+        // message in addition to our SW's onBackgroundMessage handler, causing
+        // duplicate notifications on web/PWA clients.
+        $stringData['title'] = $title;
+        $stringData['body'] = $body;
+
         foreach ($tokens as $token) {
             $payload = [
                 'message' => [
                     'token' => $token,
-                    'notification' => [
-                        'title' => $title,
-                        'body' => $body,
-                    ],
                     'data' => $stringData,
                     'webpush' => [
                         'headers' => ['Urgency' => 'high'],
-                        'notification' => [
-                            'icon' => '/icons/icon-192-v4.png',
-                            'badge' => '/icons/favicon-32-v4.png',
-                        ],
                         'fcm_options' => array_filter([
                             'link' => $stringData['url'] ?? null,
                         ]),

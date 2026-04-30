@@ -31,6 +31,18 @@ final class DeviceTokenController extends Controller
             ],
         );
 
+        // FCM rotates tokens on SW reinstall, browser data clear, etc. so the
+        // same physical device can produce multiple tokens for the same user
+        // over time. Without cleanup the user receives N duplicate pushes.
+        // Drop any *other* tokens for this user/UA so only the freshest stays.
+        if ($userAgent !== null) {
+            DeviceToken::query()
+                ->where('user_id', $user->getKey())
+                ->where('user_agent', $userAgent)
+                ->where('token', '!=', $token)
+                ->delete();
+        }
+
         return response()->json([
             'id' => $record->getKey(),
             'created' => $record->wasRecentlyCreated,
