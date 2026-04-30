@@ -3,18 +3,18 @@
 @section('title', $ticket->title)
 
 @section('content')
-    <section class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
+    <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
             <div class="flex flex-wrap items-center justify-between gap-4">
-                <div>
+                <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">{{ $ticket->status->label() }}</span>
                         <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-950">{{ $ticket->priority->label() }}</span>
                     </div>
-                    <h1 class="mt-4 text-3xl font-semibold text-slate-950">{{ $ticket->title }}</h1>
+                    <h1 class="mt-4 break-words text-3xl font-semibold text-slate-950">{{ $ticket->title }}</h1>
                 </div>
 
-                <div class="flex gap-3">
+                <div class="flex flex-wrap gap-3">
                     <a href="{{ route('portal.tickets.index') }}" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ __('Back') }}</a>
                     @can('update', $ticket)
                         <a href="{{ route('portal.tickets.edit', $ticket) }}" class="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-900">{{ __('Edit') }}</a>
@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <p class="mt-6 text-base leading-8 text-slate-700">{{ $ticket->description }}</p>
+            <p class="mt-6 break-words text-base leading-8 text-slate-700">{{ $ticket->description }}</p>
 
             <div class="mt-8 grid gap-4 sm:grid-cols-2">
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
@@ -47,7 +47,7 @@
                 <h2 class="text-lg font-semibold text-slate-950">{{ __('Attachments') }}</h2>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
                     @forelse ($ticket->attachments as $attachment)
-                        <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
+                        <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="break-all rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
                     @empty
                         <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No images uploaded for this ticket.') }}</p>
                     @endforelse
@@ -55,8 +55,8 @@
             </div>
         </article>
 
-        <div class="space-y-6">
-            <article class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
+        <div class="min-w-0 space-y-6">
+            <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
                 <h2 class="text-xl font-semibold text-slate-950">{{ __('Conversation') }}</h2>
 
                 <div class="mt-6 space-y-4">
@@ -66,7 +66,7 @@
                                 <p class="text-sm font-semibold text-slate-950">{{ $comment->user?->name ?? __('Unknown user') }}</p>
                                 <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $comment->created_at->diffForHumans() }}</p>
                             </div>
-                            <p class="mt-3 text-sm leading-7 text-slate-700">{{ $comment->body }}</p>
+                            <p class="mt-3 break-words text-sm leading-7 text-slate-700">{{ $comment->body }}</p>
                         </div>
                     @empty
                         <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No comments yet.') }}</p>
@@ -87,7 +87,7 @@
                 @endcan
             </article>
 
-            <article class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
+            <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
                 <h2 class="text-xl font-semibold text-slate-950">{{ __('Status history') }}</h2>
 
                 <div class="card-deck mt-6" data-card-deck>
