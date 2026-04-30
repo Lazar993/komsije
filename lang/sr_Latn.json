@@ -1,4 +1,7 @@
 {
+    ":actor updated this ticket.": ":actor je ažurirao/la prijavu.",
+    "New ticket in :building": "Nova prijava u zgradi :building",
+    "New announcement in :building": "Novo obaveštenje u zgradi :building",
     "Portal": "Portal",
     "Building Portal": "Portal zgrade",
     "No active building": "Nema aktivne zgrade",

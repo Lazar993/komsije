@@ -60,9 +60,13 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
      */
     public function toFcm(object $notifiable): array
     {
+        $body = $this->note !== null && $this->note !== ''
+            ? $this->note
+            : __(':actor updated this ticket.', ['actor' => $this->actor->name]);
+
         return [
-            'title' => __('Ticket updated: :title', ['title' => $this->ticket->title]),
-            'body' => $this->note ?? __('A maintenance ticket was updated.'),
+            'title' => $this->ticket->title,
+            'body' => $body,
             'data' => [
                 'type' => 'ticket_updated',
                 'ticket_id' => $this->ticket->getKey(),

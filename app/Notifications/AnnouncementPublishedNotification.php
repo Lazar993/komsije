@@ -56,8 +56,8 @@ final class AnnouncementPublishedNotification extends Notification implements Sh
     public function toFcm(object $notifiable): array
     {
         return [
-            'title' => __('New announcement'),
-            'body' => $this->announcement->title,
+            'title' => $this->announcement->title,
+            'body' => __('New announcement in :building', ['building' => $this->announcement->building->name]),
             'data' => [
                 'type' => 'announcement_published',
                 'announcement_id' => $this->announcement->getKey(),

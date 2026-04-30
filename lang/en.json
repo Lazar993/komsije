@@ -1,4 +1,7 @@
 {
+    ":actor updated this ticket.": ":actor updated this ticket.",
+    "New ticket in :building": "New ticket in :building",
+    "New announcement in :building": "New announcement in :building",
     "Portal": "Portal",
     "Building Portal": "Building Portal",
     "No active building": "No active building",

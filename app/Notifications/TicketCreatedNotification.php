@@ -56,8 +56,8 @@ final class TicketCreatedNotification extends Notification implements ShouldQueu
     public function toFcm(object $notifiable): array
     {
         return [
-            'title' => __('New maintenance ticket'),
-            'body' => $this->ticket->title,
+            'title' => $this->ticket->title,
+            'body' => __('New ticket in :building', ['building' => $this->ticket->building->name]),
             'data' => [
                 'type' => 'ticket_created',
                 'ticket_id' => $this->ticket->getKey(),
