@@ -1,4 +1,4 @@
-const VERSION = 'komsije-v7';
+const VERSION = 'komsije-v8';
 const STATIC_CACHE = `${VERSION}-static`;
 const DYNAMIC_CACHE = `${VERSION}-dynamic`;
 const API_CACHE = `${VERSION}-api`;
@@ -64,7 +64,7 @@ self.addEventListener('push', (event) => {
             url: data.url || data.click_action || '/',
             ...data,
         },
-        renotify: true,
+        renotify: false,
     };
 
     event.waitUntil(self.registration.showNotification(title, options));

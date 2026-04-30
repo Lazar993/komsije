@@ -85,11 +85,37 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
     /**
      * Route notifications for the FCM channel.
      *
+     * Returns at most one token per device (user_agent), preferring the most
+     * recently used. FCM rotates tokens over time and pre-cleanup migrations
+     * left some users with stale duplicates — dedup here so a single push
+     * never goes to the same physical device twice.
+     *
      * @return array<int, string>
      */
     public function routeNotificationForFcm(): array
     {
-        return $this->deviceTokens()->pluck('token')->all();
+        $tokens = $this->deviceTokens()
+            ->orderByDesc('last_used_at')
+            ->orderByDesc('id')
+            ->get(['token', 'user_agent']);
+
+        $seenUserAgents = [];
+        $result = [];
+
+        foreach ($tokens as $row) {
+            $ua = (string) ($row->user_agent ?? '');
+
+            if ($ua !== '') {
+                if (isset($seenUserAgents[$ua])) {
+                    continue;
+                }
+                $seenUserAgents[$ua] = true;
+            }
+
+            $result[] = (string) $row->token;
+        }
+
+        return $result;
     }
 
     public function canAccessPanel(Panel $panel): bool

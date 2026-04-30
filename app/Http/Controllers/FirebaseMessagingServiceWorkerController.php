@@ -62,7 +62,7 @@ final class FirebaseMessagingServiceWorkerController extends Controller
                         url: data.url || data.click_action || '/',
                         ...data,
                     },
-                    renotify: true,
+                    renotify: false,
                 });
             });
 

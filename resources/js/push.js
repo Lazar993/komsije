@@ -250,16 +250,27 @@ export async function enablePush(configOverride = null) {
     }
 
     onMessage(messaging, (payload) => {
-        const notification = payload.notification || {};
         const data = payload.data || {};
+        const notification = payload.notification || {};
+        const title = notification.title || data.title || 'Komšije';
+        const body = notification.body || data.body || '';
 
-        // Foreground: show as native notification too (tab is open).
-        if (Notification.permission === 'granted') {
-            new Notification(notification.title || data.title || 'Komšije', {
-                body: notification.body || data.body || '',
+        // Foreground display via the SW registration so we share the same
+        // tag-based collapsing as background notifications. Using a raw
+        // `new Notification()` here would bypass the tag and produce a second
+        // visible notification on top of the SW-rendered one.
+        const tag = data.type ? `${data.type}-${data.ticket_id || data.announcement_id || ''}` : undefined;
+
+        const reg = swRegistration || navigator.serviceWorker.controller?.registration;
+
+        if (reg && typeof reg.showNotification === 'function') {
+            reg.showNotification(title, {
+                body,
                 icon: '/icons/icon-192-v4.png',
                 badge: '/icons/favicon-32-v4.png',
-                data,
+                tag,
+                renotify: false,
+                data: { url: data.url || '/', ...data },
             });
         }
     });
