@@ -89,6 +89,91 @@
     .komsije-safe-bottom {
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
     }
+
+    /* Card deck: scrollable list on desktop/tablet, swipeable carousel on mobile. */
+    .card-deck {
+        position: relative;
+    }
+
+    .card-deck__scroller {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        max-height: 28rem;
+        overflow-y: auto;
+        overflow-x: hidden;
+        scrollbar-gutter: stable;
+        padding-right: 0.25rem;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.55) transparent;
+    }
+
+    .card-deck__scroller::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .card-deck__scroller::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .card-deck__scroller::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.55);
+        border-radius: 9999px;
+    }
+
+    .card-deck__scroller>* {
+        flex: none;
+    }
+
+    .card-deck__counter {
+        display: none;
+    }
+}
+
+@media (max-width: 767px) {
+    @layer components {
+        .card-deck__scroller {
+            flex-direction: row;
+            gap: 0.75rem;
+            max-height: none;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            padding: 0 0 0.25rem 0;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
+        }
+
+        .card-deck__scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card-deck__scroller>* {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            min-width: 100%;
+            width: 100%;
+        }
+
+        .card-deck__counter {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.875rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--komsije-muted);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .card-deck[data-card-deck-single='true'] .card-deck__counter,
+        .card-deck[data-card-deck-empty='true'] .card-deck__counter {
+            display: none;
+        }
+    }
 }
 
 @media (max-width: 767px) {

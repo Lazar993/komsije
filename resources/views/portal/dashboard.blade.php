@@ -101,12 +101,15 @@
                     <a href="{{ route('portal.tickets.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
 
-                <div class="mt-5 space-y-3">
-                    @forelse ($recentTickets as $ticket)
-                        <x-portal.ticket-card :ticket="$ticket" :href="route('portal.tickets.show', $ticket->id)" />
-                    @empty
-                        <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Još nema prijavljenih kvarova u ovoj zgradi.') }}</div>
-                    @endforelse
+                <div class="card-deck mt-5" data-card-deck>
+                    <div class="card-deck__scroller" data-card-deck-scroller>
+                        @forelse ($recentTickets as $ticket)
+                            <x-portal.ticket-card :ticket="$ticket" :href="route('portal.tickets.show', $ticket->id)" />
+                        @empty
+                            <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Još nema prijavljenih kvarova u ovoj zgradi.') }}</div>
+                        @endforelse
+                    </div>
+                    <p class="card-deck__counter" data-card-deck-counter aria-live="polite">1/{{ $recentTickets->count() }}</p>
                 </div>
             </article>
 
@@ -119,12 +122,15 @@
                     <a href="{{ route('portal.announcements.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
 
-                <div class="mt-5 space-y-3">
-                    @forelse ($recentAnnouncements as $announcement)
-                        <x-portal.announcement-card :announcement="$announcement" :href="route('portal.announcements.show', $announcement->id)" :unread="! $announcement->is_read" />
-                    @empty
-                        <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Nema aktivnih obaveštenja za ovu zgradu.') }}</div>
-                    @endforelse
+                <div class="card-deck mt-5" data-card-deck>
+                    <div class="card-deck__scroller" data-card-deck-scroller>
+                        @forelse ($recentAnnouncements as $announcement)
+                            <x-portal.announcement-card :announcement="$announcement" :href="route('portal.announcements.show', $announcement->id)" :unread="! $announcement->is_read" />
+                        @empty
+                            <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Nema aktivnih obaveštenja za ovu zgradu.') }}</div>
+                        @endforelse
+                    </div>
+                    <p class="card-deck__counter" data-card-deck-counter aria-live="polite">1/{{ $recentAnnouncements->count() }}</p>
                 </div>
             </article>
         </section>

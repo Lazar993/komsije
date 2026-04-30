@@ -17,6 +17,12 @@ final class NotifyTicketReporterOfUpdates implements ShouldQueue
 
     public function handle(TicketUpdated $event): void
     {
+        \Illuminate\Support\Facades\Log::info('DIAG NotifyTicketReporterOfUpdates handle()', [
+            'ticket_id' => $event->ticket->getKey(),
+            'actor_id' => $event->actor->getKey(),
+            'pid' => getmypid(),
+        ]);
+
         $ticket = $event->ticket->loadMissing('reporter', 'assignee', 'apartment', 'building');
 
         $recipients = Collection::make([

@@ -90,21 +90,24 @@
             <article class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
                 <h2 class="text-xl font-semibold text-slate-950">{{ __('Status history') }}</h2>
 
-                <div class="mt-6 space-y-4">
-                    @forelse ($ticket->statusHistory as $entry)
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                            <div class="flex items-center justify-between gap-3">
-                                <p class="text-sm font-semibold text-slate-950">{{ $entry->actor?->name ?? __('System') }}</p>
-                                <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $entry->created_at->translatedFormat('M j, Y H:i') }}</p>
+                <div class="card-deck mt-6" data-card-deck>
+                    <div class="card-deck__scroller" data-card-deck-scroller>
+                        @forelse ($ticket->statusHistory as $entry)
+                            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm font-semibold text-slate-950">{{ $entry->actor?->name ?? __('System') }}</p>
+                                    <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $entry->created_at->translatedFormat('M j, Y H:i') }}</p>
+                                </div>
+                                <p class="mt-3 text-sm text-slate-700">{{ $entry->from_status?->label() ?? __('None') }} → {{ $entry->to_status?->label() ?? __('None') }}</p>
+                                {{-- @if ($entry->note)
+                                    <p class="mt-2 text-sm leading-7 text-slate-600">{{ $entry->note }}</p>
+                                @endif --}}
                             </div>
-                            <p class="mt-3 text-sm text-slate-700">{{ $entry->from_status?->label() ?? __('None') }} → {{ $entry->to_status?->label() ?? __('None') }}</p>
-                            {{-- @if ($entry->note)
-                                <p class="mt-2 text-sm leading-7 text-slate-600">{{ $entry->note }}</p>
-                            @endif --}}
-                        </div>
-                    @empty
-                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No status changes have been recorded yet.') }}</p>
-                    @endforelse
+                        @empty
+                            <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No status changes have been recorded yet.') }}</p>
+                        @endforelse
+                    </div>
+                    <p class="card-deck__counter" data-card-deck-counter aria-live="polite">1/{{ $ticket->statusHistory->count() }}</p>
                 </div>
             </article>
         </div>

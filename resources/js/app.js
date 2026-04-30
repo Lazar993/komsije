@@ -15,11 +15,96 @@ document.addEventListener('DOMContentLoaded', async () => {
     upgradeImagesForPerformance();
     setupTicketFilters();
     setupAnnouncementPagination();
+    setupCardDecks();
     setupInstallPrompt();
     setupPushSettings();
     await registerServiceWorker();
     initPushNotifications();
 });
+
+function setupCardDecks(root = document) {
+    const decks = root.querySelectorAll('[data-card-deck]');
+    if (!decks.length) {
+        return;
+    }
+
+    const mobileQuery = window.matchMedia('(max-width: 767px)');
+
+    decks.forEach((deck) => {
+        if (deck.dataset.cardDeckReady === 'true') {
+            return;
+        }
+        deck.dataset.cardDeckReady = 'true';
+
+        const scroller = deck.querySelector('[data-card-deck-scroller]');
+        const counter = deck.querySelector('[data-card-deck-counter]');
+        if (!scroller) {
+            return;
+        }
+
+        const items = () => Array.from(scroller.children).filter(
+            (child) => child.dataset.cardDeckItem !== 'skip',
+        );
+
+        const refreshState = () => {
+            const total = items().length;
+            if (total === 0) {
+                deck.dataset.cardDeckEmpty = 'true';
+                deck.removeAttribute('data-card-deck-single');
+            } else if (total === 1) {
+                deck.dataset.cardDeckSingle = 'true';
+                deck.removeAttribute('data-card-deck-empty');
+            } else {
+                deck.removeAttribute('data-card-deck-single');
+                deck.removeAttribute('data-card-deck-empty');
+            }
+            return total;
+        };
+
+        const updateCounter = () => {
+            if (!counter) {
+                return;
+            }
+            const total = items().length;
+            if (total <= 1 || !mobileQuery.matches) {
+                return;
+            }
+            const width = scroller.clientWidth || 1;
+            const index = Math.min(total - 1, Math.max(0, Math.round(scroller.scrollLeft / width)));
+            counter.textContent = `${index + 1}/${total}`;
+        };
+
+        refreshState();
+        updateCounter();
+
+        let frame = null;
+        scroller.addEventListener(
+            'scroll',
+            () => {
+                if (frame) {
+                    cancelAnimationFrame(frame);
+                }
+                frame = requestAnimationFrame(updateCounter);
+            },
+            { passive: true },
+        );
+
+        const onResize = () => {
+            scroller.scrollLeft = 0;
+            updateCounter();
+        };
+
+        if (typeof mobileQuery.addEventListener === 'function') {
+            mobileQuery.addEventListener('change', onResize);
+        } else if (typeof mobileQuery.addListener === 'function') {
+            mobileQuery.addListener(onResize);
+        }
+
+        window.addEventListener('resize', updateCounter, { passive: true });
+    });
+}
+
+window.komsijeSetupCardDecks = setupCardDecks;
 
 function setupTicketFilters() {
     setupAsyncListing({

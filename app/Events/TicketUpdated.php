@@ -21,5 +21,13 @@ final class TicketUpdated
         public readonly TicketStatus $toStatus,
         public readonly ?string $note = null,
     ) {
+        \Illuminate\Support\Facades\Log::info('DIAG TicketUpdated dispatched', [
+            'ticket_id' => $ticket->getKey(),
+            'actor_id' => $actor->getKey(),
+            'note' => $note,
+            'trace' => collect(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 8))
+                ->map(fn ($f) => ($f['class'] ?? '').'::'.($f['function'] ?? '').'@'.($f['line'] ?? '?'))
+                ->all(),
+        ]);
     }
 }
