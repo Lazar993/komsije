@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\InviteRegistrationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\SetSiteLocaleController;
 use App\Http\Controllers\Web\Portal\AnnouncementController;
 use App\Http\Controllers\Web\Portal\BuildingContextController;
@@ -25,6 +26,8 @@ Route::get('/', function () {
 });
 
 Route::post('locale', SetSiteLocaleController::class)->name('locale.update');
+
+Route::get('page/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 // Public, unauthenticated route — Firebase Messaging requires the SW to live at site root.
 Route::get('firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)

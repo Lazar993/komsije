@@ -23,9 +23,9 @@
             ];
         @endphp
 
-        <div class="relative isolate min-h-screen overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] md:pb-8">
+        <div class="relative isolate flex min-h-screen flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] md:pb-0">
             <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_58%)]"></div>
-            <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+            <div class="relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <header class="komsije-surface mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
                     <div class="flex flex-col gap-4">
                         <div class="flex items-start justify-between gap-3">
@@ -113,6 +113,8 @@
 
                 <main class="flex-1">@yield('content')</main>
             </div>
+
+            <x-site-footer />
 
             @include('partials.install-prompt')
 
