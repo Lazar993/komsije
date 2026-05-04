@@ -32,6 +32,11 @@ class Announcement extends Model
         return $this->hasMany(AnnouncementRead::class);
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(AnnouncementAttachment::class);
+    }
+
     /**
      * @return array<string, string>
      */

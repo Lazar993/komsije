@@ -365,5 +365,19 @@
     "Find Notifications and switch them to Allow.": "Pronađite Notifications i postavite na Allow.",
     "Reload the page.": "Osvežite stranicu.",
     "Your browser does not support push notifications.": "Vaš pretraživač ne podržava push obaveštenja.",
-    "Push notifications are not configured on the server right now.": "Push obaveštenja trenutno nisu podešena na serveru."
+    "Push notifications are not configured on the server right now.": "Push obaveštenja trenutno nisu podešena na serveru.",
+    "Important": "Važno",
+    "Važno": "Važno",
+    "Označi kao važno (prikazuje se na vrhu spiska).": "Označi kao važno (prikazuje se na vrhu spiska).",
+    "Prilozi": "Prilozi",
+    "PDF ili DOC/DOCX. Najviše 10 fajlova, do 20 MB po fajlu.": "PDF ili DOC/DOCX. Najviše 10 fajlova, do 20 MB po fajlu.",
+    "Postojeći prilozi": "Postojeći prilozi",
+    "Ukloni": "Ukloni",
+    "Akcije": "Akcije",
+    "Čeka odobrenje": "Čeka odobrenje",
+    "Odobri i objavi": "Odobri i objavi",
+    "Vaša objava će biti vidljiva svim komšijama tek nakon što je upravnik odobri.": "Vaša objava će biti vidljiva svim komšijama tek nakon što je upravnik odobri.",
+    "Vaša objava je poslata na odobrenje upravniku.": "Vaša objava je poslata na odobrenje upravniku.",
+    "Ova objava čeka odobrenje upravnika i još uvek nije vidljiva ostalim komšijama.": "Ova objava čeka odobrenje upravnika i još uvek nije vidljiva ostalim komšijama.",
+    "Objava je odobrena i objavljena.": "Objava je odobrena i objavljena."
 }

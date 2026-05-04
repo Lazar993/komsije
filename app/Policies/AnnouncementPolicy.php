@@ -26,19 +26,33 @@ final class AnnouncementPolicy
             return true;
         }
 
-        return $user->hasBuildingRole($announcement->building_id, BuildingRole::PropertyManager);
+        if ($user->hasBuildingRole($announcement->building_id, BuildingRole::PropertyManager)) {
+            return true;
+        }
+
+        return (int) $announcement->author_id === (int) $user->getKey();
     }
 
     public function create(User $user, ?Building $building = null): bool
     {
         if ($building === null) {
-            return $user->isBuildingAdmin();
+            return $user->buildings()->exists();
         }
 
-        return $user->isBuildingAdmin($building->getKey());
+        return $user->belongsToBuilding($building->getKey());
     }
 
     public function update(User $user, Announcement $announcement): bool
+    {
+        if ($user->isBuildingAdmin($announcement->building_id)) {
+            return true;
+        }
+
+        return (int) $announcement->author_id === (int) $user->getKey()
+            && $user->belongsToBuilding($announcement->building_id);
+    }
+
+    public function approve(User $user, Announcement $announcement): bool
     {
         return $user->isBuildingAdmin($announcement->building_id);
     }

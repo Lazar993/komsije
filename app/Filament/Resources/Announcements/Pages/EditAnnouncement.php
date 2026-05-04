@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class EditAnnouncement extends EditRecord
 {
@@ -17,7 +18,10 @@ class EditAnnouncement extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        return app(AnnouncementService::class)->update($record, $data);
+        $data['attachments'] = $data['attachments_uploads'] ?? [];
+        unset($data['attachments_uploads']);
+
+        return app(AnnouncementService::class)->update($record, $data, Auth::user());
     }
 
     protected function getHeaderActions(): array

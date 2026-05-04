@@ -15,16 +15,20 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -64,6 +68,29 @@ class AnnouncementResource extends Resource
                     ->helperText('Important announcements also send an email to all residents.')
                     ->default(false),
                 DateTimePicker::make('published_at'),
+                FileUpload::make('attachments_uploads')
+                    ->label('Attachments')
+                    ->helperText('Upload PDF or DOC/DOCX files (max 20 MB each, up to 10 files).')
+                    ->multiple()
+                    ->maxFiles(10)
+                    ->maxSize(20480)
+                    ->acceptedFileTypes([
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    ])
+                    ->storeFiles(false)
+                    ->dehydrated()
+                    ->columnSpanFull(),
+                CheckboxList::make('remove_attachments')
+                    ->label('Remove existing attachments')
+                    ->options(fn (?Announcement $record): array => $record
+                        ? $record->attachments()->pluck('original_name', 'id')->all()
+                        : [])
+                    ->visible(fn (?Announcement $record): bool => $record !== null && $record->attachments()->exists())
+                    ->dehydrated()
+                    ->bulkToggleable()
+                    ->columnSpanFull(),
             ]),
         ]);
     }
@@ -81,6 +108,19 @@ class AnnouncementResource extends Resource
                 ->dateTime(),
             TextEntry::make('reads_count')
                 ->label('Reads'),
+            RepeatableEntry::make('attachments')
+                ->label('Attachments')
+                ->visible(fn (Announcement $record): bool => $record->attachments()->exists())
+                ->schema([
+                    TextEntry::make('original_name')
+                        ->label('File'),
+                    TextEntry::make('size')
+                        ->label('Size')
+                        ->formatStateUsing(fn (?int $state): string => $state ? round($state / 1024, 1) . ' KB' : '—'),
+                    TextEntry::make('mime_type')
+                        ->label('Type'),
+                ])
+                ->columns(3),
         ]);
     }
 
@@ -94,6 +134,10 @@ class AnnouncementResource extends Resource
                     ->sortable(),
                 TextColumn::make('title')
                     ->searchable(),
+                IconColumn::make('is_important')
+                    ->label('Important')
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('published_at')
                     ->dateTime()
                     ->sortable(),
@@ -101,6 +145,8 @@ class AnnouncementResource extends Resource
                     ->label('Reads'),
             ])
             ->filters([
+                TernaryFilter::make('is_important')
+                    ->label('Important'),
                 TernaryFilter::make('published_at')
                     ->label('Published')
                     ->nullable(),

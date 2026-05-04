@@ -19,6 +19,9 @@ class CreateAnnouncement extends CreateRecord
     {
         $building = Building::query()->findOrFail($data['building_id']);
 
+        $data['attachments'] = $data['attachments_uploads'] ?? [];
+        unset($data['attachments_uploads']);
+
         return app(AnnouncementService::class)->create($building, Auth::user(), $data);
     }
 }

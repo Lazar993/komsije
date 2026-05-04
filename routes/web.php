@@ -72,6 +72,8 @@ Route::middleware('auth')->group(function (): void {
 			Route::get('announcements/{announcement}', [AnnouncementController::class, 'show'])->name('announcements.show');
 			Route::get('announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
 			Route::put('announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
+			Route::post('announcements/{announcement}/approve', [AnnouncementController::class, 'approve'])->name('announcements.approve');
+			Route::get('announcements/{announcement}/attachments/{attachment}', [AnnouncementController::class, 'downloadAttachment'])->name('announcements.attachments.download');
 		});
 	});
 });

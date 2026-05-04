@@ -7,14 +7,17 @@ namespace App\Services;
 use App\Events\AnnouncementCreated;
 use App\Events\AnnouncementPublished;
 use App\Models\Announcement;
+use App\Models\AnnouncementAttachment;
 use App\Models\Building;
 use App\Models\User;
 use App\Repositories\Contracts\AnnouncementRepositoryInterface;
 use App\Support\Cache\CacheKey;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use stdClass;
 
 final class AnnouncementService
@@ -51,11 +54,14 @@ final class AnnouncementService
                 'author_id' => $author->getKey(),
                 'building_id' => $building->getKey(),
                 'content' => $data['content'],
+                'is_important' => (bool) ($data['is_important'] ?? false),
                 'published_at' => $data['published_at'] ?? null,
                 'title' => $data['title'],
             ]);
 
-            $announcement->load('author')->loadCount('reads');
+            $this->storeAttachments($announcement, $author, $data['attachments'] ?? []);
+
+            $announcement->load('author', 'attachments')->loadCount('reads');
 
             event(new AnnouncementCreated($announcement));
 
@@ -70,18 +76,24 @@ final class AnnouncementService
     /**
      * @param array<string, mixed> $data
      */
-    public function update(Announcement $announcement, array $data): Announcement
+    public function update(Announcement $announcement, array $data, ?User $actor = null): Announcement
     {
-        return DB::transaction(function () use ($announcement, $data): Announcement {
+        return DB::transaction(function () use ($announcement, $data, $actor): Announcement {
             $wasPublished = $announcement->published_at !== null;
 
             $updatedAnnouncement = $this->announcements->update($announcement, [
                 'content' => $data['content'] ?? $announcement->content,
+                'is_important' => array_key_exists('is_important', $data)
+                    ? (bool) $data['is_important']
+                    : $announcement->is_important,
                 'published_at' => $data['published_at'] ?? $announcement->published_at,
                 'title' => $data['title'] ?? $announcement->title,
             ]);
 
-            $updatedAnnouncement->load('author')->loadCount('reads');
+            $this->removeAttachments($updatedAnnouncement, $data['remove_attachments'] ?? []);
+            $this->storeAttachments($updatedAnnouncement, $actor, $data['attachments'] ?? []);
+
+            $updatedAnnouncement->load('author', 'attachments')->loadCount('reads');
 
             if (! $wasPublished && $updatedAnnouncement->published_at !== null) {
                 event(new AnnouncementPublished($updatedAnnouncement));
@@ -143,5 +155,58 @@ final class AnnouncementService
                     : null,
             ];
         })->values();
+    }
+
+    /**
+     * @param array<int, mixed> $files
+     */
+    private function storeAttachments(Announcement $announcement, ?User $uploader, array $files): void
+    {
+        $disk = 'local';
+        $directory = "announcements/{$announcement->getKey()}";
+
+        foreach ($files as $file) {
+            if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                continue;
+            }
+
+            $path = $file->store($directory, $disk);
+
+            if (! is_string($path) || $path === '') {
+                continue;
+            }
+
+            AnnouncementAttachment::query()->create([
+                'announcement_id' => $announcement->getKey(),
+                'uploaded_by' => $uploader?->getKey(),
+                'disk' => $disk,
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getClientMimeType(),
+                'size' => (int) $file->getSize(),
+            ]);
+        }
+    }
+
+    /**
+     * @param array<int, int|string> $ids
+     */
+    private function removeAttachments(Announcement $announcement, array $ids): void
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+
+        if ($ids === []) {
+            return;
+        }
+
+        $attachments = AnnouncementAttachment::query()
+            ->where('announcement_id', $announcement->getKey())
+            ->whereIn('id', $ids)
+            ->get();
+
+        foreach ($attachments as $attachment) {
+            $attachment->deleteFile();
+            $attachment->delete();
+        }
     }
 }
