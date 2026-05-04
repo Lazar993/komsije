@@ -29,6 +29,11 @@ final class UpdateProfileRequest extends FormRequest
                 Rule::unique(User::class, 'email')->ignore($this->user()?->getKey()),
             ],
             'name' => ['required', 'string', 'max:255'],
+            'notify_push' => ['sometimes', 'boolean'],
+            'notify_email' => ['sometimes', 'boolean'],
+            'notify_email_announcements' => ['sometimes', 'boolean'],
+            'notify_email_tickets' => ['sometimes', 'boolean'],
+            'notify_digest' => ['sometimes', 'in:none,daily,weekly'],
         ];
     }
 }

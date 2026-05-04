@@ -7,6 +7,7 @@ namespace App\Notifications;
 use App\Filament\Resources\Tickets\TicketResource;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Notifications\Concerns\ResolvesChannels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,6 +16,7 @@ use Illuminate\Notifications\Notification;
 final class TicketUpdatedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use ResolvesChannels;
 
     public function __construct(
         private readonly Ticket $ticket,
@@ -28,7 +30,7 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail', \App\Notifications\Channels\FcmChannel::class];
+        return $this->resolveChannels($notifiable, category: 'tickets');
     }
 
     public function toMail(object $notifiable): MailMessage

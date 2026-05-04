@@ -23,7 +23,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'is_super_admin', 'locale', 'profile_image_path'])]
+#[Fillable(['name', 'email', 'password', 'is_super_admin', 'locale', 'profile_image_path', 'notify_push', 'notify_email', 'notify_email_announcements', 'notify_email_tickets', 'notify_digest'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasLocalePreference
 {
@@ -116,6 +116,41 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         }
 
         return $result;
+    }
+
+    /**
+     * Whether this user currently has at least one usable push token.
+     */
+    public function hasActiveDeviceToken(): bool
+    {
+        return $this->deviceTokens()->exists();
+    }
+
+    /**
+     * Whether the user wants push for a given event category.
+     * Defaults to true when push is enabled and a token exists.
+     */
+    public function wantsPush(): bool
+    {
+        return (bool) ($this->notify_push ?? true) && $this->hasActiveDeviceToken();
+    }
+
+    /**
+     * Whether the user has explicitly opted in to email for a category.
+     * Categories: 'announcements', 'tickets'. Master toggle 'notify_email'
+     * acts as a global opt-in covering everything when true.
+     */
+    public function wantsEmailFor(string $category): bool
+    {
+        if ((bool) ($this->notify_email ?? false)) {
+            return true;
+        }
+
+        return match ($category) {
+            'announcements' => (bool) ($this->notify_email_announcements ?? false),
+            'tickets' => (bool) ($this->notify_email_tickets ?? false),
+            default => false,
+        };
     }
 
     public function canAccessPanel(Panel $panel): bool
@@ -347,6 +382,11 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
             'email_verified_at' => 'datetime',
             'is_super_admin' => 'boolean',
             'password' => 'hashed',
+            'notify_push' => 'boolean',
+            'notify_email' => 'boolean',
+            'notify_email_announcements' => 'boolean',
+            'notify_email_tickets' => 'boolean',
+            'last_digest_sent_at' => 'datetime',
         ];
     }
 }

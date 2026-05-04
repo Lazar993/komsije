@@ -18,6 +18,8 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -57,6 +59,10 @@ class AnnouncementResource extends Resource
                     ->required()
                     ->rows(6)
                     ->maxLength(10000),
+                Toggle::make('is_important')
+                    ->label('Important')
+                    ->helperText('Important announcements also send an email to all residents.')
+                    ->default(false),
                 DateTimePicker::make('published_at'),
             ]),
         ]);
@@ -68,6 +74,9 @@ class AnnouncementResource extends Resource
             TextEntry::make('building.name'),
             TextEntry::make('title'),
             TextEntry::make('content'),
+            IconEntry::make('is_important')
+                ->boolean()
+                ->label('Important'),
             TextEntry::make('published_at')
                 ->dateTime(),
             TextEntry::make('reads_count')

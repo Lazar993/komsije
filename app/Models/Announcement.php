@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['building_id', 'author_id', 'title', 'content', 'published_at'])]
+#[Fillable(['building_id', 'author_id', 'title', 'content', 'is_important', 'published_at'])]
 class Announcement extends Model
 {
     use HasFactory;
@@ -38,6 +38,7 @@ class Announcement extends Model
     protected function casts(): array
     {
         return [
+            'is_important' => 'boolean',
             'published_at' => 'datetime',
         ];
     }

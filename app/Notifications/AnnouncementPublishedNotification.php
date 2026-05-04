@@ -6,6 +6,7 @@ namespace App\Notifications;
 
 use App\Filament\Resources\Announcements\AnnouncementResource;
 use App\Models\Announcement;
+use App\Notifications\Concerns\ResolvesChannels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,6 +15,7 @@ use Illuminate\Notifications\Notification;
 final class AnnouncementPublishedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+    use ResolvesChannels;
 
     public function __construct(private readonly Announcement $announcement)
     {
@@ -24,7 +26,11 @@ final class AnnouncementPublishedNotification extends Notification implements Sh
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail', \App\Notifications\Channels\FcmChannel::class];
+        return $this->resolveChannels(
+            $notifiable,
+            category: 'announcements',
+            critical: (bool) $this->announcement->is_important,
+        );
     }
 
     public function toMail(object $notifiable): MailMessage

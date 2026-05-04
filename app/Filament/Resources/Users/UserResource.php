@@ -104,6 +104,31 @@ class UserResource extends Resource
                     ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleApartmentOptions()),
             ]),
+            Section::make('Notification preferences')->schema([
+                Toggle::make('notify_push')
+                    ->label('Push notifications')
+                    ->helperText('Real-time alerts on the user\'s devices.')
+                    ->default(true),
+                Toggle::make('notify_email')
+                    ->label('Email (all events)')
+                    ->helperText('Master email opt-in. When off, the per-category toggles below apply.')
+                    ->default(false),
+                Toggle::make('notify_email_announcements')
+                    ->label('Email for announcements')
+                    ->default(false),
+                Toggle::make('notify_email_tickets')
+                    ->label('Email for ticket activity')
+                    ->default(false),
+                Select::make('notify_digest')
+                    ->label('Email digest')
+                    ->options([
+                        'none' => 'Off',
+                        'daily' => 'Daily',
+                        'weekly' => 'Weekly',
+                    ])
+                    ->default('none')
+                    ->native(false),
+            ]),
         ]);
     }
 
