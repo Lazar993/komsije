@@ -62,6 +62,8 @@
                 @foreach ($existingAttachments as $attachment)
                     <li class="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                         <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
+                           target="_blank"
+                           rel="noopener"
                            class="inline-flex min-w-0 items-center gap-2 truncate font-medium text-slate-700 hover:text-[var(--komsije-primary)]">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">
                                 <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />

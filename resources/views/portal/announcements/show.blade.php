@@ -43,6 +43,8 @@
                         @foreach ($announcement->attachments as $attachment)
                             <li class="flex items-center justify-between gap-3 py-3">
                                 <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
+                                   target="_blank"
+                                   rel="noopener"
                                    class="inline-flex min-w-0 items-center gap-3 truncate text-sm font-medium text-slate-700 transition hover:text-[var(--komsije-primary)]">
                                     <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
