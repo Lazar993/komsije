@@ -16,7 +16,7 @@
         <header class="border-b border-[var(--komsije-border)] bg-white/80 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <a href="{{ url('/') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('icons/logo-icon-v2.svg') }}" alt="" class="h-9 w-9 rounded-2xl" width="36" height="36">
+                    <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-9 w-9 rounded-2xl" width="36" height="36">
                     <span class="text-lg font-semibold text-[var(--komsije-dark)]">Komšije</span>
                 </a>
                 @auth

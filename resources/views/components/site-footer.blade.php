@@ -13,7 +13,7 @@
         <div class="hidden gap-10 md:flex md:items-start md:justify-between">
             <div class="max-w-sm">
                 <a href="{{ url('/') }}" class="flex items-center gap-3">
-                    <img src="{{ asset('icons/logo-icon-v2.svg') }}" alt="" class="h-10 w-10 rounded-2xl bg-white/5" width="40" height="40">
+                    <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-10 w-10 rounded-2xl bg-white/5" width="40" height="40">
                     <span class="text-xl font-semibold text-white">Komšije</span>
                 </a>
                 <p class="mt-4 text-sm leading-relaxed text-slate-400">
@@ -36,7 +36,7 @@
         {{-- Mobile layout: stacked, centered --}}
         <div class="flex flex-col items-center gap-6 text-center md:hidden">
             <a href="{{ url('/') }}" class="flex items-center gap-2">
-                <img src="{{ asset('icons/logo-icon-v2.svg') }}" alt="" class="h-9 w-9 rounded-2xl bg-white/5" width="36" height="36">
+                <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-9 w-9 rounded-2xl bg-white/5" width="36" height="36">
                 <span class="text-lg font-semibold text-white">Komšije</span>
             </a>
             @if ($footerPages->isNotEmpty())

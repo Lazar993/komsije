@@ -5,7 +5,7 @@
     hidden
 >
     <div class="komsije-surface flex items-center gap-3 rounded-[1.75rem] px-4 py-4 shadow-xl shadow-slate-900/10">
-        <img src="{{ asset('icons/logo-icon-v2.svg') }}" alt="" class="h-12 w-12 shrink-0 rounded-2xl" width="48" height="48">
+        <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-12 w-12 shrink-0 rounded-2xl" width="48" height="48">
         <div class="min-w-0 flex-1">
             <p class="text-sm font-semibold text-slate-900" data-install-title>{{ __('Install Komšije') }}</p>
             <p class="mt-1 text-xs leading-5 text-slate-500" data-install-copy>{{ __('Dodajte aplikaciju na početni ekran radi bržeg pristupa i rada u punom ekranu.') }}</p>

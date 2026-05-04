@@ -266,8 +266,8 @@ export async function enablePush(configOverride = null) {
         if (reg && typeof reg.showNotification === 'function') {
             reg.showNotification(title, {
                 body,
-                icon: '/icons/icon-192-v4.png',
-                badge: '/icons/favicon-32-v4.png',
+                icon: '/icons/icon-192-v5.png',
+                badge: '/icons/favicon-32-v5.png',
                 tag,
                 renotify: false,
                 data: { url: data.url || '/', ...data },

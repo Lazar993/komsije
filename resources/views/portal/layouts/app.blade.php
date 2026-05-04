@@ -30,7 +30,7 @@
                     <div class="flex flex-col gap-4">
                         <div class="flex items-start justify-between gap-3">
                             <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-3">
-                                <img src="{{ asset('icons/logo-icon-v2.svg') }}" alt="" class="h-10 w-10 shrink-0 rounded-2xl" width="40" height="40">
+                                <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-10 w-10 shrink-0 rounded-2xl" width="40" height="40">
                                 <span class="min-w-0">
                                     <span class="block truncate text-xl font-semibold text-[var(--komsije-dark)]">Komšije</span>
                                     <span class="block text-sm text-slate-500">{{ __('Sve u vezi zgrade, na jednom mestu.') }}</span>

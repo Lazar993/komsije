@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="kz-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1D4ED8"/>
+      <stop offset="55%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="kz-shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="60%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="kz-white" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#DBEAFE"/>
+    </linearGradient>
+    <filter id="kz-soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded background -->
+  <rect x="40" y="40" width="432" height="432" rx="112" fill="url(#kz-bg)"/>
+  <rect x="40" y="40" width="432" height="432" rx="112" fill="url(#kz-shine)"/>
+
+  <!-- Soft glow behind tower -->
+  <ellipse cx="280" cy="430" rx="180" ry="22" fill="#000" opacity="0.18" filter="url(#kz-soft)"/>
+
+  <!-- K diagonal arms (drawn first, stem will cap their inner ends) -->
+  <g stroke="url(#kz-white)" stroke-width="58" stroke-linecap="round" fill="none">
+    <line x1="216" y1="256" x2="396" y2="108"/>
+    <line x1="216" y1="256" x2="396" y2="404"/>
+  </g>
+
+  <!-- Pitched roof on top of the tower -->
+  <path d="M128 118 L180 74 L232 118 Z" fill="#FBBF24"/>
+  <!-- Tiny chimney/antenna -->
+  <rect x="206" y="80" width="8" height="24" rx="2" fill="#FBBF24"/>
+  <circle cx="210" cy="76" r="6" fill="#FBBF24"/>
+
+  <!-- Tower stem -->
+  <rect x="140" y="112" width="80" height="304" rx="14" fill="url(#kz-white)"/>
+
+  <!-- Subtle vertical highlight on tower -->
+  <rect x="146" y="120" width="6" height="288" rx="3" fill="#FFFFFF" opacity="0.85"/>
+
+  <!-- Windows (upper section) -->
+  <g fill="#1E3A8A">
+    <rect x="155" y="138" width="22" height="22" rx="4"/>
+    <rect x="183" y="138" width="22" height="22" rx="4" fill="#FBBF24"/>
+    <rect x="155" y="170" width="22" height="22" rx="4"/>
+    <rect x="183" y="170" width="22" height="22" rx="4"/>
+    <rect x="155" y="202" width="22" height="22" rx="4" fill="#FBBF24"/>
+    <rect x="183" y="202" width="22" height="22" rx="4"/>
+  </g>
+
+  <!-- Windows (lower section) -->
+  <g fill="#1E3A8A">
+    <rect x="155" y="296" width="22" height="22" rx="4"/>
+    <rect x="183" y="296" width="22" height="22" rx="4" fill="#FBBF24"/>
+    <rect x="155" y="328" width="22" height="22" rx="4"/>
+    <rect x="183" y="328" width="22" height="22" rx="4"/>
+  </g>
+
+  <!-- Entrance door -->
+  <rect x="168" y="362" width="24" height="46" rx="8" fill="#22C55E"/>
+  <circle cx="186" cy="386" r="2" fill="#FFFFFF"/>
+</svg>
