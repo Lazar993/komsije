@@ -90,97 +90,291 @@
         padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem);
     }
 
-    /* Static page (Terms, Privacy, About...) typography */
+    /* Static page (Terms, Privacy, About...) typography
+       Inspired by Stripe / Notion: airy spacing, clear hierarchy, calm palette. */
     .page-content {
-        color: #334155;
+        --pc-text: #334155;
+        --pc-strong: #0f172a;
+        --pc-muted: #64748b;
+        --pc-border: #e2e8f0;
+        --pc-border-soft: #eef2f7;
+        --pc-link: var(--komsije-primary);
+        --pc-link-hover: #1d4ed8;
+        --pc-bg-soft: #f8fafc;
+        --pc-bg-code: #f1f5f9;
+
+        color: var(--pc-text);
+        font-size: 1.0625rem;
+        /* 17px */
+        line-height: 1.75;
+        font-feature-settings: 'ss01', 'cv02', 'cv11';
+        -webkit-font-smoothing: antialiased;
     }
 
     .page-content>*+* {
-        margin-top: 1.1em;
+        margin-top: 1.25em;
     }
 
+    /* Lead paragraph: first paragraph stands out slightly (Stripe-style intro). */
+    .page-content>p:first-child {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: #1e293b;
+    }
+
+    /* Headings */
     .page-content h1,
     .page-content h2,
     .page-content h3,
-    .page-content h4 {
-        color: var(--komsije-dark);
+    .page-content h4,
+    .page-content h5,
+    .page-content h6 {
+        color: var(--pc-strong);
         font-weight: 600;
+        letter-spacing: -0.01em;
         line-height: 1.25;
+        scroll-margin-top: 6rem;
     }
 
     .page-content h2 {
-        font-size: 1.5rem;
-        margin-top: 2.25rem;
+        font-size: 1.625rem;
+        /* 26px */
+        margin-top: 2.75em;
+        letter-spacing: -0.015em;
+    }
+
+    .page-content h2+* {
+        margin-top: 0.75em;
     }
 
     .page-content h3 {
-        font-size: 1.2rem;
-        margin-top: 1.75rem;
+        font-size: 1.25rem;
+        /* 20px */
+        margin-top: 2.25em;
+    }
+
+    .page-content h3+* {
+        margin-top: 0.5em;
     }
 
     .page-content h4 {
-        font-size: 1.05rem;
-        margin-top: 1.5rem;
+        font-size: 1.0625rem;
+        margin-top: 2em;
+        text-transform: none;
     }
 
+    /* Paragraphs */
     .page-content p {
-        line-height: 1.75;
+        text-wrap: pretty;
     }
 
-    .page-content a {
-        color: var(--komsije-primary);
+    /* Links */
+    .page-content a:not(.no-underline) {
+        color: var(--pc-link);
         text-decoration: underline;
+        text-decoration-color: rgba(37, 99, 235, 0.35);
+        text-decoration-thickness: 1px;
         text-underline-offset: 3px;
+        transition: color 0.15s ease, text-decoration-color 0.15s ease;
     }
 
-    .page-content a:hover {
-        color: #1d4ed8;
+    .page-content a:not(.no-underline):hover {
+        color: var(--pc-link-hover);
+        text-decoration-color: currentColor;
     }
 
-    .page-content strong {
-        color: var(--komsije-dark);
+    /* Inline emphasis */
+    .page-content strong,
+    .page-content b {
+        color: var(--pc-strong);
         font-weight: 600;
     }
 
+    .page-content em,
+    .page-content i {
+        color: #1e293b;
+    }
+
+    .page-content mark {
+        background: rgba(250, 204, 21, 0.35);
+        color: var(--pc-strong);
+        padding: 0 0.2em;
+        border-radius: 0.2rem;
+    }
+
+    /* Lists */
     .page-content ul,
     .page-content ol {
         padding-left: 1.5rem;
-        line-height: 1.7;
     }
 
     .page-content ul {
         list-style: disc;
     }
 
+    .page-content ul ul {
+        list-style: circle;
+    }
+
     .page-content ol {
         list-style: decimal;
     }
 
+    .page-content li {
+        padding-left: 0.25rem;
+    }
+
+    .page-content li::marker {
+        color: #94a3b8;
+    }
+
     .page-content ul>li+li,
     .page-content ol>li+li {
-        margin-top: 0.4rem;
+        margin-top: 0.5rem;
     }
 
+    .page-content li>p {
+        margin: 0;
+    }
+
+    .page-content li>ul,
+    .page-content li>ol {
+        margin-top: 0.5rem;
+    }
+
+    /* Blockquote — Notion-style left rule with soft tinted background */
     .page-content blockquote {
         border-left: 3px solid var(--komsije-primary);
-        background: rgba(37, 99, 235, 0.05);
-        padding: 0.75rem 1rem;
-        color: #475569;
-        font-style: italic;
-        border-radius: 0.25rem;
+        background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.02));
+        padding: 1rem 1.25rem;
+        color: #334155;
+        font-style: normal;
+        border-radius: 0 0.5rem 0.5rem 0;
     }
 
+    .page-content blockquote p {
+        margin: 0;
+    }
+
+    .page-content blockquote p+p {
+        margin-top: 0.75em;
+    }
+
+    /* Horizontal rule — soft divider */
     .page-content hr {
         border: 0;
-        border-top: 1px solid var(--komsije-border);
-        margin: 2rem 0;
+        border-top: 1px solid var(--pc-border);
+        margin: 3rem auto;
+        max-width: 8rem;
     }
 
+    /* Inline code */
     .page-content code {
-        background: #f1f5f9;
-        padding: 0.1rem 0.35rem;
-        border-radius: 0.25rem;
+        background: var(--pc-bg-code);
+        color: #0f172a;
+        padding: 0.15rem 0.4rem;
+        border-radius: 0.375rem;
         font-size: 0.9em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        border: 1px solid var(--pc-border-soft);
+    }
+
+    /* Code blocks */
+    .page-content pre {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        overflow-x: auto;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    }
+
+    .page-content pre code {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: inherit;
+        font-size: inherit;
+        border-radius: 0;
+    }
+
+    /* Tables */
+    .page-content table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95em;
+        border: 1px solid var(--pc-border);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .page-content th,
+    .page-content td {
+        text-align: left;
+        padding: 0.625rem 0.875rem;
+        border-bottom: 1px solid var(--pc-border-soft);
+        vertical-align: top;
+    }
+
+    .page-content th {
+        background: var(--pc-bg-soft);
+        color: var(--pc-strong);
+        font-weight: 600;
+    }
+
+    .page-content tr:last-child td {
+        border-bottom: 0;
+    }
+
+    /* Images */
+    .page-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.75rem;
+        border: 1px solid var(--pc-border-soft);
+        margin: 0 auto;
+    }
+
+    .page-content figure {
+        text-align: center;
+    }
+
+    .page-content figure figcaption {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--pc-muted);
+    }
+
+    /* Keyboard */
+    .page-content kbd {
+        background: #fff;
+        border: 1px solid var(--pc-border);
+        border-bottom-width: 2px;
+        border-radius: 0.375rem;
+        padding: 0.1rem 0.4rem;
+        font-size: 0.85em;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        color: var(--pc-strong);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    }
+
+    @media (min-width: 640px) {
+        .page-content {
+            font-size: 1.09375rem;
+            /* ~17.5px */
+        }
+
+        .page-content h2 {
+            font-size: 1.875rem;
+            /* 30px */
+        }
+
+        .page-content h3 {
+            font-size: 1.375rem;
+            /* 22px */
+        }
     }
 
     /* Card deck: scrollable list on desktop/tablet, swipeable carousel on mobile. */
