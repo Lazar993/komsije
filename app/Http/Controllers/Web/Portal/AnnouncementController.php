@@ -15,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\View\View;
 
@@ -186,7 +187,10 @@ final class AnnouncementController extends PortalController
 
         abort_unless($disk->exists($attachment->path), 404);
 
-        return response()->streamDownload(function () use ($disk, $attachment): void {
+        $disposition = $request->query('download') === '1' ? 'attachment' : 'inline';
+        $contentDisposition = HeaderUtils::makeDisposition($disposition, $attachment->original_name);
+
+        return response()->stream(function () use ($disk, $attachment): void {
             $stream = $disk->readStream($attachment->path);
 
             if ($stream === null) {
@@ -198,9 +202,11 @@ final class AnnouncementController extends PortalController
             if (is_resource($stream)) {
                 fclose($stream);
             }
-        }, $attachment->original_name, [
+        }, 200, [
             'Content-Type' => $attachment->mime_type ?? 'application/octet-stream',
             'Content-Length' => (string) ($attachment->size ?: $disk->size($attachment->path)),
+            'Content-Disposition' => $contentDisposition,
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 }

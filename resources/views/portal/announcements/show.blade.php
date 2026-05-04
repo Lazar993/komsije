@@ -54,9 +54,15 @@
                                     </span>
                                     <span class="truncate">{{ $attachment->original_name }}</span>
                                 </a>
-                                <span class="shrink-0 text-xs text-slate-400">
-                                    {{ $attachment->size > 0 ? number_format($attachment->size / 1024, 1) . ' KB' : '—' }}
-                                </span>
+                                <div class="flex shrink-0 items-center gap-3">
+                                    <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}?download=1"
+                                       class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
+                                        {{ __('Preuzmi') }}
+                                    </a>
+                                    <span class="text-xs text-slate-400">
+                                        {{ $attachment->size > 0 ? number_format($attachment->size / 1024, 1) . ' KB' : '—' }}
+                                    </span>
+                                </div>
                             </li>
                         @endforeach
                     </ul>
