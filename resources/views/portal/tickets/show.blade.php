@@ -11,7 +11,7 @@
                         <span class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">{{ $ticket->status->label() }}</span>
                         <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-950">{{ $ticket->priority->label() }}</span>
                     </div>
-                    <h1 class="mt-4 break-words text-3xl font-semibold text-slate-950">{{ $ticket->title }}</h1>
+                    <h1 class="mt-4 break-words text-2xl font-semibold text-slate-950 sm:text-3xl">{{ $ticket->title }}</h1>
                 </div>
 
                 <div class="flex flex-wrap gap-3">

@@ -3,12 +3,12 @@
 @section('title', $announcement->title)
 
 @section('content')
-    <section class="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-        <article class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
+    <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <article class="min-w-0 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <span class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] {{ $announcement->published_at ? 'bg-emerald-100 text-emerald-950' : 'bg-amber-100 text-amber-950' }}">{{ $announcement->published_at ? __('Published') : __('Draft') }}</span>
-                    <h1 class="mt-4 text-3xl font-semibold text-slate-950">{{ $announcement->title }}</h1>
+                    <h1 class="mt-4 break-words text-2xl font-semibold text-slate-950 sm:text-3xl">{{ $announcement->title }}</h1>
                 </div>
                 <div class="flex flex-wrap gap-3">
                     <a href="{{ route('portal.announcements.index') }}" class="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ __('Back') }}</a>
@@ -41,7 +41,7 @@
                     <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Prilozi') }}</h2>
                     <ul class="mt-4 divide-y divide-slate-100">
                         @foreach ($announcement->attachments as $attachment)
-                            <li class="flex items-center justify-between gap-3 py-3">
+                            <li class="flex flex-col items-start gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                                 <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
                                    target="_blank"
                                    rel="noopener"
@@ -54,7 +54,7 @@
                                     </span>
                                     <span class="truncate">{{ $attachment->original_name }}</span>
                                 </a>
-                                <div class="flex shrink-0 items-center gap-3">
+                                <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:shrink-0 sm:justify-end">
                                     <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}?download=1"
                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
                                         {{ __('Preuzmi') }}
@@ -70,7 +70,7 @@
             @endif
         </article>
 
-        <aside class="rounded-[2rem] border border-white/70 bg-white/80 p-8 shadow-xl shadow-slate-900/8 backdrop-blur">
+        <aside class="min-w-0 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
             <h2 class="text-xl font-semibold text-slate-950">{{ __('Announcement details') }}</h2>
             <div class="mt-6 space-y-4">
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">

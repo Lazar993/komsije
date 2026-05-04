@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <span class="rounded-2xl bg-white px-3 py-2 text-xs font-medium text-slate-500 ring-1 ring-slate-200 transition group-hover:text-[var(--komsije-primary)]">{{ __('Otvori') }}</span>
+        <span class="hidden rounded-2xl bg-white px-3 py-2 text-xs font-medium text-slate-500 ring-1 ring-slate-200 transition group-hover:text-[var(--komsije-primary)] sm:inline-flex">{{ __('Otvori') }}</span>
     </div>
 @if ($href)
     </a>

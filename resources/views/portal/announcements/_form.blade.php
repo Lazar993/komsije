@@ -27,7 +27,7 @@
     @if ($isAdmin)
         <div>
             <label for="published_at" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Publish at') }}</label>
-            <input id="published_at" name="published_at" type="datetime-local" value="{{ old('published_at', isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}" class="komsije-input w-full rounded-2xl px-4 py-3">
+            <input id="published_at" name="published_at" type="datetime-local" value="{{ old('published_at', isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}" class="komsije-input block min-w-0 w-full rounded-2xl px-4 py-3">
             <p class="mt-2 text-sm text-slate-500">{{ __('Leave empty to keep it as a draft.') }}</p>
             @error('published_at')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
         </div>
@@ -60,7 +60,7 @@
             <p class="mb-2 block text-sm font-medium text-slate-700">{{ __('Postojeći prilozi') }}</p>
             <ul class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-[var(--komsije-border)] bg-white">
                 @foreach ($existingAttachments as $attachment)
-                    <li class="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <li class="flex flex-col items-start gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                         <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
                            target="_blank"
                            rel="noopener"
@@ -71,7 +71,7 @@
                             </svg>
                             <span class="truncate">{{ $attachment->original_name }}</span>
                         </a>
-                        <label class="inline-flex items-center gap-2 text-xs text-rose-600">
+                        <label class="inline-flex w-full items-center justify-end gap-2 text-xs text-rose-600 sm:w-auto sm:justify-start">
                             <input type="checkbox" name="remove_attachments[]" value="{{ $attachment->id }}" class="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500">
                             {{ __('Ukloni') }}
                         </label>

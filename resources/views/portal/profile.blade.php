@@ -19,7 +19,7 @@
     @endphp
 
     <section class="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_23rem]">
-        <article class="overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
+        <article class="min-w-0 overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div class="min-w-0 flex-1">
@@ -31,7 +31,7 @@
                                 <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.75rem] bg-white/10 text-xl font-semibold text-white">{{ $initials !== '' ? $initials : 'K' }}</span>
                             @endif
                             <div class="min-w-0">
-                                <h1 class="truncate text-3xl font-bold tracking-tight sm:text-4xl">{{ $user->name }}</h1>
+                                <h1 class="truncate text-2xl font-bold tracking-tight sm:text-4xl">{{ $user->name }}</h1>
                                 <p class="mt-2 text-sm text-slate-300">{{ $user->email }}</p>
                                 <p class="mt-2 text-sm text-slate-200">
                                     {{ $profileApartment ? __('Stan :number, sprat :floor', ['number' => $profileApartment->number, 'floor' => $profileApartment->floor]) : __('Stan nije povezan sa nalogom.') }}
@@ -66,7 +66,7 @@
             </div>
         </article>
 
-        <aside class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+        <aside class="komsije-surface min-w-0 rounded-[2rem] p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Aktivnost') }}</p>
@@ -112,8 +112,8 @@
         @include('partials.push-settings', ['variant' => 'card'])
     </section>
 
-    <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+    <section class="mt-6 grid gap-6 lg:grid-cols-2">
+        <article class="komsije-surface min-w-0 rounded-[2rem] p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Poslednji kvar') }}</p>
@@ -146,7 +146,7 @@
             </div>
         </article>
 
-        <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+        <article class="komsije-surface min-w-0 rounded-[2rem] p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Obaveštenja') }}</p>
@@ -171,7 +171,7 @@
     </section>
 
     <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-        <article class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+        <article class="komsije-surface min-w-0 rounded-[2rem] p-6 sm:p-7">
             <div class="flex items-start justify-between gap-4">
                 <div>
                     <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Informacije o zgradi') }}</p>
@@ -202,7 +202,7 @@
             @endif
         </article>
 
-        <article class="space-y-6">
+        <article class="min-w-0 space-y-6">
             <section class="komsije-surface rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-start justify-between gap-4">
                     <div>

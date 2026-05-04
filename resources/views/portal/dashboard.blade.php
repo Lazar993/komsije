@@ -4,20 +4,20 @@
 
 @section('content')
     @if ($currentBuilding === null)
-        <section class="komsije-surface rounded-[2rem] p-8 sm:p-10">
+        <section class="komsije-surface rounded-[2rem] p-6 sm:p-10">
             <p class="text-sm font-semibold uppercase tracking-[0.24em] text-[var(--komsije-primary)]">{{ __('Portal status') }}</p>
-            <h1 class="mt-4 max-w-2xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{{ __('No building is assigned to this account yet.') }}</h1>
+            <h1 class="mt-4 max-w-2xl text-2xl font-bold tracking-tight text-slate-950 sm:text-4xl">{{ __('No building is assigned to this account yet.') }}</h1>
             <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">{{ __('Add the user to at least one building from the admin area, then return to the portal. The same account can belong to multiple buildings and switch between them here.') }}</p>
         </section>
     @else
         @include('partials.push-settings', ['variant' => 'banner'])
 
         <section class="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_24rem]">
-            <article class="overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
+            <article class="min-w-0 overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
                 <div class="flex flex-col gap-6">
                     <div class="space-y-3">
                         <span class="inline-flex w-fit rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-blue-100">{{ __('Početna') }}</span>
-                        <h1 class="max-w-xl text-3xl font-bold tracking-tight sm:text-5xl">{{ __('Sve za vašu zgradu, bez lutanja.') }}</h1>
+                        <h1 class="max-w-xl text-2xl font-bold tracking-tight sm:text-5xl">{{ __('Sve za vašu zgradu, bez lutanja.') }}</h1>
                         <p class="max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">{{ $currentBuilding->name }} · {{ $currentBuilding->address }}</p>
                     </div>
 
@@ -55,7 +55,7 @@
                 </div>
             </article>
 
-            <aside class="komsije-surface rounded-[2rem] p-6 sm:p-7">
+            <aside class="komsije-surface min-w-0 rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Danas') }}</p>
@@ -92,7 +92,7 @@
         </section>
 
         <section class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <article class="komsije-surface overflow-hidden rounded-[2rem] p-6 sm:p-7">
+            <article class="komsije-surface min-w-0 overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Kvarovi') }}</p>
@@ -113,7 +113,7 @@
                 </div>
             </article>
 
-            <article class="komsije-surface overflow-hidden rounded-[2rem] p-6 sm:p-7">
+            <article class="komsije-surface min-w-0 overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Obaveštenja') }}</p>
