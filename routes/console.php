@@ -15,3 +15,7 @@ Schedule::command('notifications:send-digest --frequency=daily')
 Schedule::command('notifications:send-digest --frequency=weekly')
     ->weeklyOn(1, '09:00')
     ->withoutOverlapping();
+
+Schedule::command('app:prune-old-content')
+    ->dailyAt('03:00')
+    ->withoutOverlapping();
