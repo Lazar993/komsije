@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['building_id', 'title', 'description', 'is_active', 'ends_at'])]
+#[Fillable(['building_id', 'title', 'description', 'is_anonymous', 'is_active', 'ends_at'])]
 class Poll extends Model
 {
     use HasFactory;
@@ -55,6 +55,7 @@ class Poll extends Model
     {
         return [
             'ends_at' => 'datetime',
+            'is_anonymous' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

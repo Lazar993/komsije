@@ -418,5 +418,15 @@
     "Poll": "Anketa",
     "Option text": "Tekst opcije",
     "Active": "Aktivno",
-    "Ends at": "Ističe"
+    "Ends at": "Ističe",
+    "Anonymous": "Anonimno",
+    "Anonymous voting": "Anonimno glasanje",
+    "If enabled, the poll keeps voters private while still preventing duplicate votes.": "Ako je uključeno, anketa čuva privatnost glasača i dalje sprečava dupliranje glasova.",
+    "Results": "Rezultati",
+    "Option": "Opcija",
+    "Who voted": "Ko je glasao",
+    "Voter": "Glasač",
+    "Voted at": "Vreme glasanja",
+    "Total votes": "Ukupno glasova",
+    "This poll is anonymous. Individual voter identities are hidden.": "Ova anketa je anonimna. Identitet pojedinačnih glasača je skriven."
 }

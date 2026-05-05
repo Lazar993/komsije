@@ -420,5 +420,15 @@
     "Poll": "Poll",
     "Option text": "Option text",
     "Active": "Active",
-    "Ends at": "Ends at"
+    "Ends at": "Ends at",
+    "Anonymous": "Anonymous",
+    "Anonymous voting": "Anonymous voting",
+    "If enabled, the poll keeps voters private while still preventing duplicate votes.": "If enabled, the poll keeps voters private while still preventing duplicate votes.",
+    "Results": "Results",
+    "Option": "Option",
+    "Who voted": "Who voted",
+    "Voter": "Voter",
+    "Voted at": "Voted at",
+    "Total votes": "Total votes",
+    "This poll is anonymous. Individual voter identities are hidden.": "This poll is anonymous. Individual voter identities are hidden."
 }
