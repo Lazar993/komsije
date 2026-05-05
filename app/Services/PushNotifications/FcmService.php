@@ -79,7 +79,14 @@ final class FcmService
                     'token' => $token,
                     'data' => $stringData,
                     'webpush' => [
-                        'headers' => ['Urgency' => 'high'],
+                        'headers' => [
+                            'Urgency' => 'high',
+                            // Cap how long FCM/Google relays a queued message
+                            // when the device is offline. 24h is a sane default
+                            // for ticket / announcement notifications: longer
+                            // than that and the context is usually stale.
+                            'TTL' => '86400s',
+                        ],
                         'fcm_options' => array_filter([
                             'link' => $stringData['url'] ?? null,
                         ]),

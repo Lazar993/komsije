@@ -55,14 +55,20 @@ final class FirebaseMessagingServiceWorkerController extends Controller
 
                 self.registration.showNotification(title, {
                     body: notification.body || data.body || '',
-                    icon: '/icons/icon-192-v4.png',
-                    badge: '/icons/favicon-32-v4.png',
+                    icon: '/icons/icon-192-v5.png',
+                    badge: '/icons/notification-badge-96.png',
                     tag: data.type ? `\${data.type}-\${data.ticket_id || data.announcement_id || ''}` : undefined,
                     data: {
                         url: data.url || data.click_action || '/',
                         ...data,
                     },
                     renotify: false,
+                    // Android-only options (silently ignored on iOS/desktop):
+                    // gentle vibration pattern + a stable language hint so the
+                    // OS picks the right TTS voice if read aloud.
+                    vibrate: [120, 60, 120],
+                    lang: 'sr-Latn',
+                    timestamp: Date.now(),
                 });
             });
 

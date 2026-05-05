@@ -267,10 +267,14 @@ export async function enablePush(configOverride = null) {
             reg.showNotification(title, {
                 body,
                 icon: '/icons/icon-192-v5.png',
-                badge: '/icons/favicon-32-v5.png',
+                badge: '/icons/notification-badge-96.png',
                 tag,
                 renotify: false,
                 data: { url: data.url || '/', ...data },
+                // Android-only extras (no-op on iOS/desktop).
+                vibrate: [120, 60, 120],
+                lang: 'sr-Latn',
+                timestamp: Date.now(),
             });
         }
     });

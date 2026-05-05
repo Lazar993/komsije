@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#4F46E5">
 <meta name="description" content="{{ __('Sve u vezi zgrade, na jednom mestu.') }}">
-<link rel="manifest" href="{{ asset('manifest.json') }}?v=5">
+<link rel="manifest" href="{{ asset('manifest.json') }}?v=6">
 <link rel="icon" type="image/svg+xml" sizes="any" href="{{ asset('icons/logo-icon-v3.svg') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32-v5.png') }}">
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon-v5.png') }}">

@@ -1,5 +1,7 @@
 const APP_NAME = 'Komšije';
 const INSTALL_PROMPT_DISMISSED_KEY = 'komsije-install-dismissed';
+const INSTALL_PROMPT_DISMISSED_AT_KEY = 'komsije-install-dismissed-at';
+const INSTALL_PROMPT_REENGAGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let deferredInstallPrompt = null;
 let serviceWorkerRegistration = null;
@@ -320,7 +322,7 @@ function setupInstallPrompt() {
     const titleElement = promptElement.querySelector('[data-install-title]');
     const copyElement = promptElement.querySelector('[data-install-copy]');
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const wasDismissed = window.localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY) === 'true';
+    const wasDismissed = isInstallPromptDismissed();
     const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
 
     if (isStandalone || wasDismissed) {
@@ -328,13 +330,13 @@ function setupInstallPrompt() {
     }
 
     dismissButton?.addEventListener('click', () => {
-        window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'true');
+        rememberInstallPromptDismissal();
         setInstallPromptVisibility(promptElement, false);
     });
 
     actionButton?.addEventListener('click', async () => {
         if (actionButton.dataset.mode === 'ios-help') {
-            window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'true');
+            rememberInstallPromptDismissal();
             setInstallPromptVisibility(promptElement, false);
             return;
         }
@@ -347,9 +349,9 @@ function setupInstallPrompt() {
         const { outcome } = await deferredInstallPrompt.userChoice;
 
         if (outcome === 'dismissed') {
-            window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'true');
+            rememberInstallPromptDismissal();
         } else {
-            window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
+            clearInstallPromptDismissal();
         }
 
         deferredInstallPrompt = null;
@@ -365,7 +367,7 @@ function setupInstallPrompt() {
     window.addEventListener('appinstalled', () => {
         deferredInstallPrompt = null;
         setInstallPromptVisibility(promptElement, false);
-        window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
+        clearInstallPromptDismissal();
         document.documentElement.dataset.appInstalled = 'true';
     });
 
@@ -384,6 +386,45 @@ function setupInstallPrompt() {
         }
 
         setInstallPromptVisibility(promptElement, true);
+    }
+}
+
+function isInstallPromptDismissed() {
+    try {
+        if (window.localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY) !== 'true') {
+            return false;
+        }
+
+        // Re-engage Android/Chrome users after the cool-off window so the
+        // install affordance isn't permanently suppressed by a single dismiss.
+        const dismissedAt = Number(window.localStorage.getItem(INSTALL_PROMPT_DISMISSED_AT_KEY) || 0);
+
+        if (dismissedAt && Date.now() - dismissedAt > INSTALL_PROMPT_REENGAGE_MS) {
+            clearInstallPromptDismissal();
+            return false;
+        }
+
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function rememberInstallPromptDismissal() {
+    try {
+        window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'true');
+        window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_AT_KEY, String(Date.now()));
+    } catch {
+        // Storage unavailable (e.g. private mode) — non-fatal.
+    }
+}
+
+function clearInstallPromptDismissal() {
+    try {
+        window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
+        window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_AT_KEY);
+    } catch {
+        // Storage unavailable — non-fatal.
     }
 }
 

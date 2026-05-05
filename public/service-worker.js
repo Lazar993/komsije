@@ -1,15 +1,16 @@
-const VERSION = 'komsije-v9';
+const VERSION = 'komsije-v10';
 const STATIC_CACHE = `${VERSION}-static`;
 const DYNAMIC_CACHE = `${VERSION}-dynamic`;
 const API_CACHE = `${VERSION}-api`;
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL = [
-    '/manifest.json?v=5',
+    '/manifest.json?v=6',
     '/offline.html',
     '/icons/favicon-32-v5.png',
     '/icons/icon-192-v5.png',
     '/icons/icon-512-v5.png',
     '/icons/apple-touch-icon-v5.png',
+    '/icons/notification-badge-96.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -58,13 +59,19 @@ self.addEventListener('push', (event) => {
     const options = {
         body,
         icon: notification.icon || '/icons/icon-192-v5.png',
-        badge: notification.badge || '/icons/favicon-32-v5.png',
+        badge: notification.badge || '/icons/notification-badge-96.png',
         tag: data.type ? `${data.type}-${data.ticket_id || data.announcement_id || ''}` : undefined,
         data: {
             url: data.url || data.click_action || '/',
             ...data,
         },
         renotify: false,
+        // Android-only options (ignored on iOS/desktop): subtle vibration
+        // pattern, language hint, and an explicit timestamp so notifications
+        // sort correctly in the system shade.
+        vibrate: [120, 60, 120],
+        lang: 'sr-Latn',
+        timestamp: Date.now(),
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
