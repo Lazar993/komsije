@@ -6,6 +6,7 @@ return [
     'accepted' => 'The :attribute must be accepted.',
     'array' => 'The :attribute must be an array.',
     'boolean' => 'The :attribute field must be true or false.',
+    'confirmed' => 'The :attribute confirmation does not match.',
     'date' => 'The :attribute is not a valid date.',
     'email' => 'The :attribute must be a valid email address.',
     'enum' => 'The selected :attribute is invalid.',
@@ -13,6 +14,12 @@ return [
     'file' => 'The :attribute must be a file.',
     'image' => 'The :attribute must be an image.',
     'integer' => 'The :attribute must be an integer.',
+    'min' => [
+        'array' => 'The :attribute must have at least :min items.',
+        'file' => 'The :attribute must be at least :min kilobytes.',
+        'numeric' => 'The :attribute must be at least :min.',
+        'string' => 'The :attribute must be at least :min characters.',
+    ],
     'max' => [
         'array' => 'The :attribute must not have more than :max items.',
         'file' => 'The :attribute must not be greater than :max kilobytes.',

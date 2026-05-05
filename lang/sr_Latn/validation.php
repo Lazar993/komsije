@@ -6,6 +6,7 @@ return [
     'accepted' => ':attribute mora biti prihvaćen.',
     'array' => ':attribute mora biti niz.',
     'boolean' => 'Polje :attribute mora biti tačno ili netačno.',
+    'confirmed' => 'Potvrda polja :attribute se ne poklapa.',
     'date' => ':attribute nije ispravan datum.',
     'email' => ':attribute mora biti ispravna email adresa.',
     'enum' => 'Izabrani :attribute nije ispravan.',
@@ -13,6 +14,12 @@ return [
     'file' => ':attribute mora biti fajl.',
     'image' => ':attribute mora biti slika.',
     'integer' => ':attribute mora biti ceo broj.',
+    'min' => [
+        'array' => ':attribute mora imati najmanje :min stavki.',
+        'file' => ':attribute mora biti najmanje :min kilobajta.',
+        'numeric' => ':attribute mora biti najmanje :min.',
+        'string' => ':attribute mora imati najmanje :min karaktera.',
+    ],
     'max' => [
         'array' => ':attribute ne sme imati više od :max stavki.',
         'file' => ':attribute ne sme biti veći od :max kilobajta.',
