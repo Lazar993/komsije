@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Portal;
 
 use App\Models\AnnouncementRead;
+use App\Models\Building;
 use App\Models\Poll;
 use App\Services\AnnouncementService;
 use App\Services\DashboardService;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -59,24 +61,13 @@ final class DashboardController extends PortalController
                 return $announcement;
             });
 
-            $userId = (int) $request->user()->getKey();
+            $polls = $this->pollsForBuilding($currentBuilding, (int) $request->user()->getKey());
+        }
 
-            $polls = Poll::query()
-                ->where('building_id', $currentBuilding->getKey())
-                ->open()
-                ->withCount('votes')
-                ->withExists([
-                    'votes as has_voted' => fn ($query) => $query->where('user_id', $userId),
-                ])
-                ->with([
-                    'options' => fn ($query) => $query->withCount('votes')->orderBy('id'),
-                    'votes' => fn ($query) => $query
-                        ->where('user_id', $userId)
-                        ->select(['id', 'poll_id', 'poll_option_id', 'user_id']),
-                ])
-                ->latest('created_at')
-                ->limit(3)
-                ->get();
+        if ($request->ajax() && $request->query('fragment') === 'polls') {
+            return view('portal.partials.polls-panel', [
+                'polls' => $polls,
+            ]);
         }
 
         return $this->portalView($request, 'portal.dashboard', [
@@ -87,5 +78,28 @@ final class DashboardController extends PortalController
             'recentAnnouncements' => $recentAnnouncements,
             'recentTickets' => $recentTickets,
         ]);
+    }
+
+    /**
+     * @return Collection<int, Poll>
+     */
+    private function pollsForBuilding(Building $building, int $userId): Collection
+    {
+        return Poll::query()
+            ->where('building_id', $building->getKey())
+            ->open()
+            ->withCount('votes')
+            ->withExists([
+                'votes as has_voted' => fn ($query) => $query->where('user_id', $userId),
+            ])
+            ->with([
+                'options' => fn ($query) => $query->withCount('votes')->orderBy('id'),
+                'votes' => fn ($query) => $query
+                    ->where('user_id', $userId)
+                    ->select(['id', 'poll_id', 'poll_option_id', 'user_id']),
+            ])
+            ->latest('created_at')
+            ->limit(3)
+            ->get();
     }
 }
