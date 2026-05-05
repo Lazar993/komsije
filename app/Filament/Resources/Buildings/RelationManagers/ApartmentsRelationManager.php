@@ -64,8 +64,8 @@ class ApartmentsRelationManager extends RelationManager
                     ->label('Tenants')
                     ->badge()
                     ->separator(','),
-                IconColumn::make('available_for_marketplace')
-                    ->boolean(),
+                // IconColumn::make('available_for_marketplace')
+                //     ->boolean(),
             ])
             ->headerActions([
                 CreateAction::make()

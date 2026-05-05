@@ -79,8 +79,8 @@ class ApartmentResource extends Resource
             TextEntry::make('building.name'),
             TextEntry::make('number'),
             TextEntry::make('floor'),
-            IconEntry::make('available_for_marketplace')
-                ->boolean(),
+            // IconEntry::make('available_for_marketplace')
+            //     ->boolean(),
             TextEntry::make('tenants.name')
                 ->label('Tenants')
                 ->listWithLineBreaks(),
@@ -112,8 +112,8 @@ class ApartmentResource extends Resource
                     ->label('Tenants')
                     ->badge()
                     ->separator(','),
-                IconColumn::make('available_for_marketplace')
-                    ->boolean(),
+                // IconColumn::make('available_for_marketplace')
+                //     ->boolean(),
             ])
             ->filters([
                 SelectFilter::make('building_id')
