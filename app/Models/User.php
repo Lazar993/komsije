@@ -72,6 +72,11 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         return $this->hasMany(AnnouncementRead::class);
     }
 
+    public function votes(): HasMany
+    {
+        return $this->hasMany(Vote::class);
+    }
+
     public function createdInvites(): HasMany
     {
         return $this->hasMany(Invite::class, 'created_by');

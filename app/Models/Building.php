@@ -68,6 +68,11 @@ class Building extends Model
         return $this->hasMany(Announcement::class);
     }
 
+    public function polls(): HasMany
+    {
+        return $this->hasMany(Poll::class);
+    }
+
     public function invites(): HasMany
     {
         return $this->hasMany(Invite::class);

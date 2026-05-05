@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\SetSiteLocaleController;
 use App\Http\Controllers\Web\Portal\AnnouncementController;
 use App\Http\Controllers\Web\Portal\BuildingContextController;
 use App\Http\Controllers\Web\Portal\DashboardController;
+use App\Http\Controllers\Web\Portal\PollVoteController;
 use App\Http\Controllers\Web\Portal\ProfileController;
 use App\Http\Controllers\Web\Portal\TicketController;
 use App\Http\Middleware\EnsurePortalBuildingContext;
@@ -74,6 +75,8 @@ Route::middleware('auth')->group(function (): void {
 			Route::put('announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
 			Route::post('announcements/{announcement}/approve', [AnnouncementController::class, 'approve'])->name('announcements.approve');
 			Route::get('announcements/{announcement}/attachments/{attachment}', [AnnouncementController::class, 'downloadAttachment'])->name('announcements.attachments.download');
+
+			Route::post('polls/{poll}/vote', PollVoteController::class)->name('polls.vote');
 		});
 	});
 });
