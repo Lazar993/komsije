@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Filament\Resources\Announcements\AnnouncementResource;
 use App\Models\Announcement;
 use App\Notifications\Concerns\ResolvesChannels;
 use Illuminate\Bus\Queueable;
@@ -35,11 +34,13 @@ final class AnnouncementPublishedNotification extends Notification implements Sh
 
     public function toMail(object $notifiable): MailMessage
     {
+        // Recipients are building tenants; link to the tenant-facing portal
+        // route so the email never points at /admin (which 403s for tenants).
         return (new MailMessage())
             ->subject(__('New building announcement'))
             ->line(__('A new announcement was published in :building.', ['building' => $this->announcement->building->name]))
             ->line($this->announcement->title)
-            ->action(__('Read announcement'), AnnouncementResource::getUrl('view', ['record' => $this->announcement]));
+            ->action(__('Read announcement'), route('portal.announcements.show', $this->announcement));
     }
 
     /**

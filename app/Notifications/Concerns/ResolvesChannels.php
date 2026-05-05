@@ -10,12 +10,16 @@ use App\Notifications\Channels\FcmChannel;
 /**
  * Centralised channel-resolution rules for notifications.
  *
- * Strategy (see notification matrix):
- *   - Always-email events (invites, password reset, security): mail only.
- *   - Critical events (e.g. important announcement): push + mail.
- *   - Standard events: push if the user has push + token, mail only as a
- *     fallback (no token) or when the user explicitly opted in for the
- *     category.
+ * Strategy (product rule):
+ *   - Tenants/users only ever receive email when (a) they are being invited
+ *     (handled separately via $emailAlways) or (b) they have explicitly opted
+ *     in for the category in their notification preferences.
+ *   - Everything else is delivered as push (when a device token exists) plus
+ *     an in-app database record.
+ *   - We deliberately do NOT fall back to email when push is unavailable:
+ *     emails were leaking to tenants for every poll/ticket update where the
+ *     PWA hadn't yet registered a token, and several mail templates link to
+ *     the Filament admin panel (which 403s for tenants).
  *
  * The 'database' channel is always included so the in-app notification
  * centre keeps a record regardless of delivery channel choice.
@@ -40,42 +44,27 @@ trait ResolvesChannels
 
         $channels = ['database'];
 
-        // Non-User notifiables can't have preferences — be conservative and
-        // send both channels for critical events, push otherwise.
+        // Non-User notifiables can't have preferences — push only (we have no
+        // way to tell whether emailing this address is appropriate).
         if (! $notifiable instanceof User) {
             $channels[] = FcmChannel::class;
-            if ($critical) {
-                $channels[] = 'mail';
-            }
 
             return $channels;
         }
 
-        $pushAvailable = $notifiable->wantsPush();
-
-        if ($critical) {
-            // Important: deliver everywhere we reasonably can.
-            if ($pushAvailable) {
-                $channels[] = FcmChannel::class;
-            }
-            $channels[] = 'mail';
-
-            return $channels;
-        }
-
-        if ($pushAvailable) {
+        if ($notifiable->wantsPush()) {
             $channels[] = FcmChannel::class;
-
-            if ($notifiable->wantsEmailFor($category)) {
-                $channels[] = 'mail';
-            }
-
-            return $channels;
         }
 
-        // No push token (or push disabled) → email is the fallback so the
-        // user is never silent.
-        $channels[] = 'mail';
+        // Email is opt-in only. wantsEmailFor() returns true when either the
+        // master 'notify_email' toggle is on, or the per-category toggle for
+        // this event is on. Without an opt-in, we never send mail — even for
+        // "critical" events — so tenants stop receiving links to /admin.
+        if ($notifiable->wantsEmailFor($category)) {
+            $channels[] = 'mail';
+        }
+
+        unset($critical);
 
         return $channels;
     }

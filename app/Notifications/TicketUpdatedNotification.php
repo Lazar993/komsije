@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Filament\Resources\Tickets\TicketResource;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\Concerns\ResolvesChannels;
@@ -35,11 +34,13 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
+        // Always link to the tenant-facing portal route. The Filament admin URL
+        // 403s for tenants (the most common recipient: ticket reporters).
         return (new MailMessage())
             ->subject(__('Maintenance ticket updated'))
             ->line(__(':actor updated the ticket ":title".', ['actor' => $this->actor->name, 'title' => $this->ticket->title]))
             ->line($this->note ?? __('Open the ticket to review the latest status and discussion.'))
-            ->action(__('Open ticket'), TicketResource::getUrl('view', ['record' => $this->ticket]));
+            ->action(__('Open ticket'), route('portal.tickets.show', $this->ticket));
     }
 
     /**
