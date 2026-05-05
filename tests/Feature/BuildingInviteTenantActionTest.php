@@ -56,4 +56,37 @@ class BuildingInviteTenantActionTest extends TestCase
                 && ($notifiable->routes['mail'] ?? null) === 'tenant@example.com';
         });
     }
+
+    public function test_super_admin_can_invite_building_admin_from_building_view(): void
+    {
+        Notification::fake();
+
+        $building = Building::factory()->create();
+        $superAdmin = User::factory()->create([
+            'is_super_admin' => true,
+        ]);
+
+        $this->actingAs($superAdmin);
+
+        Livewire::test(ViewBuilding::class, ['record' => $building->getRouteKey()])
+            ->callAction('inviteAdmin', data: [
+                'email' => 'manager@example.com',
+            ])
+            ->assertHasNoActionErrors()
+            ->assertNotified();
+
+        $invite = Invite::query()
+            ->where('building_id', $building->getKey())
+            ->whereNull('apartment_id')
+            ->where('email', 'manager@example.com')
+            ->where('role', BuildingRole::PropertyManager->value)
+            ->first();
+
+        $this->assertNotNull($invite);
+
+        Notification::assertSentOnDemand(TenantInviteNotification::class, function (TenantInviteNotification $notification, array $channels, object $notifiable): bool {
+            return in_array('mail', $channels, true)
+                && ($notifiable->routes['mail'] ?? null) === 'manager@example.com';
+        });
+    }
 }

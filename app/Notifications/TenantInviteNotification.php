@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
+use App\Enums\BuildingRole;
 use App\Models\Invite;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,11 +29,19 @@ final class TenantInviteNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $role = BuildingRole::from((string) $this->invite->role);
+
         return (new MailMessage())
             ->subject(__('Poziv za pristup zgradi :building', ['building' => $this->invite->building->name]))
             ->greeting(__('Zdravo,'))
-            ->line(__('Pozvani ste da se pridružite zgradi :building preko aplikacije Komšije.', ['building' => $this->invite->building->name]))
-            ->line(__('Stan: :apartment', ['apartment' => $this->invite->apartment?->number ?? __('N/A')]))
+            ->line(match ($role) {
+                BuildingRole::Tenant => __('Pozvani ste da se pridružite zgradi :building preko aplikacije Komšije.', ['building' => $this->invite->building->name]),
+                BuildingRole::PropertyManager => __('Pozvani ste da se pridružite zgradi :building kao administrator preko aplikacije Komšije.', ['building' => $this->invite->building->name]),
+            })
+            ->line(match ($role) {
+                BuildingRole::Tenant => __('Stan: :apartment', ['apartment' => $this->invite->apartment?->number ?? __('N/A')]),
+                BuildingRole::PropertyManager => __('Uloga: Administrator zgrade'),
+            })
             ->line(__('Ovaj link važi do :date i može se iskoristiti samo jednom.', ['date' => $this->invite->expires_at?->format('d.m.Y H:i')]))
             ->action(__('Prihvati poziv'), route('invite.show', $this->invite->token))
             ->line(__('Ako ne očekujete ovaj poziv, slobodno ignorišite ovu poruku.'));

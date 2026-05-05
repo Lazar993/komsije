@@ -11,6 +11,7 @@ use App\Models\Invite;
 use App\Models\User;
 use App\Notifications\TenantInviteNotification;
 use App\Services\InviteService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -88,6 +89,58 @@ class InviteRegistrationTest extends TestCase
         $this->assertTrue($user->hasRoleInBuilding('tenant', $building->getKey()));
         $this->assertNotNull($invite->fresh()?->used_at);
         $this->assertSame($building->getKey(), session('current_building_id'));
+    }
+
+    public function test_admin_invite_acceptance_creates_manager_membership_and_logs_user_in(): void
+    {
+        [$building] = $this->makeBuildingContext();
+        $superAdmin = User::factory()->create([
+            'is_super_admin' => true,
+        ]);
+
+        $invite = Invite::query()->create([
+            'apartment_id' => null,
+            'building_id' => $building->getKey(),
+            'created_by' => $superAdmin->getKey(),
+            'email' => 'manager@example.com',
+            'role' => BuildingRole::PropertyManager->value,
+        ]);
+
+        $response = $this->post(route('invite.store', $invite->token), [
+            'email' => 'manager@example.com',
+            'name' => 'Future Manager',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertRedirect(route('portal.dashboard'));
+        $this->assertAuthenticated();
+
+        $user = User::query()->where('email', 'manager@example.com')->firstOrFail();
+
+        $this->assertTrue($building->managers()->whereKey($user->getKey())->exists());
+        $this->assertTrue($user->hasRoleInBuilding('admin', $building->getKey()));
+        $this->assertFalse($user->apartments()->exists());
+        $this->assertNotNull($invite->fresh()?->used_at);
+        $this->assertSame($building->getKey(), session('current_building_id'));
+    }
+
+    public function test_building_admin_cannot_create_property_manager_invite(): void
+    {
+        [$building, $apartment] = $this->makeBuildingContext();
+        $manager = User::factory()->create();
+
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+
+        $this->expectException(AuthorizationException::class);
+
+        app(InviteService::class)->create(
+            $building,
+            $apartment,
+            $manager,
+            'manager@example.com',
+            BuildingRole::PropertyManager,
+        );
     }
 
     public function test_used_or_email_mismatched_invites_cannot_be_reused(): void

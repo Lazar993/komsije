@@ -32,10 +32,15 @@
 
                 <main class="flex flex-1 items-center py-4 md:py-8">
                     <div class="grid w-full gap-6 lg:grid-cols-[1.1fr_0.9fr] xl:gap-8">
+                        @php($inviteRole = \App\Enums\BuildingRole::from((string) $invite->role))
                         <section class="komsije-surface rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(239,246,255,0.96))] p-6 sm:p-8 lg:p-10">
                             <p class="inline-flex rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--komsije-primary)]">{{ __('Invite Registration') }}</p>
                             <h1 class="mt-5 max-w-xl text-4xl font-semibold leading-tight text-[var(--komsije-dark)] sm:text-5xl">{{ __('Pozvani ste da se pridružite zgradi :building.', ['building' => $invite->building->name]) }}</h1>
-                            <p class="mt-5 max-w-xl text-base leading-7 text-slate-600">{{ __('Vaš nalog će biti povezan sa stanom :apartment i automatski dodat u portal za stanare.', ['apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+                            <p class="mt-5 max-w-xl text-base leading-7 text-slate-600">
+                                {{ $inviteRole === \App\Enums\BuildingRole::Tenant
+                                    ? __('Vaš nalog će biti povezan sa stanom :apartment i automatski dodat u portal za stanare.', ['apartment' => $invite->apartment?->number ?? __('N/A')])
+                                    : __('Vaš nalog će biti dodat kao administrator ove zgrade i dobićete pristup upravljanju zgradom.') }}
+                            </p>
 
                             <div class="mt-8 grid gap-4">
                                 <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
@@ -43,13 +48,20 @@
                                     <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ $invite->building->name }}</p>
                                 </div>
                                 <div class="grid gap-4 sm:grid-cols-2">
-                                    <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
-                                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Apartment') }}</p>
-                                        <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ $invite->apartment?->number ?? __('N/A') }}</p>
-                                    </div>
+                                    @if ($inviteRole === \App\Enums\BuildingRole::Tenant)
+                                        <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
+                                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Apartment') }}</p>
+                                            <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ $invite->apartment?->number ?? __('N/A') }}</p>
+                                        </div>
+                                    @else
+                                        <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
+                                            <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Access') }}</p>
+                                            <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ __('Building administration') }}</p>
+                                        </div>
+                                    @endif
                                     <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
                                         <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Role') }}</p>
-                                        <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ __('Tenant') }}</p>
+                                        <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ __($inviteRole->label()) }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -57,13 +69,17 @@
 
                         <section class="komsije-surface rounded-[2rem] p-6 sm:p-8">
                             <div class="mb-8">
-                                <p class="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--komsije-primary)]">{{ __('Resident Portal') }}</p>
+                                <p class="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--komsije-primary)]">{{ __('Building Portal') }}</p>
                                 @if ($hasExistingAccount)
                                     <h2 class="mt-3 text-3xl font-semibold text-[var(--komsije-dark)]">{{ __('Accept invite') }}</h2>
                                     <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('An account already exists for :email. Enter your current password to accept the invite and link this building to your existing account.', ['email' => $invite->email]) }}</p>
                                 @else
                                     <h2 class="mt-3 text-3xl font-semibold text-[var(--komsije-dark)]">{{ __('Kreirajte svoj nalog') }}</h2>
-                                    <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+                                    <p class="mt-3 text-sm leading-6 text-slate-600">
+                                        {{ $inviteRole === \App\Enums\BuildingRole::Tenant
+                                            ? __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')])
+                                            : __('Pozvani ste da se pridružite zgradi :building kao administrator.', ['building' => $invite->building->name]) }}
+                                    </p>
                                 @endif
                             </div>
 

@@ -24,35 +24,51 @@ final class InviteService
     {
     }
 
-    public function create(Building $building, Apartment $apartment, User $creator, string $email): Invite
+    public function create(Building $building, ?Apartment $apartment, User $creator, string $email, BuildingRole $role = BuildingRole::Tenant): Invite
     {
-        if (! $creator->isBuildingAdmin($building->getKey())) {
-            throw new AuthorizationException('You are not allowed to invite tenants to this building.');
+        if (! $this->canCreateInvite($creator, $building, $role)) {
+            throw new AuthorizationException(match ($role) {
+                BuildingRole::PropertyManager => 'You are not allowed to invite admins to this building.',
+                BuildingRole::Tenant => 'You are not allowed to invite tenants to this building.',
+            });
         }
 
-        if ((int) $apartment->building_id !== (int) $building->getKey()) {
+        if ($role === BuildingRole::Tenant && $apartment === null) {
+            throw ValidationException::withMessages([
+                'apartment_id' => [__('An apartment is required for tenant invites.')],
+            ]);
+        }
+
+        if ($apartment !== null && (int) $apartment->building_id !== (int) $building->getKey()) {
             throw ValidationException::withMessages([
                 'apartment_id' => [__('Selected apartment does not belong to this building.')],
             ]);
         }
 
         $normalizedEmail = Str::lower(trim($email));
+        $apartmentId = $role === BuildingRole::Tenant ? $apartment?->getKey() : null;
 
-        return DB::transaction(function () use ($apartment, $building, $creator, $normalizedEmail): Invite {
-            Invite::query()
+        return DB::transaction(function () use ($apartmentId, $building, $creator, $normalizedEmail, $role): Invite {
+            $existingInvites = Invite::query()
                 ->valid()
                 ->where('email', $normalizedEmail)
                 ->where('building_id', $building->getKey())
-                ->where('apartment_id', $apartment->getKey())
-                ->where('role', BuildingRole::Tenant->value)
-                ->update(['expires_at' => now()]);
+                ->where('role', $role->value);
+
+            if ($apartmentId === null) {
+                $existingInvites->whereNull('apartment_id');
+            } else {
+                $existingInvites->where('apartment_id', $apartmentId);
+            }
+
+            $existingInvites->update(['expires_at' => now()]);
 
             $invite = Invite::query()->create([
-                'apartment_id' => $apartment->getKey(),
+                'apartment_id' => $apartmentId,
                 'building_id' => $building->getKey(),
                 'created_by' => $creator->getKey(),
                 'email' => $normalizedEmail,
-                'role' => BuildingRole::Tenant->value,
+                'role' => $role->value,
             ])->load(['apartment', 'building', 'creator']);
 
             Notification::route('mail', $normalizedEmail)
@@ -108,12 +124,6 @@ final class InviteService
                 ]);
             }
 
-            if ($lockedInvite->apartment === null) {
-                throw ValidationException::withMessages([
-                    'email' => [__('This invitation is missing an apartment assignment.')],
-                ]);
-            }
-
             $existingUser = User::query()->where('email', $normalizedEmail)->first();
 
             if ($existingUser !== null) {
@@ -138,10 +148,55 @@ final class InviteService
                 ]);
             }
 
-            $this->apartments->assignTenant($lockedInvite->apartment, $user);
+            $role = BuildingRole::from((string) $lockedInvite->role);
+
+            match ($role) {
+                BuildingRole::Tenant => $this->acceptTenantInvite($lockedInvite, $user),
+                BuildingRole::PropertyManager => $this->acceptPropertyManagerInvite($lockedInvite, $user),
+            };
+
             $lockedInvite->markAsUsed();
 
             return $user->load(['apartments', 'buildings']);
         });
+    }
+
+    private function canCreateInvite(User $creator, Building $building, BuildingRole $role): bool
+    {
+        return match ($role) {
+            BuildingRole::Tenant => $creator->isBuildingAdmin($building->getKey()),
+            BuildingRole::PropertyManager => $creator->isSuperAdmin(),
+        };
+    }
+
+    private function acceptTenantInvite(Invite $invite, User $user): void
+    {
+        if ($invite->apartment === null) {
+            throw ValidationException::withMessages([
+                'email' => [__('This invitation is missing an apartment assignment.')],
+            ]);
+        }
+
+        $this->apartments->assignTenant($invite->apartment, $user);
+    }
+
+    private function acceptPropertyManagerInvite(Invite $invite, User $user): void
+    {
+        $building = $invite->building;
+
+        if ($building === null || $user->isSuperAdmin()) {
+            return;
+        }
+
+        $hasManagerRole = $building->users()
+            ->whereKey($user->getKey())
+            ->wherePivot('role', BuildingRole::PropertyManager->value)
+            ->exists();
+
+        if (! $hasManagerRole) {
+            $building->users()->attach($user->getKey(), ['role' => BuildingRole::PropertyManager->value]);
+        }
+
+        $user->syncBuildingRole($building->getKey());
     }
 }
