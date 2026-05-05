@@ -1,4 +1,4 @@
-const VERSION = 'komsije-v10';
+const VERSION = 'komsije-v11';
 const STATIC_CACHE = `${VERSION}-static`;
 const DYNAMIC_CACHE = `${VERSION}-dynamic`;
 const API_CACHE = `${VERSION}-api`;
@@ -10,6 +10,8 @@ const APP_SHELL = [
     '/icons/icon-192-v5.png',
     '/icons/icon-512-v5.png',
     '/icons/apple-touch-icon-v5.png',
+    '/icons/apple-touch-icon-167-v5.png',
+    '/icons/apple-touch-icon-152-v5.png',
     '/icons/notification-badge-96.png',
 ];
 

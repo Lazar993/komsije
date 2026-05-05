@@ -26,6 +26,8 @@
         scroll-behavior: smooth;
         overflow-x: hidden;
         background-color: var(--komsije-background);
+        /* iOS Safari: kill the gray flash on tap so buttons/links feel native. */
+        -webkit-tap-highlight-color: transparent;
     }
 
     body {
