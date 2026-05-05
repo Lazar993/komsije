@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Buildings;
 
+use App\Filament\Resources\Buildings\RelationManagers\ApartmentsRelationManager;
 use App\Filament\Resources\Buildings\Pages\CreateBuilding;
 use App\Filament\Resources\Buildings\Pages\EditBuilding;
 use App\Filament\Resources\Buildings\Pages\ListBuildings;
@@ -127,6 +128,13 @@ class BuildingResource extends Resource
             'create' => CreateBuilding::route('/create'),
             'view' => ViewBuilding::route('/{record}'),
             'edit' => EditBuilding::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ApartmentsRelationManager::class,
         ];
     }
 }

@@ -28,6 +28,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -90,6 +92,14 @@ class ApartmentResource extends Resource
         return $table
             ->recordTitleAttribute('number')
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['building', 'tenants']))
+            ->groups([
+                Group::make('building.name')
+                    ->label('Building')
+                    ->titlePrefixedWithLabel(false)
+                    ->collapsible()
+                    ->getDescriptionFromRecordUsing(fn (Apartment $record): ?string => $record->building?->address),
+            ])
+            ->defaultGroup('building.name')
             ->columns([
                 TextColumn::make('building.name')
                     ->searchable()
@@ -104,6 +114,11 @@ class ApartmentResource extends Resource
                     ->separator(','),
                 IconColumn::make('available_for_marketplace')
                     ->boolean(),
+            ])
+            ->filters([
+                SelectFilter::make('building_id')
+                    ->label('Building')
+                    ->options(self::accessibleBuildingOptions()),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -173,5 +188,10 @@ class ApartmentResource extends Resource
             'view' => ViewApartment::route('/{record}'),
             'edit' => EditApartment::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return Auth::user()?->isSuperAdmin() ?? false;
     }
 }
