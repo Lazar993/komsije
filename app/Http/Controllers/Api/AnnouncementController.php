@@ -43,9 +43,17 @@ final class AnnouncementController extends Controller
 
     public function store(StoreAnnouncementRequest $request): AnnouncementResource
     {
-        $this->authorize('create', [Announcement::class, $this->tenantContext->building()]);
+        $building = $this->tenantContext->building();
+        $this->authorize('create', [Announcement::class, $building]);
 
-        return new AnnouncementResource($this->announcementService->create($this->tenantContext->building(), $request->user(), $request->validated()));
+        $data = $request->validated();
+
+        if (! $request->user()->isBuildingAdmin($building->getKey())) {
+            $data['published_at'] = null;
+            $data['is_important'] = false;
+        }
+
+        return new AnnouncementResource($this->announcementService->create($building, $request->user(), $data));
     }
 
     public function show(Announcement $announcement): AnnouncementResource
