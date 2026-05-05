@@ -15,6 +15,7 @@ window.komsijePush = { enablePush, disablePush, getPushStatus };
 document.addEventListener('DOMContentLoaded', async () => {
     applyStandaloneMode();
     upgradeImagesForPerformance();
+    setupFileInputPreviews();
     setupTicketFilters();
     setupAnnouncementPagination();
     setupCardDecks();
@@ -23,6 +24,51 @@ document.addEventListener('DOMContentLoaded', async () => {
     await registerServiceWorker();
     initPushNotifications();
 });
+
+function setupFileInputPreviews(root = document) {
+    const inputs = root.querySelectorAll('[data-file-preview-input]');
+
+    inputs.forEach((input) => {
+        if (!(input instanceof HTMLInputElement) || input.dataset.filePreviewReady === 'true') {
+            return;
+        }
+
+        const list = input.parentElement?.querySelector('[data-file-preview-list]');
+        if (!(list instanceof HTMLElement)) {
+            return;
+        }
+
+        input.dataset.filePreviewReady = 'true';
+
+        const render = () => {
+            const files = Array.from(input.files ?? []);
+
+            if (!files.length) {
+                list.innerHTML = '';
+                list.classList.add('hidden');
+
+                return;
+            }
+
+            list.innerHTML = files
+                .map((file) => `<li class="break-all leading-6">${escapeHtml(file.name)}</li>`)
+                .join('');
+            list.classList.remove('hidden');
+        };
+
+        input.addEventListener('change', render);
+        render();
+    });
+}
+
+function escapeHtml(value) {
+    return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
 
 function setupCardDecks(root = document) {
     const decks = root.querySelectorAll('[data-card-deck]');

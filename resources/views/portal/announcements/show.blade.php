@@ -45,14 +45,14 @@
                                 <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
                                    target="_blank"
                                    rel="noopener"
-                                   class="inline-flex min-w-0 items-center gap-3 truncate text-sm font-medium text-slate-700 transition hover:text-[var(--komsije-primary)]">
+                                   class="inline-flex min-w-0 w-full items-center gap-3 text-sm font-medium text-slate-700 transition hover:text-[var(--komsije-primary)] sm:flex-1">
                                     <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
                                             <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
                                             <path d="M14 3v5h5" />
                                         </svg>
                                     </span>
-                                    <span class="truncate">{{ $attachment->original_name }}</span>
+                                    <span class="min-w-0 break-all sm:truncate">{{ $attachment->original_name }}</span>
                                 </a>
                                 <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:shrink-0 sm:justify-end">
                                     <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}?download=1"

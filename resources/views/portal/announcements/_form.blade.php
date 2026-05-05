@@ -49,7 +49,8 @@
 
     <div>
         <label for="attachments" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Prilozi') }}</label>
-        <input id="attachments" name="attachments[]" type="file" multiple accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="komsije-input w-full rounded-2xl px-4 py-3 text-sm">
+        <input id="attachments" name="attachments[]" type="file" multiple accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-file-preview-input class="komsije-input block min-w-0 w-full max-w-full overflow-hidden rounded-2xl px-4 py-3 text-sm text-slate-600 file:mr-4 file:rounded-2xl file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:font-medium file:text-white hover:file:bg-slate-800">
+        <ul data-file-preview-list class="mt-3 hidden space-y-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"></ul>
         <p class="mt-2 text-sm text-slate-500">{{ __('PDF ili DOC/DOCX. Najviše 10 fajlova, do 20 MB po fajlu.') }}</p>
         @error('attachments')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
         @error('attachments.*')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
@@ -64,12 +65,12 @@
                         <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
                            target="_blank"
                            rel="noopener"
-                           class="inline-flex min-w-0 items-center gap-2 truncate font-medium text-slate-700 hover:text-[var(--komsije-primary)]">
+                           class="inline-flex min-w-0 w-full items-center gap-2 font-medium text-slate-700 hover:text-[var(--komsije-primary)] sm:flex-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">
                                 <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
                                 <path d="M14 3v5h5" />
                             </svg>
-                            <span class="truncate">{{ $attachment->original_name }}</span>
+                            <span class="min-w-0 break-all sm:truncate">{{ $attachment->original_name }}</span>
                         </a>
                         <label class="inline-flex w-full items-center justify-end gap-2 text-xs text-rose-600 sm:w-auto sm:justify-start">
                             <input type="checkbox" name="remove_attachments[]" value="{{ $attachment->id }}" class="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500">
