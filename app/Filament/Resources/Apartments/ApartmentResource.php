@@ -192,6 +192,6 @@ class ApartmentResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->isSuperAdmin() ?? false;
+        return Auth::user()?->isBuildingAdmin() ?? false;
     }
 }
