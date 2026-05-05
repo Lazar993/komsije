@@ -192,7 +192,7 @@ class PortalAccessTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('count', 2)
-            ->assertJsonPath('countLabel', '2 messages');
+            ->assertJsonPath('countLabel', '2 poruka');
 
         $this->assertStringContainsString('Please share a photo.', $response->json('html'));
         $this->assertStringContainsString('Uploading it now.', $response->json('html'));
@@ -225,7 +225,7 @@ class PortalAccessTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('count', 1)
-            ->assertJsonPath('countLabel', '1 message');
+            ->assertJsonPath('countLabel', '1 poruka');
 
         $this->assertDatabaseHas('ticket_comments', [
             'ticket_id' => $ticket->getKey(),

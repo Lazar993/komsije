@@ -69,6 +69,13 @@
                     data-refresh-interval="15000"
                     data-comment-count="{{ $conversation->count() }}"
                     data-latest-comment-id="{{ $conversation->last()?->getKey() ?? '' }}"
+                    data-status-idle="{{ __('Messages stay on this ticket so everyone sees the same timeline.') }}"
+                    data-status-sending="{{ __('Sending...') }}"
+                    data-status-sent="{{ __('Message sent.') }}"
+                    data-status-validation="{{ __('Please review the message and try again.') }}"
+                    data-status-failed="{{ __('Message delivery failed.') }}"
+                    data-error-send="{{ __('Unable to send the message right now. Reload the page and try again.') }}"
+                    data-error-generic="{{ __('Unable to send the message right now.') }}"
                 >
                 <div class="flex flex-wrap items-start justify-between gap-3">
                     <div>

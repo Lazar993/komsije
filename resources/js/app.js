@@ -190,6 +190,13 @@ function setupTicketConversation(root = document) {
         let isSubmitting = false;
         let shouldStickToBottom = true;
         let pollRequest = null;
+        const idleStatus = conversation.dataset.statusIdle || 'Messages stay on this ticket so everyone sees the same timeline.';
+        const sendingStatus = conversation.dataset.statusSending || 'Sending...';
+        const sentStatus = conversation.dataset.statusSent || 'Message sent.';
+        const validationStatus = conversation.dataset.statusValidation || 'Please review the message and try again.';
+        const failedStatus = conversation.dataset.statusFailed || 'Message delivery failed.';
+        const sendErrorMessage = conversation.dataset.errorSend || 'Unable to send the message right now. Reload the page and try again.';
+        const genericErrorMessage = conversation.dataset.errorGeneric || 'Unable to send the message right now.';
 
         const feed = () => shell.querySelector('[data-ticket-conversation-feed]');
 
@@ -334,7 +341,7 @@ function setupTicketConversation(root = document) {
             shouldStickToBottom = true;
             setSubmitState(true);
             setError('');
-            setStatus('Sending...');
+            setStatus(sendingStatus);
 
             try {
                 const response = await fetch(form.action, {
@@ -351,10 +358,10 @@ function setupTicketConversation(root = document) {
                 if (!response.ok) {
                     const message = payload?.errors?.body?.[0]
                         || payload?.message
-                        || 'Unable to send the message right now.';
+                        || genericErrorMessage;
 
                     setError(message);
-                    setStatus('Please review the message and try again.');
+                    setStatus(validationStatus);
                     return;
                 }
 
@@ -365,13 +372,13 @@ function setupTicketConversation(root = document) {
                     textarea.focus();
                 }
 
-                setStatus('Message sent.');
+                setStatus(sentStatus);
                 window.setTimeout(() => {
-                    setStatus('Messages stay on this ticket so everyone sees the same timeline.');
+                    setStatus(idleStatus);
                 }, 2500);
             } catch (error) {
-                setError('Unable to send the message right now. Reload the page and try again.');
-                setStatus('Message delivery failed.');
+                setError(sendErrorMessage);
+                setStatus(failedStatus);
             } finally {
                 isSubmitting = false;
                 setSubmitState(false);
