@@ -11,11 +11,6 @@
             ->take(2)
             ->map(fn (string $segment): string => \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr($segment, 0, 1)))
             ->implode('');
-        $recentTicketTone = match ($recentTicket?->status?->value) {
-            'resolved' => 'success',
-            'in_progress' => 'warning',
-            default => 'primary',
-        };
     @endphp
 
     <section class="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_23rem]">
@@ -122,27 +117,15 @@
                 <a href="{{ route('portal.tickets.index') }}" class="text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Svi kvarovi') }}</a>
             </div>
 
-            <div class="mt-5">
-                @if ($recentTicket)
-                    <div class="rounded-[1.5rem] bg-slate-50 p-5">
-                        <div class="flex flex-wrap items-center gap-2">
-                            <x-portal.badge :label="$recentTicket->status->label()" :tone="$recentTicketTone" />
-                            <span class="text-xs font-medium text-slate-400">{{ $recentTicket->created_at->translatedFormat('d M Y, H:i') }}</span>
-                        </div>
-                        <h3 class="mt-4 text-lg font-semibold text-slate-950">{{ $recentTicket->title }}</h3>
-                        <p class="mt-2 text-sm leading-6 text-slate-600">{{ \Illuminate\Support\Str::limit($recentTicket->description, 180) }}</p>
-                        <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-500">
-                            @if ($recentTicket->apartment?->number)
-                                <span>{{ __('Stan :number', ['number' => $recentTicket->apartment->number]) }}</span>
-                            @endif
-                            @if ($recentTicket->assignee?->name)
-                                <span>{{ __('Zadužen: :name', ['name' => $recentTicket->assignee->name]) }}</span>
-                            @endif
-                        </div>
-                    </div>
-                @else
-                    <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Još nema prijava povezanih sa vašim nalogom.') }}</div>
-                @endif
+            <div class="card-deck mt-5" data-card-deck>
+                <div class="card-deck__scroller" data-card-deck-scroller>
+                    @forelse ($recentTickets as $ticket)
+                        <x-portal.ticket-card :ticket="$ticket" :href="route('portal.tickets.show', $ticket)" />
+                    @empty
+                        <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Još nema prijava povezanih sa vašim nalogom.') }}</div>
+                    @endforelse
+                </div>
+                <p class="card-deck__counter" data-card-deck-counter aria-live="polite">1/{{ $recentTickets->count() }}</p>
             </div>
         </article>
 
@@ -160,12 +143,15 @@
                 </div>
             </div>
 
-            <div class="mt-5 space-y-3">
-                @forelse ($recentAnnouncements as $announcement)
-                    <x-portal.announcement-card :announcement="$announcement" :href="route('portal.announcements.show', $announcement)" :unread="! $announcement->is_read" />
-                @empty
-                    <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Nema objavljenih obaveštenja za aktivnu zgradu.') }}</div>
-                @endforelse
+            <div class="card-deck mt-5" data-card-deck>
+                <div class="card-deck__scroller" data-card-deck-scroller>
+                    @forelse ($recentAnnouncements as $announcement)
+                        <x-portal.announcement-card :announcement="$announcement" :href="route('portal.announcements.show', $announcement)" :unread="! $announcement->is_read" />
+                    @empty
+                        <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-sm text-slate-500">{{ __('Nema objavljenih obaveštenja za aktivnu zgradu.') }}</div>
+                    @endforelse
+                </div>
+                <p class="card-deck__counter" data-card-deck-counter aria-live="polite">1/{{ $recentAnnouncements->count() }}</p>
             </div>
         </article>
     </section>
@@ -211,9 +197,35 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('portal.profile.update') }}" class="mt-5 space-y-4">
+                <form method="POST" action="{{ route('portal.profile.update') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
                     @csrf
                     @method('PUT')
+
+                    <div>
+                        <label for="profile_image" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Profilna fotografija') }}</label>
+                        <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-slate-50 p-4">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                @if ($user->profileImageUrl())
+                                    <img src="{{ $user->profileImageUrl() }}" alt="{{ $user->name }}" class="h-16 w-16 shrink-0 rounded-[1.5rem] object-cover">
+                                @else
+                                    <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-slate-900 text-lg font-semibold text-white">{{ $initials !== '' ? $initials : 'K' }}</span>
+                                @endif
+
+                                <div class="min-w-0 flex-1 space-y-3">
+                                    <input id="profile_image" name="profile_image" type="file" accept="image/png,image/jpeg,image/webp" class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-2xl file:border-0 file:bg-slate-900 file:px-4 file:py-2.5 file:font-medium file:text-white hover:file:bg-slate-800">
+                                    <p class="text-sm text-slate-500">{{ __('Otpremite JPG, PNG ili WEBP fotografiju do 5 MB. Slika će biti prikazana kao kvadratni avatar.') }}</p>
+
+                                    @if ($user->profileImageUrl())
+                                        <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                                            <input type="checkbox" name="remove_profile_image" value="1" @checked(old('remove_profile_image')) class="h-4 w-4 rounded border-slate-300 text-[var(--komsije-primary)] focus:ring-[var(--komsije-primary)]">
+                                            <span>{{ __('Ukloni trenutnu fotografiju') }}</span>
+                                        </label>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @error('profile_image')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+                    </div>
 
                     <div>
                         <label for="name" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Ime i prezime') }}</label>

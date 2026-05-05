@@ -95,7 +95,7 @@ final class Profile extends Page
                 ->automaticallyResizeImagesToHeight('300')
                 ->imageEditorViewportWidth(300)
                 ->imageEditorViewportHeight(300)
-                ->maxSize(2048),
+                ->maxSize(5120),
             TextInput::make('name')
                 ->label(__('Name'))
                 ->required()

@@ -17,6 +17,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
@@ -35,6 +36,7 @@ final class ProfileController extends PortalController
             'total' => 0,
         ];
         $recentAnnouncements = collect();
+        $recentTickets = collect();
         $recentTicket = null;
         $recentUnreadAnnouncementsCount = 0;
         $manager = null;
@@ -55,10 +57,13 @@ final class ProfileController extends PortalController
                 'total'    => (int) $counts->sum(),
             ];
 
-            $recentTicket = (clone $ticketQuery)
-                ->with(['apartment', 'assignee'])
+            $recentTickets = (clone $ticketQuery)
+                ->with(['apartment', 'assignee', 'reporter'])
                 ->latest()
-                ->first();
+                ->limit(5)
+                ->get();
+
+            $recentTicket = $recentTickets->first();
 
             $recentAnnouncements = Announcement::query()
                 ->where('building_id', $profileBuilding->getKey())
@@ -88,6 +93,7 @@ final class ProfileController extends PortalController
             'profileApartment' => $profileApartment,
             'profileBuilding' => $profileBuilding,
             'recentAnnouncements' => $recentAnnouncements,
+            'recentTickets' => $recentTickets,
             'recentTicket' => $recentTicket,
             'recentUnreadAnnouncementsCount' => $recentUnreadAnnouncementsCount,
             'ticketStats' => $ticketStats,
@@ -96,7 +102,20 @@ final class ProfileController extends PortalController
 
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
-        $request->user()->forceFill($request->validated())->save();
+        $user = $request->user();
+        $data = $request->safe()->except(['profile_image', 'remove_profile_image']);
+
+        if ($request->boolean('remove_profile_image')) {
+            $this->deleteProfileImage($user->profile_image_path);
+            $data['profile_image_path'] = null;
+        }
+
+        if ($request->hasFile('profile_image')) {
+            $this->deleteProfileImage($user->profile_image_path);
+            $data['profile_image_path'] = $request->file('profile_image')->store('profile-images', 'public');
+        }
+
+        $user->forceFill($data)->save();
 
         return redirect()
             ->route('portal.profile.show')
@@ -149,5 +168,14 @@ final class ProfileController extends PortalController
         }
 
         return [$apartment, $building];
+    }
+
+    private function deleteProfileImage(?string $path): void
+    {
+        if (blank($path)) {
+            return;
+        }
+
+        Storage::disk('public')->delete($path);
     }
 }
