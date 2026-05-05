@@ -7,8 +7,10 @@ namespace Tests\Feature;
 use App\Enums\BuildingRole;
 use App\Models\Apartment;
 use App\Models\Building;
+use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PortalAccessTest extends TestCase
@@ -100,5 +102,137 @@ class PortalAccessTest extends TestCase
             'priority' => 'medium',
             'title' => $description,
         ]);
+    }
+
+    public function test_ticket_conversation_is_rendered_in_chronological_order_on_the_portal(): void
+    {
+        $tenant = User::factory()->create(['name' => 'Tenant User']);
+        $manager = User::factory()->create(['name' => 'Manager User']);
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+        $apartment->tenants()->attach($tenant);
+
+        $ticket = Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $tenant->getKey(),
+            'assigned_to' => $manager->getKey(),
+            'title' => 'Elevator issue',
+        ]);
+
+        DB::table('ticket_comments')->insert([
+            [
+                'ticket_id' => $ticket->getKey(),
+                'user_id' => $manager->getKey(),
+                'body' => 'Manager reply comes first.',
+                'created_at' => now()->subMinutes(10),
+                'updated_at' => now()->subMinutes(10),
+            ],
+            [
+                'ticket_id' => $ticket->getKey(),
+                'user_id' => $tenant->getKey(),
+                'body' => 'Tenant follow-up comes second.',
+                'created_at' => now()->subMinutes(2),
+                'updated_at' => now()->subMinutes(2),
+            ],
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->get(route('portal.tickets.show', $ticket));
+
+        $response->assertOk();
+        $response->assertSeeInOrder([
+            'Manager reply comes first.',
+            'Tenant follow-up comes second.',
+        ], false);
+    }
+
+    public function test_ticket_conversation_can_be_polled_as_json_for_live_refresh(): void
+    {
+        $tenant = User::factory()->create(['name' => 'Tenant User']);
+        $manager = User::factory()->create(['name' => 'Manager User']);
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+        $apartment->tenants()->attach($tenant);
+
+        $ticket = Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $tenant->getKey(),
+            'assigned_to' => $manager->getKey(),
+        ]);
+
+        DB::table('ticket_comments')->insert([
+            [
+                'ticket_id' => $ticket->getKey(),
+                'user_id' => $manager->getKey(),
+                'body' => 'Please share a photo.',
+                'created_at' => now()->subMinutes(5),
+                'updated_at' => now()->subMinutes(5),
+            ],
+            [
+                'ticket_id' => $ticket->getKey(),
+                'user_id' => $tenant->getKey(),
+                'body' => 'Uploading it now.',
+                'created_at' => now()->subMinute(),
+                'updated_at' => now()->subMinute(),
+            ],
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->getJson(route('portal.tickets.show', ['ticket' => $ticket, 'fragment' => 'conversation']));
+
+        $response->assertOk()
+            ->assertJsonPath('count', 2)
+            ->assertJsonPath('countLabel', '2 messages');
+
+        $this->assertStringContainsString('Please share a photo.', $response->json('html'));
+        $this->assertStringContainsString('Uploading it now.', $response->json('html'));
+    }
+
+    public function test_ticket_comment_submission_can_return_json_payload_for_async_chat_updates(): void
+    {
+        $tenant = User::factory()->create(['name' => 'Tenant User']);
+        $manager = User::factory()->create(['name' => 'Manager User']);
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+        $apartment->tenants()->attach($tenant);
+
+        $ticket = Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $tenant->getKey(),
+            'assigned_to' => $manager->getKey(),
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->postJson(route('portal.tickets.comments.store', $ticket), [
+                'building_id' => $building->getKey(),
+                'body' => 'Fresh message from tenant.',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('count', 1)
+            ->assertJsonPath('countLabel', '1 message');
+
+        $this->assertDatabaseHas('ticket_comments', [
+            'ticket_id' => $ticket->getKey(),
+            'user_id' => $tenant->getKey(),
+            'body' => 'Fresh message from tenant.',
+        ]);
+
+        $this->assertStringContainsString('Fresh message from tenant.', $response->json('html'));
     }
 }

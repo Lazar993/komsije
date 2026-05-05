@@ -15,6 +15,7 @@ use App\Repositories\Contracts\TicketRepositoryInterface;
 use App\Services\TicketService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -88,12 +89,16 @@ final class TicketController extends PortalController
             ->with('status', __('Ticket created successfully.'));
     }
 
-    public function show(Request $request, Ticket $ticket): View
+    public function show(Request $request, Ticket $ticket): View|JsonResponse
     {
         abort_if($ticket->building_id !== $this->tenantContext->buildingId(), 404);
         $this->authorize('view', $ticket);
 
         $ticket->load(['apartment.tenants', 'reporter', 'assignee', 'attachments', 'comments.user', 'statusHistory.actor']);
+
+        if ($request->expectsJson() && $request->query('fragment') === 'conversation') {
+            return response()->json($this->conversationPayload($request, $ticket));
+        }
 
         return $this->portalView($request, 'portal.tickets.show', [
             'ticket' => $ticket,
@@ -133,7 +138,7 @@ final class TicketController extends PortalController
             ->with('status', __('Ticket updated successfully.'));
     }
 
-    public function comment(StoreTicketCommentRequest $request, Ticket $ticket): RedirectResponse
+    public function comment(StoreTicketCommentRequest $request, Ticket $ticket): RedirectResponse|JsonResponse
     {
         abort_if($ticket->building_id !== $this->tenantContext->buildingId(), 404);
         $this->authorize('comment', $ticket);
@@ -142,9 +147,38 @@ final class TicketController extends PortalController
             'building_id' => $this->tenantContext->buildingId(),
         ]));
 
+        if ($request->expectsJson()) {
+            $ticket = $ticket->fresh();
+
+            if ($ticket instanceof Ticket) {
+                $ticket->load('comments.user');
+
+                return response()->json($this->conversationPayload($request, $ticket));
+            }
+        }
+
         return redirect()
             ->route('portal.tickets.show', $ticket)
             ->with('status', __('Comment added.'));
+    }
+
+    /**
+     * @return array{count:int,countLabel:string,html:string,latestCommentId:int|null}
+     */
+    private function conversationPayload(Request $request, Ticket $ticket): array
+    {
+        $conversation = $ticket->comments->sortBy('created_at')->values();
+
+        return [
+            'count' => $conversation->count(),
+            'countLabel' => trans_choice(':count message|:count messages', $conversation->count(), ['count' => $conversation->count()]),
+            'html' => view('portal.tickets.partials.conversation-feed', [
+                'conversation' => $conversation,
+                'currentUserId' => $request->user()?->getKey(),
+                'ticket' => $ticket,
+            ])->render(),
+            'latestCommentId' => $conversation->last()?->getKey(),
+        ];
     }
 
     /**

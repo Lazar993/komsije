@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     upgradeImagesForPerformance();
     setupFileInputPreviews();
     setupTicketFilters();
+    setupTicketConversation();
     setupAnnouncementPagination();
     setupCardDecks();
     setupInstallPrompt();
@@ -159,6 +160,223 @@ function setupTicketFilters() {
         formSelector: '[data-ticket-filters]',
         resultsSelector: '[data-ticket-results]',
         resetSelector: '[data-ticket-filters-reset]',
+    });
+}
+
+function setupTicketConversation(root = document) {
+    const conversations = root.querySelectorAll('[data-ticket-conversation]');
+
+    conversations.forEach((conversation) => {
+        if (!(conversation instanceof HTMLElement) || conversation.dataset.ticketConversationReady === 'true') {
+            return;
+        }
+
+        const article = conversation.closest('article');
+        const refreshUrl = conversation.dataset.refreshUrl;
+        const shell = conversation.querySelector('[data-ticket-conversation-shell]');
+        const count = conversation.querySelector('[data-ticket-conversation-count]');
+        const form = article?.querySelector('[data-ticket-conversation-form]');
+        const error = form?.querySelector('[data-ticket-conversation-error]');
+        const status = form?.querySelector('[data-ticket-conversation-form-status]');
+        const submit = form?.querySelector('[data-ticket-conversation-submit]');
+        const textarea = form?.querySelector('textarea[name="body"]');
+
+        if (!refreshUrl || !(shell instanceof HTMLElement)) {
+            return;
+        }
+
+        conversation.dataset.ticketConversationReady = 'true';
+
+        let isSubmitting = false;
+        let shouldStickToBottom = true;
+        let pollRequest = null;
+
+        const feed = () => shell.querySelector('[data-ticket-conversation-feed]');
+
+        const isNearBottom = () => {
+            const node = feed();
+
+            if (!(node instanceof HTMLElement)) {
+                return true;
+            }
+
+            return node.scrollHeight - node.scrollTop - node.clientHeight < 56;
+        };
+
+        const scrollToLatest = (behavior = 'smooth') => {
+            const node = feed();
+
+            if (!(node instanceof HTMLElement)) {
+                return;
+            }
+
+            node.scrollTo({
+                top: node.scrollHeight,
+                behavior,
+            });
+        };
+
+        const attachFeedTracking = () => {
+            const node = feed();
+
+            if (!(node instanceof HTMLElement) || node.dataset.ticketConversationTracked === 'true') {
+                return;
+            }
+
+            node.dataset.ticketConversationTracked = 'true';
+            node.addEventListener('scroll', () => {
+                shouldStickToBottom = isNearBottom();
+            }, { passive: true });
+        };
+
+        const setSubmitState = (disabled) => {
+            if (submit instanceof HTMLButtonElement) {
+                submit.disabled = disabled;
+            }
+        };
+
+        const setError = (message = '') => {
+            if (!(error instanceof HTMLElement)) {
+                return;
+            }
+
+            error.textContent = message;
+            error.classList.toggle('hidden', message === '');
+        };
+
+        const setStatus = (message) => {
+            if (status instanceof HTMLElement) {
+                status.textContent = message;
+            }
+        };
+
+        const applyPayload = (payload, { forceScroll = false } = {}) => {
+            const previousCount = Number(conversation.dataset.commentCount || 0);
+            const previousLatestId = conversation.dataset.latestCommentId || '';
+            const nextCount = Number(payload.count || 0);
+            const nextLatestId = payload.latestCommentId ? String(payload.latestCommentId) : '';
+            const hasNewMessage = nextCount !== previousCount || nextLatestId !== previousLatestId;
+
+            if (typeof payload.html === 'string') {
+                shell.innerHTML = payload.html;
+            }
+
+            if (count instanceof HTMLElement && typeof payload.countLabel === 'string') {
+                count.textContent = payload.countLabel;
+            }
+
+            conversation.dataset.commentCount = String(nextCount);
+            conversation.dataset.latestCommentId = nextLatestId;
+
+            attachFeedTracking();
+
+            if (forceScroll || (hasNewMessage && shouldStickToBottom)) {
+                requestAnimationFrame(() => scrollToLatest(forceScroll ? 'smooth' : 'auto'));
+            }
+        };
+
+        const fetchConversation = async ({ forceScroll = false } = {}) => {
+            pollRequest?.abort();
+            pollRequest = new AbortController();
+
+            try {
+                const url = new URL(refreshUrl, window.location.origin);
+                url.searchParams.set('fragment', 'conversation');
+
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                    },
+                    signal: pollRequest.signal,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ticket conversation refresh failed with status ${response.status}`);
+                }
+
+                applyPayload(await response.json(), { forceScroll });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    pollRequest = null;
+                }
+            }
+        };
+
+        attachFeedTracking();
+        requestAnimationFrame(() => scrollToLatest('auto'));
+
+        const pollInterval = window.setInterval(() => {
+            if (document.hidden || isSubmitting) {
+                return;
+            }
+
+            void fetchConversation();
+        }, Number(conversation.dataset.refreshInterval || 15000));
+
+        window.addEventListener('beforeunload', () => {
+            window.clearInterval(pollInterval);
+            pollRequest?.abort();
+        }, { once: true });
+
+        form?.addEventListener('submit', async (event) => {
+            if (!(form instanceof HTMLFormElement)) {
+                return;
+            }
+
+            event.preventDefault();
+
+            if (isSubmitting) {
+                return;
+            }
+
+            isSubmitting = true;
+            shouldStickToBottom = true;
+            setSubmitState(true);
+            setError('');
+            setStatus('Sending...');
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method || 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                    },
+                    body: new FormData(form),
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok) {
+                    const message = payload?.errors?.body?.[0]
+                        || payload?.message
+                        || 'Unable to send the message right now.';
+
+                    setError(message);
+                    setStatus('Please review the message and try again.');
+                    return;
+                }
+
+                applyPayload(payload, { forceScroll: true });
+
+                if (textarea instanceof HTMLTextAreaElement) {
+                    textarea.value = '';
+                    textarea.focus();
+                }
+
+                setStatus('Message sent.');
+                window.setTimeout(() => {
+                    setStatus('Messages stay on this ticket so everyone sees the same timeline.');
+                }, 2500);
+            } catch (error) {
+                setError('Unable to send the message right now. Reload the page and try again.');
+                setStatus('Message delivery failed.');
+            } finally {
+                isSubmitting = false;
+                setSubmitState(false);
+            }
+        });
     });
 }
 

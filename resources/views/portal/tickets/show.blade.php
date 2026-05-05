@@ -3,6 +3,12 @@
 @section('title', $ticket->title)
 
 @section('content')
+    @php
+        $conversation = $ticket->comments->sortBy('created_at')->values();
+        $currentUserId = auth()->id();
+        $conversationCountLabel = trans_choice(':count message|:count messages', $conversation->count(), ['count' => $conversation->count()]);
+    @endphp
+
     <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
             <div class="flex flex-wrap items-center justify-between gap-4">
@@ -57,32 +63,45 @@
 
         <div class="min-w-0 space-y-6">
             <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
-                <h2 class="text-xl font-semibold text-slate-950">{{ __('Conversation') }}</h2>
+                <div
+                    data-ticket-conversation
+                    data-refresh-url="{{ route('portal.tickets.show', $ticket) }}"
+                    data-refresh-interval="15000"
+                    data-comment-count="{{ $conversation->count() }}"
+                    data-latest-comment-id="{{ $conversation->last()?->getKey() ?? '' }}"
+                >
+                <div class="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-950">{{ __('Conversation') }}</h2>
+                        <p class="mt-2 text-sm leading-6 text-slate-500">{{ __('Keep the tenant and manager aligned with quick back-and-forth updates on this ticket.') }}</p>
+                    </div>
+                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500" data-ticket-conversation-count>{{ $conversationCountLabel }}</span>
+                </div>
 
-                <div class="mt-6 space-y-4">
-                    @forelse ($ticket->comments as $comment)
-                        <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-                            <div class="flex items-center justify-between gap-3">
-                                <p class="text-sm font-semibold text-slate-950">{{ $comment->user?->name ?? __('Unknown user') }}</p>
-                                <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $comment->created_at->diffForHumans() }}</p>
-                            </div>
-                            <p class="mt-3 break-words text-sm leading-7 text-slate-700">{{ $comment->body }}</p>
-                        </div>
-                    @empty
-                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No comments yet.') }}</p>
-                    @endforelse
+                <div class="mt-6 rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.92),rgba(241,245,249,0.88))] p-3 sm:p-4" data-ticket-conversation-shell>
+                    @include('portal.tickets.partials.conversation-feed', ['conversation' => $conversation, 'currentUserId' => $currentUserId, 'ticket' => $ticket])
+                </div>
                 </div>
 
                 @can('comment', $ticket)
-                    <form method="POST" action="{{ route('portal.tickets.comments.store', $ticket) }}" class="mt-6 space-y-4">
+                    <form method="POST" action="{{ route('portal.tickets.comments.store', $ticket) }}" class="mt-6 rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/5 sm:p-5" data-ticket-conversation-form>
                         @csrf
                         <input type="hidden" name="building_id" value="{{ $currentBuilding->getKey() }}">
-                        <div>
-                            <label for="body" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Add comment') }}</label>
-                            <textarea id="body" name="body" rows="4" required class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15">{{ old('body') }}</textarea>
-                            @error('body')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold uppercase tracking-[0.18em] text-white">
+                                {{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::substr(auth()->user()?->name ?? 'U', 0, 1)) }}
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <label for="body" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Reply') }}</label>
+                                <textarea id="body" name="body" rows="4" required placeholder="{{ __('Write an update, question, or next step...') }}" class="w-full rounded-[1.4rem] border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-500/15">{{ old('body') }}</textarea>
+                                <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                                    <p class="text-xs leading-5 text-slate-500" data-ticket-conversation-form-status>{{ __('Messages stay on this ticket so everyone sees the same timeline.') }}</p>
+                                    <button type="submit" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-900 disabled:cursor-not-allowed disabled:opacity-60" data-ticket-conversation-submit>{{ __('Send message') }}</button>
+                                </div>
+                                @error('body')<p class="mt-2 text-sm text-rose-600" data-ticket-conversation-error>{{ $message }}</p>@enderror
+                                <p class="mt-2 hidden text-sm text-rose-600" data-ticket-conversation-error></p>
+                            </div>
                         </div>
-                        <button type="submit" class="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-sky-900">{{ __('Post comment') }}</button>
                     </form>
                 @endcan
             </article>
