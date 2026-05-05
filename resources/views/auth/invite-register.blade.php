@@ -6,108 +6,122 @@
         <title>{{ __('Prihvatanje poziva') }} | Komšije</title>
         @include('partials.pwa-head')
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen bg-[linear-gradient(135deg,#083344_0%,#164e63_40%,#f4a261_100%)] text-slate-950 antialiased">
-        <div class="relative isolate min-h-screen overflow-hidden">
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(250,204,21,0.32),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.2),transparent_36%)]"></div>
+    <body class="min-h-screen font-sans text-slate-900 antialiased overscroll-y-none" data-app-shell="standalone">
+        <div class="relative isolate min-h-screen overflow-x-hidden">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.18),transparent_58%)]"></div>
 
-            <div class="relative mx-auto flex min-h-screen max-w-6xl items-center px-4 py-10 sm:px-6 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:px-8">
-                <section class="hidden rounded-[2rem] border border-white/20 bg-white/10 p-10 text-white shadow-2xl shadow-slate-950/30 backdrop-blur lg:block">
-                    <p class="mb-4 inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-100">Komšije</p>
-                    <h1 class="max-w-xl text-5xl font-semibold leading-tight">{{ __('Pozvani ste da se pridružite zgradi :building.', ['building' => $invite->building->name]) }}</h1>
-                    <p class="mt-6 max-w-xl text-lg leading-8 text-slate-100/90">{{ __('Vaš nalog će biti povezan sa stanom :apartment i automatski dodat u portal za stanare.', ['apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+            <div class="relative mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+                <header class="komsije-surface mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <a href="{{ url('/') }}" class="flex min-w-0 items-center gap-3">
+                            <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-10 w-10 shrink-0 rounded-2xl" width="40" height="40">
+                            <span class="min-w-0">
+                                <span class="block truncate text-xl font-semibold text-[var(--komsije-dark)]">Komšije</span>
+                                <span class="block text-sm text-slate-500">{{ __('Sve u vezi zgrade, na jednom mestu.') }}</span>
+                            </span>
+                        </a>
 
-                    <div class="mt-10 rounded-3xl border border-white/20 bg-slate-950/20 p-6">
-                        <p class="text-sm uppercase tracking-[0.18em] text-amber-200">{{ __('Detalji poziva') }}</p>
-                        <dl class="mt-4 space-y-3 text-sm text-slate-100/85">
-                            <div class="flex items-center justify-between gap-4">
-                                <dt>{{ __('Zgrada') }}</dt>
-                                <dd class="font-semibold text-white">{{ $invite->building->name }}</dd>
-                            </div>
-                            <div class="flex items-center justify-between gap-4">
-                                <dt>{{ __('Stan') }}</dt>
-                                <dd class="font-semibold text-white">{{ $invite->apartment?->number ?? __('N/A') }}</dd>
-                            </div>
-                            <div class="flex items-center justify-between gap-4">
-                                <dt>{{ __('Uloga') }}</dt>
-                                <dd class="font-semibold text-white">{{ __('Tenant') }}</dd>
-                            </div>
-                        </dl>
-                    </div>
-                </section>
-
-                <section class="w-full rounded-[2rem] border border-slate-200/70 bg-white/92 p-6 shadow-2xl shadow-slate-950/20 backdrop-blur sm:p-8">
-                    <div class="mb-8 flex items-start justify-between gap-4">
-                        <div>
-                            <p class="text-sm font-semibold uppercase tracking-[0.22em] text-cyan-800">{{ __('Invite Registration') }}</p>
-                            @if ($hasExistingAccount)
-                                <h2 class="mt-3 text-3xl font-semibold text-slate-950">{{ __('Accept invite') }}</h2>
-                                <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('An account already exists for :email. Enter your current password to accept the invite and link this building to your existing account.', ['email' => $invite->email]) }}</p>
-                            @else
-                                <h2 class="mt-3 text-3xl font-semibold text-slate-950">{{ __('Kreirajte svoj nalog') }}</h2>
-                                <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
-                            @endif
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            @include('partials.language-switcher', ['compact' => true])
                         </div>
-
-                        @include('partials.language-switcher')
                     </div>
+                </header>
 
-                    <form method="POST" action="{{ route('invite.store', $invite->token) }}" class="space-y-5">
-                        @csrf
+                <main class="flex flex-1 items-center py-4 md:py-8">
+                    <div class="grid w-full gap-6 lg:grid-cols-[1.1fr_0.9fr] xl:gap-8">
+                        <section class="komsije-surface rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(239,246,255,0.96))] p-6 sm:p-8 lg:p-10">
+                            <p class="inline-flex rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--komsije-primary)]">{{ __('Invite Registration') }}</p>
+                            <h1 class="mt-5 max-w-xl text-4xl font-semibold leading-tight text-[var(--komsije-dark)] sm:text-5xl">{{ __('Pozvani ste da se pridružite zgradi :building.', ['building' => $invite->building->name]) }}</h1>
+                            <p class="mt-5 max-w-xl text-base leading-7 text-slate-600">{{ __('Vaš nalog će biti povezan sa stanom :apartment i automatski dodat u portal za stanare.', ['apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
 
-                        @unless ($hasExistingAccount)
-                            <div>
-                                <label for="name" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Name') }}</label>
-                                <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
-                                @error('name')
-                                    <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                                @enderror
+                            <div class="mt-8 grid gap-4">
+                                <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
+                                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Building') }}</p>
+                                    <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ $invite->building->name }}</p>
+                                </div>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
+                                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Apartment') }}</p>
+                                        <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ $invite->apartment?->number ?? __('N/A') }}</p>
+                                    </div>
+                                    <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80 p-5">
+                                        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--komsije-primary)]">{{ __('Role') }}</p>
+                                        <p class="mt-2 text-base font-semibold text-[var(--komsije-dark)]">{{ __('Tenant') }}</p>
+                                    </div>
+                                </div>
                             </div>
-                        @endunless
+                        </section>
 
-                        <div>
-                            <label for="email" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Email') }}</label>
-                            <input id="email" name="email" type="email" value="{{ old('email', $invite->email) }}" readonly required class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15">
-                            @error('email')
-                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="password" class="mb-2 block text-sm font-medium text-slate-700">
-                                {{ $hasExistingAccount ? __('Your current password') : __('Password') }}
-                            </label>
-                            <x-password-input id="password" name="password" required autocomplete="new-password" inputClass="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15" />
-                            @error('password')
-                                <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        @unless ($hasExistingAccount)
-                            <div>
-                                <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm password') }}</label>
-                                <x-password-input id="password_confirmation" name="password_confirmation" required autocomplete="new-password" inputClass="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-950 outline-none transition focus:border-cyan-600 focus:ring-4 focus:ring-cyan-500/15" />
+                        <section class="komsije-surface rounded-[2rem] p-6 sm:p-8">
+                            <div class="mb-8">
+                                <p class="text-sm font-semibold uppercase tracking-[0.22em] text-[var(--komsije-primary)]">{{ __('Resident Portal') }}</p>
+                                @if ($hasExistingAccount)
+                                    <h2 class="mt-3 text-3xl font-semibold text-[var(--komsije-dark)]">{{ __('Accept invite') }}</h2>
+                                    <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('An account already exists for :email. Enter your current password to accept the invite and link this building to your existing account.', ['email' => $invite->email]) }}</p>
+                                @else
+                                    <h2 class="mt-3 text-3xl font-semibold text-[var(--komsije-dark)]">{{ __('Kreirajte svoj nalog') }}</h2>
+                                    <p class="mt-3 text-sm leading-6 text-slate-600">{{ __('Pozvani ste da se pridružite zgradi :building, stan :apartment.', ['building' => $invite->building->name, 'apartment' => $invite->apartment?->number ?? __('N/A')]) }}</p>
+                                @endif
                             </div>
-                        @else
-                            {{-- For existing users the password is not "confirmed" — submit the same value as confirmation --}}
-                            <input type="hidden" name="password_confirmation" value="">
-                        @endunless
 
-                        <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-900">
-                            {{ $hasExistingAccount ? __('Accept invite') : __('Join building') }}
-                        </button>
-                    </form>
+                            <form method="POST" action="{{ route('invite.store', $invite->token) }}" class="space-y-5">
+                                @csrf
 
-                    <div class="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-6 text-cyan-950">
-                        <p class="font-semibold">{{ __('Secure onboarding') }}</p>
-                        <p class="mt-1">{{ __('Ovaj poziv je vezan za adresu :email i može se iskoristiti samo jednom.', ['email' => $invite->email]) }}</p>
+                                @unless ($hasExistingAccount)
+                                    <div>
+                                        <label for="name" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Name') }}</label>
+                                        <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus class="komsije-input w-full rounded-2xl px-4 py-3 text-slate-950 transition">
+                                        @error('name')
+                                            <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                @endunless
+
+                                <div>
+                                    <label for="email" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Email') }}</label>
+                                    <input id="email" name="email" type="email" value="{{ old('email', $invite->email) }}" readonly required class="komsije-input w-full rounded-2xl bg-slate-50 px-4 py-3 text-slate-950 transition">
+                                    @error('email')
+                                        <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="password" class="mb-2 block text-sm font-medium text-slate-700">
+                                        {{ $hasExistingAccount ? __('Your current password') : __('Password') }}
+                                    </label>
+                                    <x-password-input id="password" name="password" required autocomplete="new-password" />
+                                    @error('password')
+                                        <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                @unless ($hasExistingAccount)
+                                    <div>
+                                        <label for="password_confirmation" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Confirm password') }}</label>
+                                        <x-password-input id="password_confirmation" name="password_confirmation" required autocomplete="new-password" />
+                                    </div>
+                                @else
+                                    <input type="hidden" name="password_confirmation" value="">
+                                @endunless
+
+                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--komsije-primary)] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">
+                                    {{ $hasExistingAccount ? __('Accept invite') : __('Join building') }}
+                                </button>
+                            </form>
+
+                            <div class="mt-8 rounded-[1.5rem] border border-blue-100 bg-blue-50 px-5 py-4 text-sm leading-6 text-slate-700">
+                                <p class="font-semibold text-[var(--komsije-dark)]">{{ __('Secure onboarding') }}</p>
+                                <p class="mt-1">{{ __('Ovaj poziv je vezan za adresu :email i može se iskoristiti samo jednom.', ['email' => $invite->email]) }}</p>
+                            </div>
+                        </section>
                     </div>
-                </section>
+                </main>
+
+                @include('partials.install-prompt')
             </div>
-
-            @include('partials.install-prompt')
         </div>
     </body>
 </html>
