@@ -108,6 +108,16 @@ final class FcmService
                 $errorStatus = (string) $response->json('error.status');
 
                 if (in_array($errorStatus, ['NOT_FOUND', 'UNREGISTERED', 'INVALID_ARGUMENT'], true)) {
+                    // Log even "expected" rejections so operators can tell apart
+                    // a stale token (UNREGISTERED) from an APNs/credentials
+                    // misconfiguration that surfaces as INVALID_ARGUMENT.
+                    Log::info('FCM token rejected', [
+                        'status' => $errorStatus,
+                        'http_status' => $response->status(),
+                        'token_prefix' => substr($token, 0, 12).'…',
+                        'error' => $response->json('error'),
+                    ]);
+
                     $invalidTokens[] = $token;
 
                     continue;
