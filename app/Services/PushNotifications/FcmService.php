@@ -85,7 +85,15 @@ final class FcmService
                             // when the device is offline. 24h is a sane default
                             // for ticket / announcement notifications: longer
                             // than that and the context is usually stale.
-                            'TTL' => '86400s',
+                            //
+                            // NOTE: WebPush TTL is a plain integer in seconds.
+                            // The "86400s" duration syntax is only valid for
+                            // android.ttl / apns headers and was causing FCM
+                            // to reject every single message with
+                            // INVALID_ARGUMENT — "TTL must be a non-negative
+                            // integer" — which in turn pruned every device
+                            // token. Keep this as a string of digits only.
+                            'TTL' => '86400',
                         ],
                         'fcm_options' => array_filter([
                             'link' => $stringData['url'] ?? null,
@@ -107,15 +115,14 @@ final class FcmService
 
                 $errorStatus = (string) $response->json('error.status');
 
-                if (in_array($errorStatus, ['NOT_FOUND', 'UNREGISTERED', 'INVALID_ARGUMENT'], true)) {
-                    // Log even "expected" rejections so operators can tell apart
-                    // a stale token (UNREGISTERED) from an APNs/credentials
-                    // misconfiguration that surfaces as INVALID_ARGUMENT.
-                    Log::info('FCM token rejected', [
+                // Only prune tokens that FCM tells us are gone for good.
+                // INVALID_ARGUMENT can mean *anything* about the request
+                // (bad TTL, bad data shape, …) and is NOT proof the token
+                // itself is dead, so we must not delete it on that signal.
+                if (in_array($errorStatus, ['NOT_FOUND', 'UNREGISTERED'], true)) {
+                    Log::info('FCM token rejected (pruned)', [
                         'status' => $errorStatus,
-                        'http_status' => $response->status(),
                         'token_prefix' => substr($token, 0, 12).'…',
-                        'error' => $response->json('error'),
                     ]);
 
                     $invalidTokens[] = $token;
@@ -125,8 +132,12 @@ final class FcmService
 
                 Log::warning('FCM send failed', [
                     'status' => $response->status(),
+                    'error_status' => $errorStatus,
+                    'token_prefix' => substr($token, 0, 12).'…',
                     'body' => $response->json(),
                 ]);
+
+                continue;
             } catch (ConnectionException|RequestException $e) {
                 Log::warning('FCM transport error', ['exception' => $e->getMessage()]);
             }
