@@ -5,7 +5,7 @@ Production-ready SaaS foundation for residential building management built with 
 ## What is implemented
 
 - Building-based multi-tenancy using `building_id` context from `X-Building-Id` or request payload.
-- Role-scoped memberships per building with `property_manager` and `tenant`, plus global `is_super_admin` support.
+- Role-scoped memberships per building with `admin` and `tenant`, plus global `is_super_admin` support.
 - Web portal language selection with Serbian as the default and English as an alternate persisted preference.
 - Core domain entities: buildings, apartments, users, memberships, apartment occupancy, tickets, ticket comments, ticket status history, announcements, and announcement reads.
 - API-first architecture with controllers, form requests, services, repositories, policies, events, listeners, and API resources.

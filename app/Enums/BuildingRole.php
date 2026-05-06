@@ -6,7 +6,7 @@ namespace App\Enums;
 
 enum BuildingRole: string
 {
-    case PropertyManager = 'property_manager';
+    case PropertyManager = 'admin';
     case Tenant = 'tenant';
 
     public function label(): string

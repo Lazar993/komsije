@@ -19,7 +19,7 @@ class EditUser extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['manager_building_ids'] = $this->record->buildings()
-            ->wherePivot('role', 'property_manager')
+            ->wherePivot('role', 'admin')
             ->pluck('buildings.id')
             ->all();
         $data['tenant_building_ids'] = $this->record->buildings()

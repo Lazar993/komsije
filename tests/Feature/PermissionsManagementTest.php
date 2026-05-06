@@ -35,7 +35,7 @@ class PermissionsManagementTest extends TestCase
         $this->assertDatabaseHas('building_user', [
             'building_id' => $building->getKey(),
             'user_id' => $user->getKey(),
-            'role' => 'property_manager',
+            'role' => 'admin',
         ]);
 
         $this->assertDatabaseHas('model_has_roles', [
