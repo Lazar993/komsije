@@ -35,7 +35,10 @@
             @yield('content')
         </main>
 
-        <x-site-footer />
+        @hasSection('hide_footer')
+        @else
+            <x-site-footer />
+        @endif
     </div>
 </body>
 </html>
