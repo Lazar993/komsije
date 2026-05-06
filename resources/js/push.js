@@ -5,6 +5,11 @@
 // Falls back gracefully when push is unsupported.
 
 const TOKEN_CACHE_KEY = 'komsije-fcm-token';
+const TOKEN_SYNCED_AT_KEY = 'komsije-fcm-token-synced-at';
+// Even if the FCM token hasn't rotated, force a re-POST every 24h so a
+// server-side row that was pruned (e.g. after FCM rejected a send) gets
+// recreated automatically without the user having to clear site data.
+const TOKEN_RESYNC_MS = 24 * 60 * 60 * 1000;
 const PROMPT_DEFER_KEY = 'komsije-push-prompt-deferred-until';
 const PROMPT_DECLINED_KEY = 'komsije-push-prompt-declined';
 const USER_DISABLED_KEY = 'komsije-push-user-disabled';
@@ -97,6 +102,7 @@ export async function disablePush() {
     }
 
     window.localStorage.removeItem(TOKEN_CACHE_KEY);
+    window.localStorage.removeItem(TOKEN_SYNCED_AT_KEY);
     window.localStorage.setItem(PROMPT_DECLINED_KEY, 'true');
     window.localStorage.setItem(USER_DISABLED_KEY, 'true');
 
@@ -279,9 +285,26 @@ export async function enablePush(configOverride = null) {
         }
     });
 
-    if (window.localStorage.getItem(TOKEN_CACHE_KEY) !== token) {
-        await syncTokenWithBackend(token);
-        window.localStorage.setItem(TOKEN_CACHE_KEY, token);
+    // Re-sync the token with the backend at most once every TOKEN_RESYNC_MS.
+    // We previously skipped re-sync entirely when the cached token matched the
+    // current FCM token, but that left users silent forever if their server-side
+    // device_tokens row was deleted (e.g. after an FCM rejection prunes it).
+    // FCM rarely rotates tokens, so the cache check alone meant tenants whose
+    // tokens had been pruned never re-registered until they cleared site data.
+    const cachedToken = window.localStorage.getItem(TOKEN_CACHE_KEY);
+    const lastSyncAt = Number(window.localStorage.getItem(TOKEN_SYNCED_AT_KEY) || 0);
+    const syncStale = Date.now() - lastSyncAt > TOKEN_RESYNC_MS;
+
+    if (cachedToken !== token || syncStale) {
+        try {
+            await syncTokenWithBackend(token);
+            window.localStorage.setItem(TOKEN_CACHE_KEY, token);
+            window.localStorage.setItem(TOKEN_SYNCED_AT_KEY, String(Date.now()));
+        } catch (error) {
+            // Don't poison the cache on transient network failures — we'll
+            // try again on the next page load.
+            console.warn('Token sync failed', error);
+        }
     }
 
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
