@@ -41,6 +41,18 @@
             </label>
             @error('is_important')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
         </div>
+
+        @if ($editing && ($announcement->published_at ?? null) && ($announcement->is_important ?? false))
+            <div>
+                <label class="mb-2 block text-sm font-medium text-slate-700">{{ __('Obaveštenje o izmeni') }}</label>
+                <label class="inline-flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+                    <input type="hidden" name="notify_residents" value="0">
+                    <input type="checkbox" name="notify_residents" value="1" @checked(old('notify_residents', false)) class="mt-0.5 h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500">
+                    <span class="text-sm text-slate-700">{{ __('Pošalji obaveštenje stanarima o ovoj izmeni (samo za važne objave).') }}</span>
+                </label>
+                @error('notify_residents')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+            </div>
+        @endif
     @else
         <div class="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
             {{ __('Vaša objava će biti vidljiva svim komšijama tek nakon što je upravnik odobri.') }}

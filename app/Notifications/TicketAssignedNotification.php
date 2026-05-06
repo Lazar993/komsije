@@ -12,7 +12,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-final class TicketUpdatedNotification extends Notification implements ShouldQueue
+final class TicketAssignedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
     use ResolvesChannels;
@@ -20,7 +20,6 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
     public function __construct(
         private readonly Ticket $ticket,
         private readonly User $actor,
-        private readonly ?string $note,
     ) {
     }
 
@@ -34,12 +33,9 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
 
     public function toMail(object $notifiable): MailMessage
     {
-        // Always link to the tenant-facing portal route. The Filament admin URL
-        // 403s for tenants (the most common recipient: ticket reporters).
         return (new MailMessage())
-            ->subject(__('Maintenance ticket updated'))
-            ->line(__(':actor updated the ticket ":title".', ['actor' => $this->actor->name, 'title' => $this->ticket->title]))
-            ->line($this->note ?? __('Open the ticket to review the latest status and discussion.'))
+            ->subject(__('Ticket assigned to you'))
+            ->line(__(':actor assigned the ticket ":title" to you.', ['actor' => $this->actor->name, 'title' => $this->ticket->title]))
             ->action(__('Open ticket'), route('portal.tickets.show', $this->ticket));
     }
 
@@ -51,10 +47,10 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
         return [
             'actor_id' => $this->actor->getKey(),
             'building_id' => $this->ticket->building_id,
-            'message' => $this->note ?? __('A maintenance ticket was updated.'),
+            'message' => __(':actor assigned this ticket to you.', ['actor' => $this->actor->name]),
             'ticket_id' => $this->ticket->getKey(),
             'title' => $this->ticket->title,
-            'type' => 'ticket_updated',
+            'type' => 'ticket_assigned',
         ];
     }
 
@@ -63,15 +59,11 @@ final class TicketUpdatedNotification extends Notification implements ShouldQueu
      */
     public function toFcm(object $notifiable): array
     {
-        $body = $this->note !== null && $this->note !== ''
-            ? $this->note
-            : __(':actor updated this ticket.', ['actor' => $this->actor->name]);
-
         return [
-            'title' => $this->ticket->title,
-            'body' => $body,
+            'title' => __('Assigned to you'),
+            'body' => __(':actor assigned ":title" to you.', ['actor' => $this->actor->name, 'title' => $this->ticket->title]),
             'data' => [
-                'type' => 'ticket_updated',
+                'type' => 'ticket_assigned',
                 'ticket_id' => $this->ticket->getKey(),
                 'building_id' => $this->ticket->building_id,
                 'url' => route('portal.tickets.show', $this->ticket, false),

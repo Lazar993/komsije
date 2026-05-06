@@ -22,6 +22,7 @@ final class UpdateAnnouncementRequest extends FormRequest
             'building_id' => ['required', 'integer'],
             'content' => ['sometimes', 'string', 'max:10000'],
             'is_important' => ['nullable', 'boolean'],
+            'notify_residents' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
             'title' => ['sometimes', 'string', 'max:255'],
             'attachments' => ['nullable', 'array', 'max:10'],

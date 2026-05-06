@@ -6,8 +6,11 @@ namespace App\Services;
 
 use App\Enums\BuildingRole;
 use App\Enums\TicketStatus;
+use App\Events\TicketAssigned;
+use App\Events\TicketCommented;
 use App\Events\TicketCreated;
-use App\Events\TicketUpdated;
+use App\Events\TicketResolved;
+use App\Events\TicketStatusChanged;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\Ticket;
@@ -70,6 +73,7 @@ final class TicketService
     {
         return DB::transaction(function () use ($ticket, $actor, $data): Ticket {
             $fromStatus = $ticket->status;
+            $fromAssigneeId = $ticket->assigned_to;
             $status = array_key_exists('status', $data)
                 ? $this->normalizeStatus($data['status'])
                 : $ticket->status;
@@ -88,18 +92,36 @@ final class TicketService
 
             $this->storeAttachments($updatedTicket, $data['attachments'] ?? []);
 
-            if ($fromStatus !== $updatedTicket->status) {
+            $statusChanged = $fromStatus !== $updatedTicket->status;
+            $note = $data['status_note'] ?? null;
+
+            if ($statusChanged) {
                 $updatedTicket->statusHistory()->create([
                     'changed_by' => $actor->getKey(),
                     'from_status' => $fromStatus,
-                    'note' => $data['status_note'] ?? 'Ticket status updated.',
+                    'note' => $note ?? 'Ticket status updated.',
                     'to_status' => $updatedTicket->status,
                 ]);
             }
 
             $updatedTicket->load(['apartment', 'reporter', 'assignee', 'attachments', 'comments.user', 'statusHistory.actor']);
 
-            event(new TicketUpdated($updatedTicket, $actor, $fromStatus, $updatedTicket->status, $data['status_note'] ?? null));
+            // Status events: resolved gets its own dedicated copy. Cancelled is intentionally
+            // silent (terminal state, no actionable info for participants). Anything else
+            // uses the generic status-change event.
+            if ($statusChanged) {
+                if ($updatedTicket->status === TicketStatus::Resolved) {
+                    event(new TicketResolved($updatedTicket, $actor, $note));
+                } elseif ($updatedTicket->status !== TicketStatus::Cancelled) {
+                    event(new TicketStatusChanged($updatedTicket, $actor, $fromStatus, $updatedTicket->status, $note));
+                }
+            }
+
+            // Assignment event: only when assignee actually changed to a (new) non-null user.
+            $assigneeChanged = $fromAssigneeId !== $updatedTicket->assigned_to;
+            if ($assigneeChanged && $updatedTicket->assignee !== null) {
+                event(new TicketAssigned($updatedTicket, $actor, $updatedTicket->assignee));
+            }
 
             return $updatedTicket;
         });
@@ -117,7 +139,11 @@ final class TicketService
 
         $comment->load('user');
 
-        event(new TicketUpdated($ticket->load(['reporter', 'assignee', 'apartment']), $actor, $ticket->status, $ticket->status, 'New ticket comment added.'));
+        event(new TicketCommented(
+            $ticket->load(['reporter', 'assignee', 'apartment', 'building']),
+            $comment,
+            $actor,
+        ));
 
         return $comment;
     }

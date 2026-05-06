@@ -19,3 +19,7 @@ Schedule::command('notifications:send-digest --frequency=weekly')
 Schedule::command('app:prune-old-content')
     ->dailyAt('03:00')
     ->withoutOverlapping();
+
+Schedule::command('polls:send-reminders')
+    ->hourly()
+    ->withoutOverlapping();

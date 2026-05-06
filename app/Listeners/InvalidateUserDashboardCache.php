@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Events\TicketAssigned;
+use App\Events\TicketCommented;
 use App\Events\TicketCreated;
-use App\Events\TicketUpdated;
+use App\Events\TicketResolved;
+use App\Events\TicketStatusChanged;
 use App\Models\Ticket;
 use App\Support\Cache\CacheKey;
 use Illuminate\Support\Facades\Cache;
 
 final class InvalidateUserDashboardCache
 {
-    public function handle(TicketCreated|TicketUpdated $event): void
-    {
+    public function handle(
+        TicketCreated|TicketAssigned|TicketStatusChanged|TicketResolved|TicketCommented $event
+    ): void {
         $ticket = $event->ticket->loadMissing([
             'apartment.tenants:id',
             'building.managers:id',

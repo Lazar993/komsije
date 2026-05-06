@@ -144,7 +144,7 @@ final class AnnouncementController extends PortalController
 
         if (! $isAdmin) {
             // Authors-only updates cannot change publish state or important flag.
-            unset($data['published_at'], $data['is_important']);
+            unset($data['published_at'], $data['is_important'], $data['notify_residents']);
         }
 
         $payload = array_merge($data, [

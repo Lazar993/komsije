@@ -18,6 +18,16 @@ final class NotifyManagersOfNewTicket implements ShouldQueue
     {
         $ticket = $event->ticket->loadMissing('building.managers', 'reporter', 'apartment');
 
-        Notification::send($ticket->building->managers, new TicketCreatedNotification($ticket));
+        // Exclude the actor: a manager who creates a ticket on behalf of a
+        // tenant (or for themselves) shouldn't get pushed by their own action.
+        $recipients = $ticket->building->managers
+            ->where('id', '!=', $ticket->reported_by)
+            ->values();
+
+        if ($recipients->isEmpty()) {
+            return;
+        }
+
+        Notification::send($recipients, new TicketCreatedNotification($ticket));
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Events\AnnouncementCreated;
+use App\Events\AnnouncementImportantUpdated;
 use App\Events\AnnouncementPublished;
 use App\Models\Announcement;
 use App\Models\AnnouncementAttachment;
@@ -97,6 +98,13 @@ final class AnnouncementService
 
             if (! $wasPublished && $updatedAnnouncement->published_at !== null) {
                 event(new AnnouncementPublished($updatedAnnouncement));
+            } elseif (
+                $wasPublished
+                && $updatedAnnouncement->published_at !== null
+                && $updatedAnnouncement->is_important
+                && ! empty($data['notify_residents'])
+            ) {
+                event(new AnnouncementImportantUpdated($updatedAnnouncement, $actor));
             }
 
             return $updatedAnnouncement;
