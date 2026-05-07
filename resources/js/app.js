@@ -868,7 +868,15 @@ function setupInstallPrompt() {
     const copyElement = promptElement.querySelector('[data-install-copy]');
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const wasDismissed = isInstallPromptDismissed();
-    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    const ua = window.navigator.userAgent;
+    const isIos = /iphone|ipad|ipod/i.test(ua);
+    // iPadOS 13+ reports as Mac. Treat touch-enabled "Mac" with maxTouchPoints>1 as iPad.
+    const isIpadOs = !isIos && /Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1;
+    const iosLike = isIos || isIpadOs;
+    // Add to Home Screen only works in Safari on iOS. Detect in-app browsers
+    // (Chrome iOS = CriOS, Firefox iOS = FxiOS, Edge iOS = EdgiOS, Facebook /
+    // Instagram = FBAN/FBAV/Instagram) so we can tell users to reopen in Safari.
+    const isIosSafari = iosLike && !/CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser|FBAN|FBAV|Instagram|Line\//i.test(ua);
 
     if (isStandalone || wasDismissed) {
         return;
@@ -916,13 +924,15 @@ function setupInstallPrompt() {
         document.documentElement.dataset.appInstalled = 'true';
     });
 
-    if (isIos) {
+    if (iosLike) {
         if (titleElement) {
             titleElement.textContent = APP_NAME;
         }
 
         if (copyElement) {
-            copyElement.textContent = 'U Safariju otvorite Share meni i izaberite Add to Home Screen da biste instalirali aplikaciju.';
+            copyElement.textContent = isIosSafari
+                ? 'U Safariju otvorite Share meni i izaberite Add to Home Screen da biste instalirali aplikaciju.'
+                : 'Da biste instalirali aplikaciju, otvorite ovu stranicu u Safariju, pa u Share meniju izaberite Add to Home Screen.';
         }
 
         if (actionButton) {

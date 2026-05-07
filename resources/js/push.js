@@ -69,8 +69,21 @@ export function initPushNotifications() {
         return;
     }
 
+    // 'default' = never asked. We deliberately do NOT auto-prompt here.
+    // Notification.requestPermission() must run from an explicit user gesture
+    // (the "Turn on" button in the dashboard banner / profile settings card),
+    // not from an arbitrary first click that could just as easily be the
+    // user's "Later" / dismiss tap.
     emitStatus('default');
-    schedulePermissionPrompt(config);
+
+    // Re-emit status when the tab becomes visible again so the UI updates
+    // after the user returns from system settings (e.g. iOS Settings →
+    // Notifications → Komšije, or Chrome site settings) without a reload.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            emitStatus(getPushStatus());
+        }
+    });
 }
 
 export function getPushStatus() {
@@ -173,27 +186,10 @@ function readFirebaseConfig() {
     }
 }
 
-function schedulePermissionPrompt(config) {
-    const deferUntil = Number(window.localStorage.getItem(PROMPT_DEFER_KEY) || 0);
-    const declined = window.localStorage.getItem(PROMPT_DECLINED_KEY) === 'true';
-
-    if (declined || (deferUntil && Date.now() < deferUntil)) {
-        return;
-    }
-
-    // Trigger after first meaningful user interaction (a click on a button/link).
-    const handler = async () => {
-        document.removeEventListener('click', handler, true);
-
-        try {
-            await enablePush(config);
-        } catch (error) {
-            console.warn('Push enablement failed', error);
-        }
-    };
-
-    // Defer registration until the user has actually interacted with the page.
-    document.addEventListener('click', handler, { capture: true, once: false, passive: true });
+function schedulePermissionPrompt(_config) {
+    // Deprecated: kept as a no-op so any external caller doesn't break.
+    // Push permission is now requested only from explicit user gestures
+    // (the "Turn on" buttons wired up by setupPushSettings in app.js).
 }
 
 export async function enablePush(configOverride = null) {
