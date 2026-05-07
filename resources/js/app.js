@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAnnouncementPagination();
     setupCardDecks();
     setupLightbox();
+    setupPdfPreview();
     setupInstallPrompt();
     setupPushSettings();
     await registerServiceWorker();
@@ -257,6 +258,91 @@ function cssEscape(value) {
         return window.CSS.escape(value);
     }
     return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
+}
+
+function setupPdfPreview(root = document) {
+    const overlay = root.querySelector('[data-pdf-preview]');
+    if (!(overlay instanceof HTMLElement) || overlay.dataset.pdfPreviewReady === 'true') {
+        return;
+    }
+    overlay.dataset.pdfPreviewReady = 'true';
+
+    const frame = overlay.querySelector('[data-pdf-preview-frame]');
+    const title = overlay.querySelector('[data-pdf-preview-title]');
+    const closeBtn = overlay.querySelector('[data-pdf-preview-close]');
+    const downloadLink = overlay.querySelector('[data-pdf-preview-download]');
+
+    if (!(frame instanceof HTMLIFrameElement)) {
+        return;
+    }
+
+    let lastFocus = null;
+
+    const open = (src, name) => {
+        if (!src) return;
+        lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        if (title instanceof HTMLElement) {
+            title.textContent = name || '';
+        }
+        if (downloadLink instanceof HTMLAnchorElement) {
+            const sep = src.includes('?') ? '&' : '?';
+            downloadLink.href = `${src}${sep}download=1`;
+            downloadLink.classList.remove('hidden');
+            downloadLink.classList.add('inline-flex');
+        }
+
+        frame.src = src;
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
+        if (closeBtn instanceof HTMLElement) {
+            closeBtn.focus();
+        }
+    };
+
+    const close = () => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = '';
+        frame.src = 'about:blank';
+
+        if (lastFocus && typeof lastFocus.focus === 'function') {
+            lastFocus.focus();
+        }
+        lastFocus = null;
+    };
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target instanceof Element ? event.target.closest('[data-pdf-preview-trigger]') : null;
+        if (!(trigger instanceof HTMLElement)) {
+            return;
+        }
+        const src = trigger.getAttribute('data-pdf-preview-src') || '';
+        if (!src) return;
+        // Allow modifier-click / middle-click to fall through to native open-in-tab.
+        if (event.metaKey || event.ctrlKey || event.shiftKey || (event instanceof MouseEvent && event.button !== 0)) {
+            return;
+        }
+        event.preventDefault();
+        open(src, trigger.getAttribute('data-pdf-preview-name') || '');
+    });
+
+    if (closeBtn instanceof HTMLElement) {
+        closeBtn.addEventListener('click', close);
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (overlay.classList.contains('hidden')) {
+            return;
+        }
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close();
+        }
+    });
 }
 
 function setupCardDecks(root = document) {

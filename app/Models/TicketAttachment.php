@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['ticket_id', 'disk', 'path', 'original_name', 'mime_type', 'size'])]
+#[Fillable(['ticket_id', 'disk', 'path', 'original_name', 'mime_type', 'size', 'checksum'])]
 class TicketAttachment extends Model
 {
     use HasFactory;

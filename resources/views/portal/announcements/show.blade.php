@@ -41,10 +41,19 @@
                     <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Prilozi') }}</h2>
                     <ul class="mt-4 divide-y divide-slate-100">
                         @foreach ($announcement->attachments as $attachment)
+                            @php
+                                $isPdf = ($attachment->mime_type ?? '') === 'application/pdf';
+                                $previewUrl = route('portal.announcements.attachments.download', [$announcement, $attachment]);
+                            @endphp
                             <li class="flex flex-col items-start gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                                <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
+                                <a href="{{ $previewUrl }}"
                                    target="_blank"
                                    rel="noopener"
+                                   @if ($isPdf)
+                                       data-pdf-preview-trigger
+                                       data-pdf-preview-src="{{ $previewUrl }}"
+                                       data-pdf-preview-name="{{ $attachment->original_name }}"
+                                   @endif
                                    class="inline-flex min-w-0 w-full items-center gap-3 text-sm font-medium text-slate-700 transition hover:text-[var(--komsije-primary)] sm:flex-1">
                                     <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
@@ -55,7 +64,16 @@
                                     <span class="min-w-0 break-all sm:truncate">{{ $attachment->original_name }}</span>
                                 </a>
                                 <div class="flex w-full items-center justify-between gap-3 sm:w-auto sm:shrink-0 sm:justify-end">
-                                    <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}?download=1"
+                                    @if ($isPdf)
+                                        <button type="button"
+                                                data-pdf-preview-trigger
+                                                data-pdf-preview-src="{{ $previewUrl }}"
+                                                data-pdf-preview-name="{{ $attachment->original_name }}"
+                                                class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
+                                            {{ __('Pregled') }}
+                                        </button>
+                                    @endif
+                                    <a href="{{ $previewUrl }}?download=1"
                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
                                         {{ __('Preuzmi') }}
                                     </a>

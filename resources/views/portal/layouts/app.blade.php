@@ -199,5 +199,43 @@
                 <figcaption data-lightbox-caption class="max-w-full truncate text-center text-sm text-white/80"></figcaption>
             </figure>
         </div>
+
+        <div
+            data-pdf-preview
+            class="fixed inset-0 z-[60] hidden flex-col bg-slate-950/95 backdrop-blur"
+            role="dialog"
+            aria-modal="true"
+            aria-label="{{ __('Pregled dokumenta') }}"
+        >
+            <div
+                class="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-white"
+                style="padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);"
+            >
+                <p data-pdf-preview-title class="min-w-0 flex-1 truncate text-sm font-medium"></p>
+                <a
+                    data-pdf-preview-download
+                    href="#"
+                    class="hidden rounded-full bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-white/20 sm:inline-flex"
+                >
+                    {{ __('Preuzmi') }}
+                </a>
+                <button
+                    type="button"
+                    data-pdf-preview-close
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                    aria-label="{{ __('Close') }}"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="relative flex-1 bg-slate-900">
+                <iframe
+                    data-pdf-preview-frame
+                    src="about:blank"
+                    title="{{ __('Pregled dokumenta') }}"
+                    class="absolute inset-0 h-full w-full border-0 bg-white"
+                ></iframe>
+            </div>
+        </div>
     </body>
 </html>

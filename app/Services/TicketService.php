@@ -18,14 +18,17 @@ use App\Models\Ticket;
 use App\Models\TicketComment;
 use App\Models\User;
 use App\Repositories\Contracts\TicketRepositoryInterface;
+use App\Support\Images\ImageResizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final class TicketService
 {
-    public function __construct(private readonly TicketRepositoryInterface $tickets)
-    {
+    public function __construct(
+        private readonly TicketRepositoryInterface $tickets,
+        private readonly ImageResizer $imageResizer,
+    ) {
     }
 
     /**
@@ -234,15 +237,54 @@ final class TicketService
      */
     private function storeAttachments(Ticket $ticket, array $attachments): void
     {
-        foreach ($attachments as $attachment) {
-            $path = $attachment->store('tickets/'.$ticket->getKey(), 'public');
+        if ($attachments === []) {
+            return;
+        }
+
+        $existingChecksums = $ticket->attachments()
+            ->whereNotNull('checksum')
+            ->pluck('checksum')
+            ->all();
+        $seen = array_fill_keys($existingChecksums, true);
+        $duplicates = [];
+        $prepared = [];
+
+        foreach ($attachments as $index => $attachment) {
+            $processed = $this->imageResizer->resize($attachment);
+
+            $realPath = $processed->getRealPath();
+            $checksum = $realPath !== false ? hash_file('sha256', $realPath) : null;
+
+            if (is_string($checksum) && isset($seen[$checksum])) {
+                $duplicates["attachments.{$index}"] = [
+                    __('The file ":name" is already attached to this ticket.', [
+                        'name' => $attachment->getClientOriginalName(),
+                    ]),
+                ];
+                continue;
+            }
+
+            $prepared[] = [$attachment, $processed, $checksum];
+
+            if (is_string($checksum)) {
+                $seen[$checksum] = true;
+            }
+        }
+
+        if ($duplicates !== []) {
+            throw ValidationException::withMessages($duplicates);
+        }
+
+        foreach ($prepared as [$original, $processed, $checksum]) {
+            $path = $processed->store('tickets/'.$ticket->getKey(), 'public');
 
             $ticket->attachments()->create([
                 'disk' => 'public',
-                'mime_type' => $attachment->getMimeType(),
-                'original_name' => $attachment->getClientOriginalName(),
+                'mime_type' => $processed->getMimeType(),
+                'original_name' => $original->getClientOriginalName(),
                 'path' => $path,
-                'size' => $attachment->getSize(),
+                'size' => $processed->getSize(),
+                'checksum' => $checksum,
             ]);
         }
     }
