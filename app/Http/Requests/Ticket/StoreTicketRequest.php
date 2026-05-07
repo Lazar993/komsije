@@ -6,6 +6,7 @@ namespace App\Http\Requests\Ticket;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -52,6 +53,7 @@ final class StoreTicketRequest extends FormRequest
             'priority' => ['required', Rule::enum(TicketPriority::class)],
             'status' => ['sometimes', Rule::enum(TicketStatus::class)],
             'title' => ['nullable', 'string', 'max:255'],
+            'visibility' => ['sometimes', Rule::enum(TicketVisibility::class)],
         ];
     }
 }

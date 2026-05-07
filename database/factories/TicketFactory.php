@@ -6,6 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\Ticket;
@@ -33,6 +34,8 @@ class TicketFactory extends Factory
             'description' => fake()->paragraph(),
             'status' => fake()->randomElement(TicketStatus::cases()),
             'priority' => fake()->randomElement(TicketPriority::cases()),
+            'visibility' => TicketVisibility::Private,
+            'affected_count' => 0,
             'resolved_at' => null,
         ];
     }

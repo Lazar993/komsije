@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
         Route::post('tickets', [TicketController::class, 'store']);
         Route::get('tickets/{ticket}', [TicketController::class, 'show']);
         Route::put('tickets/{ticket}', [TicketController::class, 'update']);
+        Route::post('tickets/{ticket}/affected', [TicketController::class, 'toggleAffected']);
         Route::post('tickets/{ticket}/comments', [TicketCommentController::class, 'store']);
 
         Route::get('announcements', [AnnouncementController::class, 'index']);

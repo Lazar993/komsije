@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\BuildingRole;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use App\Events\TicketAssigned;
 use App\Events\TicketCommented;
 use App\Events\TicketCreated;
@@ -47,6 +48,7 @@ final class TicketService
                 'resolved_at' => null,
                 'status' => $status,
                 'title' => $data['title'],
+                'visibility' => $this->normalizeVisibility($data['visibility'] ?? TicketVisibility::Private),
             ]);
 
             $this->storeAttachments($ticket, $data['attachments'] ?? []);
@@ -88,6 +90,9 @@ final class TicketService
                 'resolved_at' => $status === TicketStatus::Resolved ? now() : null,
                 'status' => $status,
                 'title' => $data['title'] ?? $ticket->title,
+                'visibility' => $this->normalizeVisibility(
+                    array_key_exists('visibility', $data) ? $data['visibility'] : $ticket->visibility,
+                ),
             ]);
 
             $this->storeAttachments($updatedTicket, $data['attachments'] ?? []);
@@ -186,6 +191,42 @@ final class TicketService
         }
 
         return TicketStatus::from((string) $status);
+    }
+
+    private function normalizeVisibility(mixed $visibility): TicketVisibility
+    {
+        if ($visibility instanceof TicketVisibility) {
+            return $visibility;
+        }
+
+        if ($visibility === null || $visibility === '') {
+            return TicketVisibility::Private;
+        }
+
+        return TicketVisibility::from((string) $visibility);
+    }
+
+    /**
+     * Toggle a tenant's "I have this issue too" affected flag on a public ticket.
+     * Recomputes affected_count atomically.
+     */
+    public function toggleAffected(Ticket $ticket, User $user): bool
+    {
+        return DB::transaction(function () use ($ticket, $user): bool {
+            $exists = $ticket->affectedUsers()->whereKey($user->getKey())->exists();
+
+            if ($exists) {
+                $ticket->affectedUsers()->detach($user->getKey());
+            } else {
+                $ticket->affectedUsers()->attach($user->getKey());
+            }
+
+            $ticket->forceFill([
+                'affected_count' => $ticket->affectedUsers()->count(),
+            ])->save();
+
+            return ! $exists;
+        });
     }
 
     /**

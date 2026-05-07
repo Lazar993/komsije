@@ -22,6 +22,13 @@ interface TicketRepositoryInterface
     public function paginateForBuildingAndUser(int $buildingId, User $user, array $filters, int $perPage = 10): LengthAwarePaginator;
 
     /**
+     * Public tickets visible to all residents of a building (anonymized in the UI).
+     *
+     * @param array<string, mixed> $filters
+     */
+    public function paginatePublicForBuilding(int $buildingId, array $filters, int $perPage = 10): LengthAwarePaginator;
+
+    /**
      * @param array<string, mixed> $data
      */
     public function create(array $data): Ticket;

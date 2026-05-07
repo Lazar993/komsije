@@ -59,4 +59,17 @@ final class TicketController extends Controller
 
         return new TicketResource($this->ticketService->update($ticket->load('building'), $request->user(), $request->validated()));
     }
+
+    public function toggleAffected(Request $request, Ticket $ticket, TicketService $service): \Illuminate\Http\JsonResponse
+    {
+        abort_if($ticket->building_id !== $this->tenantContext->buildingId(), 404);
+        $this->authorize('markAffected', $ticket);
+
+        $isAffected = $service->toggleAffected($ticket, $request->user());
+
+        return response()->json([
+            'is_affected' => $isAffected,
+            'affected_count' => (int) ($ticket->fresh()?->affected_count ?? 0),
+        ]);
+    }
 }

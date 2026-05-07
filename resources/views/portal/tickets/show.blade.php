@@ -7,6 +7,9 @@
         $conversation = $ticket->comments->sortBy('created_at')->values();
         $currentUserId = auth()->id();
         $conversationCountLabel = trans_choice(':count message|:count messages', $conversation->count(), ['count' => $conversation->count()]);
+        $canSeeIdentity = $canSeeIdentity ?? $ticket->viewerCanSeeIdentity(auth()->user());
+        $isAffected = $isAffected ?? false;
+        $isPublic = $ticket->isPublic();
     @endphp
 
     <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
@@ -16,6 +19,11 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">{{ $ticket->status->label() }}</span>
                         <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-amber-950">{{ $ticket->priority->label() }}</span>
+                        @if ($isPublic)
+                            <span class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-800">{{ __('Public') }}</span>
+                        @else
+                            <span class="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">{{ __('Private') }}</span>
+                        @endif
                     </div>
                     <h1 class="mt-4 break-words text-2xl font-semibold text-slate-950 sm:text-3xl">{{ $ticket->title }}</h1>
                 </div>
@@ -33,7 +41,9 @@
             <div class="mt-8 grid gap-4 sm:grid-cols-2">
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Reporter') }}</p>
-                    <p class="mt-2 text-sm font-medium text-slate-950">{{ $ticket->reporter?->name ?? __('Unknown') }}</p>
+                    <p class="mt-2 text-sm font-medium text-slate-950">
+                        {{ $canSeeIdentity ? ($ticket->reporter?->name ?? __('Unknown')) : __('Resident reported this issue') }}
+                    </p>
                 </div>
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Assigned manager') }}</p>
@@ -41,7 +51,9 @@
                 </div>
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Apartment') }}</p>
-                    <p class="mt-2 text-sm font-medium text-slate-950">{{ $ticket->apartment?->number ?? __('Not linked') }}</p>
+                    <p class="mt-2 text-sm font-medium text-slate-950">
+                        {{ $canSeeIdentity ? ($ticket->apartment?->number ?? __('Not linked')) : __('Hidden for privacy') }}
+                    </p>
                 </div>
                 <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                     <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Created') }}</p>
@@ -49,19 +61,41 @@
                 </div>
             </div>
 
+            @if ($isPublic)
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-blue-200 bg-blue-50 p-5">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-950">{{ __('Affected residents') }}</p>
+                        <p class="mt-1 text-xs text-slate-600">{{ trans_choice(':count resident has confirmed they are also affected.|:count residents have confirmed they are also affected.', (int) ($ticket->affected_count ?? 0), ['count' => (int) ($ticket->affected_count ?? 0)]) }}</p>
+                    </div>
+                    @can('markAffected', $ticket)
+                        <form method="POST" action="{{ route('portal.tickets.affected.toggle', $ticket) }}">
+                            @csrf
+                            <button type="submit" class="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-900">
+                                {{ $isAffected ? __('Remove my mark') : __('I have this issue too') }}
+                            </button>
+                        </form>
+                    @endcan
+                </div>
+            @endif
+
             <div class="mt-8">
                 <h2 class="text-lg font-semibold text-slate-950">{{ __('Attachments') }}</h2>
                 <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    @forelse ($ticket->attachments as $attachment)
-                        <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="break-all rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
-                    @empty
-                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No images uploaded for this ticket.') }}</p>
-                    @endforelse
+                    @if (! $canSeeIdentity)
+                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 sm:col-span-2">{{ __('Attachments are visible to the reporter and building managers only.') }}</p>
+                    @else
+                        @forelse ($ticket->attachments as $attachment)
+                            <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="break-all rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
+                        @empty
+                            <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No images uploaded for this ticket.') }}</p>
+                        @endforelse
+                    @endif
                 </div>
             </div>
         </article>
 
         <div class="min-w-0 space-y-6">
+            @if ($canSeeIdentity)
             <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
                 <div
                     data-ticket-conversation
@@ -112,6 +146,12 @@
                     </form>
                 @endcan
             </article>
+            @else
+                <article class="min-w-0 overflow-hidden rounded-[2rem] border border-blue-100 bg-blue-50/60 p-6 text-sm text-slate-600 shadow-sm sm:p-8">
+                    <h2 class="text-base font-semibold text-slate-950">{{ __('Conversation hidden') }}</h2>
+                    <p class="mt-2 leading-6">{{ __('To protect privacy, the conversation between the reporter and the manager is not shown on public tickets.') }}</p>
+                </article>
+            @endif
 
             <article class="min-w-0 overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
                 <h2 class="text-xl font-semibold text-slate-950">{{ __('Status history') }}</h2>
@@ -121,7 +161,7 @@
                         @forelse ($ticket->statusHistory as $entry)
                             <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                                 <div class="flex items-center justify-between gap-3">
-                                    <p class="text-sm font-semibold text-slate-950">{{ $entry->actor?->name ?? __('System') }}</p>
+                                    <p class="text-sm font-semibold text-slate-950">{{ $canSeeIdentity ? ($entry->actor?->name ?? __('System')) : __('Building team') }}</p>
                                     <p class="text-xs uppercase tracking-[0.16em] text-slate-500">{{ $entry->created_at->translatedFormat('M j, Y H:i') }}</p>
                                 </div>
                                 <p class="mt-3 text-sm text-slate-700">{{ $entry->from_status?->label() ?? __('None') }} → {{ $entry->to_status?->label() ?? __('None') }}</p>

@@ -6,6 +6,7 @@ namespace App\Http\Requests\Ticket;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,6 +32,7 @@ final class UpdateTicketRequest extends FormRequest
             'status' => ['sometimes', Rule::enum(TicketStatus::class)],
             'status_note' => ['nullable', 'string', 'max:255'],
             'title' => ['sometimes', 'string', 'max:255'],
+            'visibility' => ['sometimes', Rule::enum(TicketVisibility::class)],
         ];
     }
 }

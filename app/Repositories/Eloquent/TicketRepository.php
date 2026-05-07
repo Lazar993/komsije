@@ -35,12 +35,29 @@ final class TicketRepository implements TicketRepositoryInterface
             ->when($filters['assigned_to'] ?? null, fn (Builder $query, int $assigneeId): Builder => $query->where('assigned_to', $assigneeId))
             ->when(
                 ! $user->isBuildingAdmin($buildingId),
+                // Tenants see: tickets they reported, tickets in their apartment, or tickets
+                // where they are assigned. Public tickets are surfaced separately via
+                // paginatePublicForBuilding() so the "My tickets" tab stays personal.
                 fn (Builder $query): Builder => $query->where(
                     fn (Builder $scopedQuery): Builder => $scopedQuery
                         ->where('reported_by', $user->getKey())
+                        ->orWhere('assigned_to', $user->getKey())
                         ->orWhereHas('apartment.tenants', fn (Builder $q): Builder => $q->whereKey($user->getKey())),
                 ),
             )
+            ->latest()
+            ->paginate($perPage);
+    }
+
+    public function paginatePublicForBuilding(int $buildingId, array $filters, int $perPage = 10): LengthAwarePaginator
+    {
+        return Ticket::query()
+            ->where('building_id', $buildingId)
+            ->publicOnly()
+            ->with(['assignee'])
+            ->withCount('affectedUsers')
+            ->when($filters['status'] ?? null, fn (Builder $query, string $status): Builder => $query->where('status', $status))
+            ->when($filters['priority'] ?? null, fn (Builder $query, string $priority): Builder => $query->where('priority', $priority))
             ->latest()
             ->paginate($perPage);
     }

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Web\Portal;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use App\Http\Requests\Ticket\StoreTicketCommentRequest;
 use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Requests\Ticket\UpdateTicketRequest;
@@ -35,26 +36,42 @@ final class TicketController extends PortalController
 
         $building = $this->tenantContext->building();
         $user = $request->user();
+        $isAdmin = $user->isBuildingAdmin($building->getKey());
+
+        // "Tab" toggles the listing source for tenants between their own tickets
+        // and the public building issue board. Managers always see everything.
+        $tab = $request->query('tab') === 'public' ? 'public' : 'mine';
 
         $filters = $request->only(['status', 'priority', 'assigned_to']);
 
-        $tickets = $this->tickets->paginateForBuildingAndUser(
-            (int) $building->getKey(),
-            $user,
-            $filters,
-        )->withQueryString();
+        if (! $isAdmin && $tab === 'public') {
+            $tickets = $this->tickets->paginatePublicForBuilding(
+                (int) $building->getKey(),
+                $filters,
+            )->withQueryString();
+        } else {
+            $tickets = $this->tickets->paginateForBuildingAndUser(
+                (int) $building->getKey(),
+                $user,
+                $filters,
+            )->withQueryString();
+        }
 
         $managerOptions = $building->managers()->orderBy('name')->pluck('name', 'users.id');
 
         if ($request->ajax()) {
             return view('portal.tickets.partials.results', [
                 'tickets' => $tickets,
+                'tab' => $tab,
+                'isAdmin' => $isAdmin,
             ]);
         }
 
         return $this->portalView($request, 'portal.tickets.index', [
             'managerOptions' => $managerOptions,
             'tickets' => $tickets,
+            'tab' => $tab,
+            'isAdmin' => $isAdmin,
         ]);
     }
 
@@ -68,6 +85,7 @@ final class TicketController extends PortalController
             'managerOptions' => $building->managers()->orderBy('name')->pluck('name', 'users.id'),
             'priorities' => TicketPriority::cases(),
             'statuses' => TicketStatus::cases(),
+            'visibilities' => TicketVisibility::cases(),
         ]);
     }
 
@@ -96,13 +114,42 @@ final class TicketController extends PortalController
 
         $ticket->load(['apartment.tenants', 'reporter', 'assignee', 'attachments', 'comments.user', 'statusHistory.actor']);
 
+        $user = $request->user();
+        $canSeeIdentity = $ticket->viewerCanSeeIdentity($user);
+        $isAffected = $ticket->isPublic()
+            ? $ticket->affectedUsers()->whereKey($user->getKey())->exists()
+            : false;
+
         if ($request->expectsJson() && $request->query('fragment') === 'conversation') {
             return response()->json($this->conversationPayload($request, $ticket));
         }
 
         return $this->portalView($request, 'portal.tickets.show', [
             'ticket' => $ticket,
+            'canSeeIdentity' => $canSeeIdentity,
+            'isAffected' => $isAffected,
         ]);
+    }
+
+    public function toggleAffected(Request $request, Ticket $ticket): RedirectResponse|JsonResponse
+    {
+        abort_if($ticket->building_id !== $this->tenantContext->buildingId(), 404);
+        $this->authorize('markAffected', $ticket);
+
+        $isAffected = $this->ticketService->toggleAffected($ticket, $request->user());
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'is_affected' => $isAffected,
+                'affected_count' => $ticket->fresh()?->affected_count,
+            ]);
+        }
+
+        return redirect()
+            ->route('portal.tickets.show', $ticket)
+            ->with('status', $isAffected
+                ? __('Thanks — your manager will see that you are also affected.')
+                : __('Removed from affected residents.'));
     }
 
     public function edit(Request $request, Ticket $ticket): View
@@ -115,6 +162,7 @@ final class TicketController extends PortalController
             'managerOptions' => $this->tenantContext->building()->managers()->orderBy('name')->pluck('name', 'users.id'),
             'priorities' => TicketPriority::cases(),
             'statuses' => TicketStatus::cases(),
+            'visibilities' => TicketVisibility::cases(),
             'ticket' => $ticket,
         ]);
     }

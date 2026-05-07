@@ -17,9 +17,10 @@ final class NotifyParticipantsOfTicketResolution implements ShouldQueue
 
     public function handle(TicketResolved $event): void
     {
-        $ticket = $event->ticket->loadMissing('reporter', 'assignee');
+        $ticket = $event->ticket->loadMissing('reporter', 'assignee', 'affectedUsers');
 
         $recipients = Collection::make([$ticket->reporter, $ticket->assignee])
+            ->merge($ticket->isPublic() ? $ticket->affectedUsers : [])
             ->filter()
             ->unique('id')
             ->reject(fn ($user): bool => $user->is($event->actor));

@@ -19,7 +19,28 @@
             @endcan
         </div>
 
+        @unless ($isAdmin ?? false)
+            @php
+                $activeTab = $tab ?? 'mine';
+                $baseQuery = request()->except(['tab', 'page']);
+            @endphp
+            <div class="mt-6 inline-flex rounded-2xl border border-[var(--komsije-border)] bg-slate-50 p-1 text-sm" role="tablist">
+                <a href="{{ route('portal.tickets.index', array_merge($baseQuery, ['tab' => 'mine'])) }}"
+                   class="rounded-xl px-4 py-2 font-medium transition {{ $activeTab === 'mine' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                   role="tab" aria-selected="{{ $activeTab === 'mine' ? 'true' : 'false' }}">{{ __('My tickets') }}</a>
+                <a href="{{ route('portal.tickets.index', array_merge($baseQuery, ['tab' => 'public'])) }}"
+                   class="rounded-xl px-4 py-2 font-medium transition {{ $activeTab === 'public' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
+                   role="tab" aria-selected="{{ $activeTab === 'public' ? 'true' : 'false' }}">{{ __('Public building issues') }}</a>
+            </div>
+            @if ($activeTab === 'public')
+                <p class="mt-3 max-w-2xl text-xs leading-5 text-slate-500">{{ __('Public issues are visible to all residents of this building. Reporters are anonymized.') }}</p>
+            @endif
+        @endunless
+
         <form method="GET" action="{{ route('portal.tickets.index') }}" class="mt-6 grid gap-4 rounded-[1.5rem] border border-[var(--komsije-border)] bg-slate-50 p-5 lg:grid-cols-4" data-ticket-filters>
+            @if (! ($isAdmin ?? false))
+                <input type="hidden" name="tab" value="{{ $tab ?? 'mine' }}">
+            @endif
             <div>
                 <label for="status" class="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Status') }}</label>
                 <select id="status" name="status" class="komsije-input w-full rounded-2xl px-4 py-3 text-sm">

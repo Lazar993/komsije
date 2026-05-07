@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function (): void {
 			Route::get('tickets/{ticket}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
 			Route::put('tickets/{ticket}', [TicketController::class, 'update'])->name('tickets.update');
 			Route::post('tickets/{ticket}/comments', [TicketController::class, 'comment'])->name('tickets.comments.store');
+			Route::post('tickets/{ticket}/affected', [TicketController::class, 'toggleAffected'])->name('tickets.affected.toggle');
 
 			Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
 			Route::get('announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');

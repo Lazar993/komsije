@@ -17,9 +17,12 @@ final class NotifyParticipantsOfTicketStatusChange implements ShouldQueue
 
     public function handle(TicketStatusChanged $event): void
     {
-        $ticket = $event->ticket->loadMissing('reporter', 'assignee');
+        $ticket = $event->ticket->loadMissing('reporter', 'assignee', 'affectedUsers');
 
+        // Participants always notified. For public tickets, also include the
+        // affected residents who opted in via "I have this issue too".
         $recipients = Collection::make([$ticket->reporter, $ticket->assignee])
+            ->merge($ticket->isPublic() ? $ticket->affectedUsers : [])
             ->filter()
             ->unique('id')
             ->reject(fn ($user): bool => $user->is($event->actor));

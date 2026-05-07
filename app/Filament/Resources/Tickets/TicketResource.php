@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Tickets;
 use App\Enums\BuildingRole;
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use App\Filament\Resources\Tickets\Pages\CreateTicket;
 use App\Filament\Resources\Tickets\Pages\EditTicket;
 use App\Filament\Resources\Tickets\Pages\ListTickets;
@@ -84,6 +85,11 @@ class TicketResource extends Resource
                     ->required()
                     ->options(self::statusOptions())
                     ->default(TicketStatus::New->value),
+                Select::make('visibility')
+                    ->required()
+                    ->options(self::visibilityOptions())
+                    ->default(TicketVisibility::Private->value)
+                    ->helperText('Public tickets are visible to all residents of the same building, anonymized.'),
                 Textarea::make('title')
                     ->rows(2)
                     ->required()
@@ -109,6 +115,10 @@ class TicketResource extends Resource
                 ->badge(),
             TextEntry::make('priority')
                 ->badge(),
+            TextEntry::make('visibility')
+                ->badge(),
+            TextEntry::make('affected_count')
+                ->label('Affected residents'),
             TextEntry::make('reporter.name'),
             TextEntry::make('assignee.name'),
             TextEntry::make('description'),
@@ -131,6 +141,13 @@ class TicketResource extends Resource
                     ->badge(),
                 TextColumn::make('priority')
                     ->badge(),
+                TextColumn::make('visibility')
+                    ->badge()
+                    ->label('Visibility'),
+                TextColumn::make('affected_count')
+                    ->label('Affected')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('assignee.name')
                     ->label('Manager'),
                 TextColumn::make('updated_at')
@@ -141,6 +158,8 @@ class TicketResource extends Resource
                     ->options(self::statusOptions()),
                 SelectFilter::make('priority')
                     ->options(self::priorityOptions()),
+                SelectFilter::make('visibility')
+                    ->options(self::visibilityOptions()),
                 SelectFilter::make('building_id')
                     ->label('Building')
                     ->options(self::accessibleBuildingOptions()),
@@ -199,6 +218,14 @@ class TicketResource extends Resource
     public static function priorityOptions(): array
     {
         return collect(TicketPriority::cases())->mapWithKeys(fn (TicketPriority $priority): array => [$priority->value => $priority->label()])->all();
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function visibilityOptions(): array
+    {
+        return collect(TicketVisibility::cases())->mapWithKeys(fn (TicketVisibility $visibility): array => [$visibility->value => $visibility->label()])->all();
     }
 
     public static function getPages(): array
