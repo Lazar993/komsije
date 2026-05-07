@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTicketConversation();
     setupAnnouncementPagination();
     setupCardDecks();
+    setupLightbox();
     setupInstallPrompt();
     setupPushSettings();
     await registerServiceWorker();
@@ -69,6 +70,193 @@ function escapeHtml(value) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
+}
+
+function setupLightbox(root = document) {
+    const overlay = root.querySelector('[data-lightbox]');
+    if (!(overlay instanceof HTMLElement) || overlay.dataset.lightboxReady === 'true') {
+        return;
+    }
+    overlay.dataset.lightboxReady = 'true';
+
+    const image = overlay.querySelector('[data-lightbox-image]');
+    const caption = overlay.querySelector('[data-lightbox-caption]');
+    const prevBtn = overlay.querySelector('[data-lightbox-prev]');
+    const nextBtn = overlay.querySelector('[data-lightbox-next]');
+    const closeBtn = overlay.querySelector('[data-lightbox-close]');
+
+    if (!(image instanceof HTMLImageElement)) {
+        return;
+    }
+
+    let items = [];
+    let index = 0;
+    let lastFocus = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchActive = false;
+
+    const setNavVisibility = () => {
+        const multi = items.length > 1;
+        if (prevBtn instanceof HTMLElement) {
+            prevBtn.classList.toggle('hidden', !multi);
+            prevBtn.classList.toggle('flex', multi);
+        }
+        if (nextBtn instanceof HTMLElement) {
+            nextBtn.classList.toggle('hidden', !multi);
+            nextBtn.classList.toggle('flex', multi);
+        }
+    };
+
+    const render = () => {
+        const item = items[index];
+        if (!item) {
+            return;
+        }
+        image.src = item.src;
+        image.alt = item.alt || '';
+        if (caption instanceof HTMLElement) {
+            caption.textContent = item.alt || '';
+            caption.classList.toggle('hidden', !item.alt);
+        }
+    };
+
+    const open = (gallery, startSrc) => {
+        const triggers = Array.from(root.querySelectorAll(`[data-lightbox-trigger="${cssEscape(gallery)}"]`));
+        items = triggers
+            .map((el) => ({
+                src: el.getAttribute('data-lightbox-src') || '',
+                alt: el.getAttribute('data-lightbox-alt') || '',
+            }))
+            .filter((item) => item.src);
+
+        if (!items.length) {
+            return;
+        }
+
+        const startIndex = items.findIndex((item) => item.src === startSrc);
+        index = startIndex >= 0 ? startIndex : 0;
+
+        lastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        setNavVisibility();
+        render();
+
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
+        if (closeBtn instanceof HTMLElement) {
+            closeBtn.focus();
+        }
+    };
+
+    const close = () => {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = '';
+        image.src = '';
+        items = [];
+
+        if (lastFocus && typeof lastFocus.focus === 'function') {
+            lastFocus.focus();
+        }
+        lastFocus = null;
+    };
+
+    const next = () => {
+        if (items.length < 2) return;
+        index = (index + 1) % items.length;
+        render();
+    };
+
+    const prev = () => {
+        if (items.length < 2) return;
+        index = (index - 1 + items.length) % items.length;
+        render();
+    };
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target instanceof Element ? event.target.closest('[data-lightbox-trigger]') : null;
+        if (!(trigger instanceof HTMLElement)) {
+            return;
+        }
+        event.preventDefault();
+        const gallery = trigger.getAttribute('data-lightbox-trigger') || '';
+        const src = trigger.getAttribute('data-lightbox-src') || '';
+        if (gallery && src) {
+            open(gallery, src);
+        }
+    });
+
+    if (closeBtn instanceof HTMLElement) {
+        closeBtn.addEventListener('click', close);
+    }
+    if (nextBtn instanceof HTMLElement) {
+        nextBtn.addEventListener('click', next);
+    }
+    if (prevBtn instanceof HTMLElement) {
+        prevBtn.addEventListener('click', prev);
+    }
+
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            close();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (overlay.classList.contains('hidden')) {
+            return;
+        }
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close();
+        } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            next();
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            prev();
+        }
+    });
+
+    overlay.addEventListener('touchstart', (event) => {
+        if (event.touches.length !== 1) {
+            touchActive = false;
+            return;
+        }
+        touchActive = true;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }, { passive: true });
+
+    overlay.addEventListener('touchend', (event) => {
+        if (!touchActive) {
+            return;
+        }
+        touchActive = false;
+        const touch = event.changedTouches[0];
+        if (!touch) return;
+        const dx = touch.clientX - touchStartX;
+        const dy = touch.clientY - touchStartY;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx < 0) {
+                next();
+            } else {
+                prev();
+            }
+        } else if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+            close();
+        }
+    });
+}
+
+function cssEscape(value) {
+    if (typeof window.CSS !== 'undefined' && typeof window.CSS.escape === 'function') {
+        return window.CSS.escape(value);
+    }
+    return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
 }
 
 function setupCardDecks(root = document) {

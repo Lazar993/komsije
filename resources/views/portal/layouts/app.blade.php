@@ -158,5 +158,46 @@
                 </div>
             </nav>
         </div>
+
+        <div
+            data-lightbox
+            class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/90 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="{{ __('Image preview') }}"
+        >
+            <button
+                type="button"
+                data-lightbox-close
+                class="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                style="top: calc(env(safe-area-inset-top, 0px) + 1rem);"
+                aria-label="{{ __('Close') }}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            <button
+                type="button"
+                data-lightbox-prev
+                class="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/10 p-3 text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="{{ __('Previous image') }}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <button
+                type="button"
+                data-lightbox-next
+                class="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/10 p-3 text-white backdrop-blur transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                aria-label="{{ __('Next image') }}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            <figure class="flex max-h-full max-w-full flex-col items-center justify-center gap-3">
+                <img data-lightbox-image src="" alt="" class="max-h-[85vh] max-w-full select-none object-contain">
+                <figcaption data-lightbox-caption class="max-w-full truncate text-center text-sm text-white/80"></figcaption>
+            </figure>
+        </div>
     </body>
 </html>

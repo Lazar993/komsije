@@ -80,17 +80,49 @@
 
             <div class="mt-8">
                 <h2 class="text-lg font-semibold text-slate-950">{{ __('Attachments') }}</h2>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    @if (! $canSeeIdentity)
-                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500 sm:col-span-2">{{ __('Attachments are visible to the reporter and building managers only.') }}</p>
-                    @else
-                        @forelse ($ticket->attachments as $attachment)
-                            <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" class="break-all rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
-                        @empty
+                @if (! $canSeeIdentity)
+                    <div class="mt-4">
+                        <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('Attachments are visible to the reporter and building managers only.') }}</p>
+                    </div>
+                @else
+                    @php
+                        $ticketGalleryId = 'ticket-' . $ticket->getKey() . '-attachments';
+                        $imageAttachments = $ticket->attachments->filter(fn ($a) => str_starts_with((string) ($a->mime_type ?? ''), 'image/'))->values();
+                        $otherAttachments = $ticket->attachments->reject(fn ($a) => str_starts_with((string) ($a->mime_type ?? ''), 'image/'))->values();
+                    @endphp
+
+                    @if ($ticket->attachments->isEmpty())
+                        <div class="mt-4">
                             <p class="rounded-3xl border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">{{ __('No images uploaded for this ticket.') }}</p>
-                        @endforelse
+                        </div>
+                    @else
+                        @if ($imageAttachments->isNotEmpty())
+                            <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3" data-lightbox-gallery="{{ $ticketGalleryId }}">
+                                @foreach ($imageAttachments as $attachment)
+                                    @php $url = asset('storage/' . $attachment->path); @endphp
+                                    <button
+                                        type="button"
+                                        class="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                                        data-lightbox-trigger="{{ $ticketGalleryId }}"
+                                        data-lightbox-src="{{ $url }}"
+                                        data-lightbox-alt="{{ $attachment->original_name }}"
+                                        aria-label="{{ __('Open image :name', ['name' => $attachment->original_name]) }}"
+                                    >
+                                        <img src="{{ $url }}" alt="{{ $attachment->original_name }}" loading="lazy" class="h-full w-full object-cover transition group-hover:scale-[1.02]">
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @if ($otherAttachments->isNotEmpty())
+                            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                                @foreach ($otherAttachments as $attachment)
+                                    <a href="{{ asset('storage/' . $attachment->path) }}" target="_blank" rel="noopener" class="break-all rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 transition hover:border-slate-950 hover:text-slate-950">{{ $attachment->original_name }}</a>
+                                @endforeach
+                            </div>
+                        @endif
                     @endif
-                </div>
+                @endif
             </div>
         </article>
 
