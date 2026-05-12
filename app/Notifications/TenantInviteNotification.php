@@ -42,7 +42,7 @@ final class TenantInviteNotification extends Notification implements ShouldQueue
                 BuildingRole::Tenant => __('Stan: :apartment', ['apartment' => $this->invite->apartment?->number ?? __('N/A')]),
                 BuildingRole::PropertyManager => __('Uloga: Administrator zgrade'),
             })
-            ->line(__('Ovaj link važi do :date i može se iskoristiti samo jednom.', ['date' => $this->invite->expires_at?->format('d.m.Y H:i')]))
+            ->line(__('Ovaj link važi do :date i može se iskoristiti samo jednom.', ['date' => $this->invite->expires_at?->format('d.m.Y. H:i')]))
             ->action(__('Prihvati poziv'), route('invite.show', $this->invite->token))
             ->line(__('Ako ne očekujete ovaj poziv, slobodno ignorišite ovu poruku.'));
     }
