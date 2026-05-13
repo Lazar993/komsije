@@ -15,9 +15,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Illuminate\View\View;
 
 final class AnnouncementController extends PortalController
 {
@@ -187,8 +188,15 @@ final class AnnouncementController extends PortalController
 
         abort_unless($disk->exists($attachment->path), 404);
 
-        $disposition = $request->query('download') === '1' ? 'attachment' : 'inline';
-        $contentDisposition = HeaderUtils::makeDisposition($disposition, $attachment->original_name);
+        $downloadName = $this->downloadNameFor($attachment);
+        $disposition = $request->query('download') === '1' || ! $this->supportsInlinePreview($attachment)
+            ? 'attachment'
+            : 'inline';
+        $contentDisposition = HeaderUtils::makeDisposition(
+            $disposition,
+            $downloadName,
+            $this->asciiFallbackFilenameFor($downloadName),
+        );
 
         return response()->stream(function () use ($disk, $attachment): void {
             $stream = $disk->readStream($attachment->path);
@@ -208,5 +216,39 @@ final class AnnouncementController extends PortalController
             'Content-Disposition' => $contentDisposition,
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function supportsInlinePreview(AnnouncementAttachment $attachment): bool
+    {
+        return strtolower((string) $attachment->mime_type) === 'application/pdf';
+    }
+
+    private function downloadNameFor(AnnouncementAttachment $attachment): string
+    {
+        $name = trim(str_replace(['/', '\\'], '-', (string) $attachment->original_name));
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        $extension = pathinfo((string) $attachment->path, PATHINFO_EXTENSION);
+
+        return $extension !== '' ? "attachment.{$extension}" : 'attachment';
+    }
+
+    private function asciiFallbackFilenameFor(string $downloadName): string
+    {
+        $fallback = Str::ascii($downloadName);
+        $fallback = str_replace('%', '-', $fallback);
+        $fallback = preg_replace('/[^\x20-\x7E]/', '', $fallback) ?? '';
+        $fallback = trim($fallback);
+
+        if ($fallback !== '') {
+            return $fallback;
+        }
+
+        $extension = pathinfo($downloadName, PATHINFO_EXTENSION);
+
+        return $extension !== '' ? "attachment.{$extension}" : 'attachment';
     }
 }

@@ -74,6 +74,7 @@
                                         </button>
                                     @endif
                                     <a href="{{ $previewUrl }}?download=1"
+                                                    download="{{ $attachment->original_name }}"
                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
                                         {{ __('Preuzmi') }}
                                     </a>

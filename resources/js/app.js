@@ -288,6 +288,7 @@ function setupPdfPreview(root = document) {
         if (downloadLink instanceof HTMLAnchorElement) {
             const sep = src.includes('?') ? '&' : '?';
             downloadLink.href = `${src}${sep}download=1`;
+            downloadLink.download = name || '';
             downloadLink.classList.remove('hidden');
             downloadLink.classList.add('inline-flex');
         }
