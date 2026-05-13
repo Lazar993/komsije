@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications\Channels;
 
 use App\Models\DeviceToken;
+use App\Support\NotificationLaunchUrl;
 use App\Services\PushNotifications\FcmService;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +37,7 @@ final class FcmChannel
 
         $title = (string) ($payload['title'] ?? config('app.name'));
         $body = (string) ($payload['body'] ?? '');
-        $data = (array) ($payload['data'] ?? []);
+        $data = NotificationLaunchUrl::wrap((array) ($payload['data'] ?? []));
 
         if ($body === '') {
             return;

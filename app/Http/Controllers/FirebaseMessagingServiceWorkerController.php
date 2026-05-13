@@ -74,17 +74,20 @@ final class FirebaseMessagingServiceWorkerController extends Controller
 
             self.addEventListener('notificationclick', (event) => {
                 event.notification.close();
-                const url = event.notification.data?.url || '/';
+                const launchUrl = event.notification.data?.url || '/';
+                const targetUrl = event.notification.data?.target_url || launchUrl;
 
                 event.waitUntil(
                     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+                        const wantedUrl = new URL(targetUrl, self.location.origin);
+
                         for (const client of clients) {
                             if ('focus' in client) {
-                                client.navigate(url).catch(() => {});
+                                client.navigate(wantedUrl.toString()).catch(() => {});
                                 return client.focus();
                             }
                         }
-                        return self.clients.openWindow(url);
+                        return self.clients.openWindow(launchUrl);
                     })
                 );
             });

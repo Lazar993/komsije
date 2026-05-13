@@ -82,13 +82,15 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const targetUrl = event.notification.data?.url || '/';
+    const launchUrl = event.notification.data?.url || '/';
+    const targetUrl = event.notification.data?.target_url || launchUrl;
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+            const wantedUrl = new URL(targetUrl, self.location.origin);
+
             for (const client of clientList) {
                 const clientUrl = new URL(client.url);
-                const wantedUrl = new URL(targetUrl, self.location.origin);
 
                 if (clientUrl.origin === wantedUrl.origin && 'focus' in client) {
                     client.navigate(wantedUrl.toString()).catch(() => { });
@@ -96,7 +98,7 @@ self.addEventListener('notificationclick', (event) => {
                 }
             }
 
-            return self.clients.openWindow(targetUrl);
+            return self.clients.openWindow(launchUrl);
         })
     );
 });
