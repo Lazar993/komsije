@@ -60,6 +60,29 @@ final class PortalAnnouncementAttachmentDownloadTest extends TestCase
         $this->assertStringContainsString('filename*=', (string) $response->headers->get('Content-Disposition'));
     }
 
+    public function test_non_pdf_attachment_link_renders_download_url_in_portal_view(): void
+    {
+        Storage::fake('local');
+
+        [$user, $building] = $this->createManagerAndBuilding();
+        $announcement = Announcement::factory()->create([
+            'building_id' => $building->getKey(),
+            'author_id' => $user->getKey(),
+            'published_at' => now(),
+        ]);
+
+        $attachment = $this->createAttachment($announcement, 'zapisnik.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        $downloadUrl = route('portal.announcements.attachments.download', [$announcement, $attachment]) . '?download=1';
+
+        $response = $this->actingAs($user)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->get(route('portal.announcements.show', $announcement));
+
+        $response->assertOk();
+        $response->assertSee($downloadUrl, false);
+        $response->assertSee('data-portal-download', false);
+    }
+
     /**
      * @return array{0: User, 1: Building}
      */

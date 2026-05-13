@@ -73,10 +73,21 @@
             <p class="mb-2 block text-sm font-medium text-slate-700">{{ __('Postojeći prilozi') }}</p>
             <ul class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-[var(--komsije-border)] bg-white">
                 @foreach ($existingAttachments as $attachment)
+                    @php
+                        $isPdf = ($attachment->mime_type ?? '') === 'application/pdf';
+                        $previewUrl = route('portal.announcements.attachments.download', [$announcement, $attachment]);
+                        $downloadUrl = $previewUrl . '?download=1';
+                    @endphp
                     <li class="flex flex-col items-start gap-2 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                        <a href="{{ route('portal.announcements.attachments.download', [$announcement, $attachment]) }}"
-                           target="_blank"
-                           rel="noopener"
+                        <a href="{{ $isPdf ? $previewUrl : $downloadUrl }}"
+                           @if ($isPdf)
+                               target="_blank"
+                               rel="noopener"
+                           @else
+                               data-portal-download
+                               data-portal-download-name="{{ $attachment->original_name }}"
+                               download="{{ $attachment->original_name }}"
+                           @endif
                            class="inline-flex min-w-0 w-full items-center gap-2 font-medium text-slate-700 hover:text-[var(--komsije-primary)] sm:flex-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0">
                                 <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />

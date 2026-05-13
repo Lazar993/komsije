@@ -44,15 +44,22 @@
                             @php
                                 $isPdf = ($attachment->mime_type ?? '') === 'application/pdf';
                                 $previewUrl = route('portal.announcements.attachments.download', [$announcement, $attachment]);
+                                $downloadUrl = $previewUrl . '?download=1';
                             @endphp
                             <li class="flex flex-col items-start gap-2 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                                <a href="{{ $previewUrl }}"
-                                   target="_blank"
-                                   rel="noopener"
+                                <a href="{{ $isPdf ? $previewUrl : $downloadUrl }}"
+                                   @if ($isPdf)
+                                       target="_blank"
+                                       rel="noopener"
+                                   @endif
                                    @if ($isPdf)
                                        data-pdf-preview-trigger
                                        data-pdf-preview-src="{{ $previewUrl }}"
                                        data-pdf-preview-name="{{ $attachment->original_name }}"
+                                   @else
+                                       data-portal-download
+                                       data-portal-download-name="{{ $attachment->original_name }}"
+                                       download="{{ $attachment->original_name }}"
                                    @endif
                                    class="inline-flex min-w-0 w-full items-center gap-3 text-sm font-medium text-slate-700 transition hover:text-[var(--komsije-primary)] sm:flex-1">
                                     <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
@@ -73,7 +80,9 @@
                                             {{ __('Pregled') }}
                                         </button>
                                     @endif
-                                    <a href="{{ $previewUrl }}?download=1"
+                                                <a href="{{ $downloadUrl }}"
+                                                    data-portal-download
+                                                    data-portal-download-name="{{ $attachment->original_name }}"
                                                     download="{{ $attachment->original_name }}"
                                        class="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--komsije-primary)] hover:underline">
                                         {{ __('Preuzmi') }}

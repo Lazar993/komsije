@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAnnouncementPagination();
     setupCardDecks();
     setupLightbox();
+    setupPortalDownloads();
     setupPdfPreview();
     setupInstallPrompt();
     setupPushSettings();
@@ -260,6 +261,47 @@ function cssEscape(value) {
     return String(value).replace(/[^a-zA-Z0-9_-]/g, '\\$&');
 }
 
+function setupPortalDownloads(root = document) {
+    const scope = root instanceof Document ? root.body : root;
+
+    if (!(scope instanceof HTMLElement) || scope.dataset.portalDownloadsReady === 'true') {
+        return;
+    }
+    scope.dataset.portalDownloadsReady = 'true';
+
+    document.addEventListener('click', (event) => {
+        const trigger = event.target instanceof Element ? event.target.closest('[data-portal-download]') : null;
+        if (!(trigger instanceof HTMLAnchorElement) || !trigger.href) {
+            return;
+        }
+
+        if (event.metaKey || event.ctrlKey || event.shiftKey || (event instanceof MouseEvent && event.button !== 0)) {
+            return;
+        }
+
+        event.preventDefault();
+        startPortalDownload(trigger.href);
+    });
+}
+
+function startPortalDownload(url) {
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    frame.style.position = 'absolute';
+    frame.style.width = '0';
+    frame.style.height = '0';
+    frame.style.border = '0';
+    frame.style.opacity = '0';
+    frame.src = url;
+
+    document.body.appendChild(frame);
+
+    window.setTimeout(() => {
+        frame.remove();
+    }, 60000);
+}
+
 function setupPdfPreview(root = document) {
     const overlay = root.querySelector('[data-pdf-preview]');
     if (!(overlay instanceof HTMLElement) || overlay.dataset.pdfPreviewReady === 'true') {
@@ -289,6 +331,7 @@ function setupPdfPreview(root = document) {
             const sep = src.includes('?') ? '&' : '?';
             downloadLink.href = `${src}${sep}download=1`;
             downloadLink.download = name || '';
+            downloadLink.dataset.portalDownloadName = name || '';
             downloadLink.classList.remove('hidden');
             downloadLink.classList.add('inline-flex');
         }
