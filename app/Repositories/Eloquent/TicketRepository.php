@@ -35,15 +35,8 @@ final class TicketRepository implements TicketRepositoryInterface
             ->when($filters['assigned_to'] ?? null, fn (Builder $query, int $assigneeId): Builder => $query->where('assigned_to', $assigneeId))
             ->when(
                 ! $user->isBuildingAdmin($buildingId),
-                // Tenants see: tickets they reported, tickets in their apartment, or tickets
-                // where they are assigned. Public tickets are surfaced separately via
-                // paginatePublicForBuilding() so the "My tickets" tab stays personal.
-                fn (Builder $query): Builder => $query->where(
-                    fn (Builder $scopedQuery): Builder => $scopedQuery
-                        ->where('reported_by', $user->getKey())
-                        ->orWhere('assigned_to', $user->getKey())
-                        ->orWhereHas('apartment.tenants', fn (Builder $q): Builder => $q->whereKey($user->getKey())),
-                ),
+                // Tenant "My tickets" must remain reporter-owned only.
+                fn (Builder $query): Builder => $query->where('reported_by', $user->getKey()),
             )
             ->latest()
             ->paginate($perPage);

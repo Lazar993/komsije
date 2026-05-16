@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\BuildingRole;
+use App\Enums\TicketVisibility;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\Ticket;
@@ -234,5 +235,49 @@ class PortalAccessTest extends TestCase
         ]);
 
         $this->assertStringContainsString('Fresh message from tenant.', $response->json('html'));
+    }
+
+    public function test_tenant_default_ticket_listing_shows_only_tickets_reported_by_them(): void
+    {
+        $tenant = User::factory()->create();
+        $otherTenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($otherTenant, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach([$tenant->getKey(), $otherTenant->getKey()]);
+
+        Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $tenant->getKey(),
+            'title' => 'My own ticket',
+        ]);
+
+        Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $otherTenant->getKey(),
+            'title' => 'Other tenant private ticket',
+            'visibility' => TicketVisibility::Private,
+        ]);
+
+        Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $otherTenant->getKey(),
+            'title' => 'Other tenant public ticket',
+            'visibility' => TicketVisibility::Public,
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->get(route('portal.tickets.index'));
+
+        $response->assertOk();
+        $response->assertSee('My own ticket');
+        $response->assertDontSee('Other tenant private ticket');
+        $response->assertDontSee('Other tenant public ticket');
     }
 }
