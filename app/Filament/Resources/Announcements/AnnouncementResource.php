@@ -99,6 +99,9 @@ class AnnouncementResource extends Resource
     {
         return $schema->components([
             TextEntry::make('building.name'),
+            TextEntry::make('author.name')
+                ->label('Created by')
+                ->placeholder('—'),
             TextEntry::make('title'),
             TextEntry::make('content'),
             IconEntry::make('is_important')
@@ -128,10 +131,14 @@ class AnnouncementResource extends Resource
     {
         return $table
             ->recordTitleAttribute('title')
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('building')->withCount('reads'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['building', 'author'])->withCount('reads'))
             ->columns([
                 TextColumn::make('building.name')
                     ->sortable(),
+                TextColumn::make('author.name')
+                    ->label('Created by')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('title')
                     ->searchable(),
                 IconColumn::make('is_important')
