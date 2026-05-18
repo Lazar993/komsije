@@ -44,8 +44,6 @@
                     </div>
                 </section>
             </div>
-
-            @include('partials.install-prompt')
         </div>
     </body>
 </html>

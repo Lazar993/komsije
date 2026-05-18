@@ -135,8 +135,6 @@
                         </section>
                     </div>
                 </main>
-
-                @include('partials.install-prompt')
             </div>
         </div>
     </body>
