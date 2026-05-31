@@ -103,9 +103,14 @@
 
             <article class="komsije-surface min-w-0 overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Kvarovi') }}</p>
-                        <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Nedavne prijave') }}</h2>
+                    <div class="flex min-w-0 items-start gap-3">
+                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                            <x-portal.app-icon name="tickets" class="h-6 w-6" />
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-amber-600">{{ __('Kvarovi') }}</p>
+                            <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Nedavne prijave') }}</h2>
+                        </div>
                     </div>
                     <a href="{{ route('portal.tickets.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
@@ -124,9 +129,14 @@
 
             <article class="komsije-surface min-w-0 overflow-hidden rounded-[2rem] p-6 sm:p-7">
                 <div class="flex items-center justify-between gap-4">
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Obaveštenja') }}</p>
-                        <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Najnovije objave') }}</h2>
+                    <div class="flex min-w-0 items-start gap-3">
+                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-[var(--komsije-primary)]">
+                            <x-portal.app-icon name="announcements" class="h-6 w-6" />
+                        </span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Obaveštenja') }}</p>
+                            <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Najnovije objave') }}</h2>
+                        </div>
                     </div>
                     <a href="{{ route('portal.announcements.index') }}" class="shrink-0 text-sm font-medium text-slate-500 transition hover:text-[var(--komsije-primary)]">{{ __('Pogledaj sve') }}</a>
                 </div>
