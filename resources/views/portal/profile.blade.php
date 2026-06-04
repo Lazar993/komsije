@@ -67,7 +67,7 @@
                     <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Aktivnost') }}</p>
                     <h2 class="mt-2 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Brzi pregled') }}</h2>
                 </div>
-                <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-[var(--komsije-primary)]">{{ now()->translatedFormat('d M') }}</span>
+                <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-[var(--komsije-primary)]">{{ now()->translatedFormat('d. M') }}</span>
             </div>
 
             <div class="mt-5 space-y-3">
