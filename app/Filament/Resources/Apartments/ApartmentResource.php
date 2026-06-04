@@ -63,12 +63,12 @@ class ApartmentResource extends Resource
                 // Toggle::make('available_for_marketplace'),
                 // TextInput::make('marketplace_listing_reference')
                 //     ->maxLength(255),
-                Select::make('tenant_ids')
-                    ->label('Tenants')
-                    ->multiple()
-                    ->preload()
-                    ->searchable()
-                    ->options(fn (Get $get): array => self::tenantOptionsForBuilding($get('building_id'))),
+                // Select::make('tenant_ids')
+                //     ->label('Tenants')
+                //     ->multiple()
+                //     ->preload()
+                //     ->searchable()
+                //     ->options(fn (Get $get): array => self::tenantOptionsForBuilding($get('building_id'))),
             ]),
         ]);
     }
