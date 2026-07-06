@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\TicketStatus;
+use App\Enums\TicketVisibility;
 use App\Models\Building;
 use App\Models\Ticket;
 use App\Models\User;
@@ -102,7 +103,9 @@ final class DashboardService
 
         // Fetch all relevant tickets in a single query, then group in PHP.
         // The result is cached at the caller level, so this runs at most once per cache miss.
-        $allTickets = $this->ticketQuery($buildingIds, $includeAllTickets, $user)
+        // Tenants also see public building tickets here (in addition to their own),
+        // so the widget mirrors the shared issue board rather than only personal tickets.
+        $allTickets = $this->ticketQuery($buildingIds, $includeAllTickets, $user, includePublic: true)
             ->with(['reporter:id,name', 'assignee:id,name', 'apartment:id,building_id,number'])
             ->latest()
             ->get();
@@ -137,15 +140,19 @@ final class DashboardService
     /**
      * @param list<int> $buildingIds
      */
-    private function ticketQuery(array $buildingIds, bool $includeAllTickets, User $user): Builder
+    private function ticketQuery(array $buildingIds, bool $includeAllTickets, User $user, bool $includePublic = false): Builder
     {
         return Ticket::query()
             ->whereIn('building_id', $buildingIds)
-            ->when(! $includeAllTickets, function (Builder $query) use ($user): Builder {
-                return $query->where(function (Builder $scopedQuery) use ($user): void {
+            ->when(! $includeAllTickets, function (Builder $query) use ($user, $includePublic): Builder {
+                return $query->where(function (Builder $scopedQuery) use ($user, $includePublic): void {
                     $scopedQuery
                         ->where('reported_by', $user->getKey())
                         ->orWhereHas('apartment.tenants', fn (Builder $tenantQuery): Builder => $tenantQuery->whereKey($user->getKey()));
+
+                    if ($includePublic) {
+                        $scopedQuery->orWhere('visibility', TicketVisibility::Public->value);
+                    }
                 });
             });
     }

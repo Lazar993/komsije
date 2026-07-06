@@ -8,6 +8,7 @@ use App\Enums\BuildingRole;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\User;
+use App\Notifications\PublicTicketCreatedNotification;
 use App\Notifications\TicketCreatedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -47,5 +48,63 @@ class TicketApiTest extends TestCase
         ]);
 
         Notification::assertSentTo($manager, TicketCreatedNotification::class);
+    }
+
+    public function test_public_ticket_notifies_all_building_tenants_except_reporter(): void
+    {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $reporter = User::factory()->create();
+        $otherTenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+        $building->users()->attach($reporter, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($otherTenant, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach($reporter);
+
+        Sanctum::actingAs($reporter);
+
+        $this->postJson('/api/tickets', [
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'title' => 'Elevator is broken',
+            'description' => 'The elevator has been stuck since the morning.',
+            'priority' => 'high',
+            'visibility' => 'public',
+        ])->assertCreated();
+
+        Notification::assertSentTo($otherTenant, PublicTicketCreatedNotification::class);
+        Notification::assertNotSentTo($reporter, PublicTicketCreatedNotification::class);
+        Notification::assertSentTo($manager, TicketCreatedNotification::class);
+    }
+
+    public function test_private_ticket_does_not_notify_other_tenants(): void
+    {
+        Notification::fake();
+
+        $reporter = User::factory()->create();
+        $otherTenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($reporter, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($otherTenant, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach($reporter);
+
+        Sanctum::actingAs($reporter);
+
+        $this->postJson('/api/tickets', [
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'title' => 'Leaking sink in my kitchen',
+            'description' => 'Water is dripping under the kitchen sink.',
+            'priority' => 'medium',
+            'visibility' => 'private',
+        ])->assertCreated();
+
+        Notification::assertNotSentTo($otherTenant, PublicTicketCreatedNotification::class);
     }
 }

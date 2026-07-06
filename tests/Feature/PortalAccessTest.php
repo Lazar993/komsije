@@ -280,4 +280,68 @@ class PortalAccessTest extends TestCase
         $response->assertDontSee('Other tenant private ticket');
         $response->assertDontSee('Other tenant public ticket');
     }
+
+    public function test_public_ticket_reveals_reporter_identity_to_other_tenants(): void
+    {
+        $reporter = User::factory()->create(['name' => 'Reporting Resident']);
+        $viewer = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($reporter, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($viewer, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach($reporter);
+
+        $ticket = Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $reporter->getKey(),
+            'title' => 'Public roof leak',
+            'visibility' => TicketVisibility::Public,
+        ]);
+
+        $response = $this->actingAs($viewer)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->get(route('portal.tickets.show', $ticket));
+
+        $response->assertOk();
+        $response->assertSee('Reporting Resident');
+        $response->assertDontSee('Resident reported this issue');
+    }
+
+    public function test_tenant_dashboard_recent_tickets_include_public_building_tickets(): void
+    {
+        $tenant = User::factory()->create();
+        $otherTenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $building->users()->attach($otherTenant, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach($otherTenant);
+
+        Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $otherTenant->getKey(),
+            'title' => 'Public lobby issue',
+            'visibility' => TicketVisibility::Public,
+        ]);
+
+        Ticket::factory()->create([
+            'building_id' => $building->getKey(),
+            'apartment_id' => $apartment->getKey(),
+            'reported_by' => $otherTenant->getKey(),
+            'title' => 'Private neighbor issue',
+            'visibility' => TicketVisibility::Private,
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->get(route('portal.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('Public lobby issue');
+        $response->assertDontSee('Private neighbor issue');
+    }
 }

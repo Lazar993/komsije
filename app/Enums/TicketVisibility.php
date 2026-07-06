@@ -21,7 +21,7 @@ enum TicketVisibility: string
     {
         return match ($this) {
             self::Private => __('Only you and the building manager can see this ticket.'),
-            self::Public => __('Visible to residents of your building without revealing your personal information.'),
+            self::Public => __('Visible to all residents of your building, including who reported it and the conversation.'),
         };
     }
 }

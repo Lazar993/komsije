@@ -96,31 +96,18 @@ class Ticket extends Model
 
     /**
      * Returns true when the given viewer is allowed to see the reporter's
-     * personal information (name, apartment number, attachments).
+     * personal information (name, apartment number, attachments) and the
+     * conversation.
+     *
+     * Both private and public tickets are now fully transparent to anyone who
+     * is allowed to view them: private tickets are only ever visible to the
+     * reporter, assignee and building managers, while public tickets are
+     * intentionally open to the whole building — including who reported them
+     * and their conversation with the manager.
      */
     public function viewerCanSeeIdentity(?User $viewer): bool
     {
-        if ($viewer === null) {
-            return false;
-        }
-
-        if ($this->isPrivate()) {
-            return true;
-        }
-
-        if ($viewer->isBuildingAdmin($this->building_id)) {
-            return true;
-        }
-
-        if ($this->reported_by === $viewer->getKey()) {
-            return true;
-        }
-
-        if ($this->assigned_to === $viewer->getKey()) {
-            return true;
-        }
-
-        return false;
+        return $viewer !== null;
     }
 
     /**

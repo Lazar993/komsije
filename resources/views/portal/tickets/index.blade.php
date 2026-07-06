@@ -32,9 +32,9 @@
                    class="rounded-xl px-4 py-2 font-medium transition {{ $activeTab === 'public' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
                    role="tab" aria-selected="{{ $activeTab === 'public' ? 'true' : 'false' }}">{{ __('Public building issues') }}</a>
             </div>
-            @if ($activeTab === 'public')
+            {{-- @if ($activeTab === 'public')
                 <p class="mt-3 max-w-2xl text-xs leading-5 text-slate-500">{{ __('Public issues are visible to all residents of this building. Reporters are anonymized.') }}</p>
-            @endif
+            @endif --}}
         @endunless
 
         <form method="GET" action="{{ route('portal.tickets.index') }}" class="mt-6 grid gap-4 rounded-[1.5rem] border border-[var(--komsije-border)] bg-slate-50 p-5 lg:grid-cols-4" data-ticket-filters>
