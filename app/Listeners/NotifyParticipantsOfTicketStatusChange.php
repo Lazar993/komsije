@@ -5,27 +5,25 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\TicketStatusChanged;
+use App\Listeners\Concerns\NotifiesTicketAudience;
 use App\Notifications\TicketStatusChangedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
 
 final class NotifyParticipantsOfTicketStatusChange implements ShouldQueue
 {
     use InteractsWithQueue;
+    use NotifiesTicketAudience;
 
     public function handle(TicketStatusChanged $event): void
     {
-        $ticket = $event->ticket->loadMissing('reporter', 'assignee', 'affectedUsers');
+        $ticket = $event->ticket->loadMissing('reporter', 'assignee');
 
-        // Participants always notified. For public tickets, also include the
-        // affected residents who opted in via "I have this issue too".
-        $recipients = Collection::make([$ticket->reporter, $ticket->assignee])
-            ->merge($ticket->isPublic() ? $ticket->affectedUsers : [])
-            ->filter()
-            ->unique('id')
-            ->reject(fn ($user): bool => $user->is($event->actor));
+        // Participants (reporter + assignee) are always notified. Public tickets
+        // are broadcast to every resident of the building so the whole building
+        // is kept informed of any change.
+        $recipients = $this->ticketChangeRecipients($ticket, $event->actor, [$ticket->reporter, $ticket->assignee]);
 
         if ($recipients->isEmpty()) {
             return;

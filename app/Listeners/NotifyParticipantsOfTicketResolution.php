@@ -5,25 +5,24 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\TicketResolved;
+use App\Listeners\Concerns\NotifiesTicketAudience;
 use App\Notifications\TicketResolvedNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Notification;
 
 final class NotifyParticipantsOfTicketResolution implements ShouldQueue
 {
     use InteractsWithQueue;
+    use NotifiesTicketAudience;
 
     public function handle(TicketResolved $event): void
     {
-        $ticket = $event->ticket->loadMissing('reporter', 'assignee', 'affectedUsers');
+        $ticket = $event->ticket->loadMissing('reporter', 'assignee');
 
-        $recipients = Collection::make([$ticket->reporter, $ticket->assignee])
-            ->merge($ticket->isPublic() ? $ticket->affectedUsers : [])
-            ->filter()
-            ->unique('id')
-            ->reject(fn ($user): bool => $user->is($event->actor));
+        // Participants (reporter + assignee) are always notified. Public tickets
+        // are broadcast to every resident of the building.
+        $recipients = $this->ticketChangeRecipients($ticket, $event->actor, [$ticket->reporter, $ticket->assignee]);
 
         if ($recipients->isEmpty()) {
             return;
