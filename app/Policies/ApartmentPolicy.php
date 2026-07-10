@@ -8,9 +8,12 @@ use App\Enums\BuildingRole;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\User;
+use App\Policies\Concerns\ChecksBuildingStatus;
 
 final class ApartmentPolicy
 {
+    use ChecksBuildingStatus;
+
     public function viewAny(User $user): bool
     {
         return $user->buildings()->exists() || $user->is_super_admin;
@@ -23,6 +26,10 @@ final class ApartmentPolicy
 
     public function create(User $user, ?Building $building = null): bool
     {
+        if (! $this->buildingAllowsWrites($building)) {
+            return false;
+        }
+
         if ($building === null) {
             return $user->isBuildingAdmin();
         }
@@ -32,6 +39,15 @@ final class ApartmentPolicy
 
     public function update(User $user, Apartment $apartment): bool
     {
+        if (! $this->buildingAllowsWrites($apartment->building)) {
+            return false;
+        }
+
         return $user->isBuildingAdmin($apartment->building_id);
+    }
+
+    public function delete(User $user, Apartment $apartment): bool
+    {
+        return $this->update($user, $apartment);
     }
 }

@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\DB;
 
 final class BuildingService
 {
-    public function __construct(private readonly BuildingRepositoryInterface $buildings)
-    {
+    public function __construct(
+        private readonly BuildingRepositoryInterface $buildings,
+        private readonly BuildingLifecycleService $lifecycle,
+    ) {
     }
 
     /**
@@ -68,10 +70,19 @@ final class BuildingService
                 'address' => $data['address'],
                 'billing_customer_reference' => $data['billing_customer_reference'] ?? null,
                 'created_by' => $actor->getKey(),
+                'created_by_super_admin' => $actor->isSuperAdmin(),
                 'name' => $data['name'],
             ]);
 
             $this->syncManagers($building, array_values(array_unique($managerIds)));
+
+            // The model boot hook seeds the 30-day trial window; record the
+            // lifecycle audit trail (Created + TrialStarted) for the dashboard.
+            $this->lifecycle->log($building, \App\Enums\BuildingAuditAction::Created, $actor);
+            $this->lifecycle->log($building, \App\Enums\BuildingAuditAction::TrialStarted, $actor, [
+                'trial_ends_at' => $building->trial_ends_at?->toIso8601String(),
+            ]);
+
             Cache::forget(CacheKey::building((int) $building->getKey()));
 
             return $building->load('managers')->loadCount(['apartments', 'tickets', 'announcements']);

@@ -10,6 +10,7 @@ use App\Filament\Resources\Apartments\Pages\ListApartments;
 use App\Filament\Resources\Apartments\Pages\ViewApartment;
 use App\Models\Apartment;
 use App\Models\Building;
+use App\Rules\BuildingAcceptsWrites;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -54,7 +55,8 @@ class ApartmentResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn (): array => self::accessibleBuildingOptions()),
+                    ->rules([new BuildingAcceptsWrites()])
+                    ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 TextInput::make('number')
                     ->required()
                     ->maxLength(50),

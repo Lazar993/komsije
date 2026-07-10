@@ -10,9 +10,27 @@
             <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">{{ __('Add the user to at least one building from the admin area, then return to the portal. The same account can belong to multiple buildings and switch between them here.') }}</p>
         </section>
     @else
+        @unless ($currentBuilding->allowsWrites())
+            <section class="rounded-[2rem] border border-amber-300/70 bg-amber-50 p-6 sm:p-7" role="alert">
+                <div class="flex items-start gap-4">
+                    <span class="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                        <x-portal.app-icon name="announcements" class="h-5 w-5" />
+                    </span>
+                    <div class="space-y-1">
+                        <h2 class="text-lg font-semibold text-amber-900">
+                            {{ $currentBuilding->isArchived() ? __('This building has been archived.') : __('Your trial period has ended.') }}
+                        </h2>
+                        <p class="text-sm leading-6 text-amber-800">
+                            {{ __('Please contact T&B Solutions to continue using Komšije. You can still review your history, but creating new tickets, announcements, polls and comments is paused.') }}
+                        </p>
+                    </div>
+                </div>
+            </section>
+        @endunless
+
         @include('partials.push-settings', ['variant' => 'banner'])
 
-        <section class="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_24rem]">
+        <section class="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_24rem] mt-6">
             <article class="min-w-0 overflow-hidden rounded-[2rem] bg-[var(--komsije-dark)] px-6 py-7 text-white shadow-[0_28px_80px_-32px_rgba(15,23,42,0.85)] sm:px-8 sm:py-8">
                 <div class="flex flex-col gap-6">
                     <div class="space-y-3">

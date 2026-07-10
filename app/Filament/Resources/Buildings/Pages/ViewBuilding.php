@@ -88,6 +88,7 @@ class ViewBuilding extends ViewRecord
                         ->send();
                 }),
             EditAction::make(),
+            ...BuildingResource::lifecycleActions(),
         ];
     }
 }

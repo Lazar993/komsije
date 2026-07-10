@@ -10,6 +10,7 @@ use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
 use App\Filament\Resources\Announcements\Pages\ViewAnnouncement;
 use App\Models\Announcement;
 use App\Models\Building;
+use App\Rules\BuildingAcceptsWrites;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -54,7 +55,8 @@ class AnnouncementResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn (): array => self::accessibleBuildingOptions()),
+                    ->rules([new BuildingAcceptsWrites()])
+                    ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 Textarea::make('title')
                     ->required()
                     ->rows(2)

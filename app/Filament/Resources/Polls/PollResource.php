@@ -10,6 +10,7 @@ use App\Filament\Resources\Polls\Pages\ListPolls;
 use App\Filament\Resources\Polls\Pages\ViewPoll;
 use App\Models\Building;
 use App\Models\Poll;
+use App\Rules\BuildingAcceptsWrites;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -54,7 +55,8 @@ class PollResource extends Resource
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->options(fn (): array => self::accessibleBuildingOptions()),
+                    ->rules([new BuildingAcceptsWrites()])
+                    ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255),

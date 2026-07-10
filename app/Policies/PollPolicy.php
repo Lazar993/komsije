@@ -7,9 +7,12 @@ namespace App\Policies;
 use App\Models\Building;
 use App\Models\Poll;
 use App\Models\User;
+use App\Policies\Concerns\ChecksBuildingStatus;
 
 final class PollPolicy
 {
+    use ChecksBuildingStatus;
+
     public function viewAny(User $user): bool
     {
         return $user->isBuildingAdmin();
@@ -22,6 +25,10 @@ final class PollPolicy
 
     public function create(User $user, ?Building $building = null): bool
     {
+        if (! $this->buildingAllowsWrites($building)) {
+            return false;
+        }
+
         if ($building === null) {
             return $user->isBuildingAdmin();
         }
@@ -35,6 +42,10 @@ final class PollPolicy
 
     public function update(User $user, Poll $poll): bool
     {
+        if (! $this->buildingAllowsWrites($poll->building)) {
+            return false;
+        }
+
         return $user->isBuildingAdmin((int) $poll->building_id);
     }
 
@@ -45,6 +56,10 @@ final class PollPolicy
 
     public function vote(User $user, Poll $poll): bool
     {
+        if (! $this->buildingAllowsWrites($poll->building)) {
+            return false;
+        }
+
         return $user->belongsToBuilding((int) $poll->building_id);
     }
 }

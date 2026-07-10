@@ -14,6 +14,7 @@ use App\Filament\Resources\Tickets\Pages\ListTickets;
 use App\Filament\Resources\Tickets\Pages\ViewTicket;
 use App\Models\Apartment;
 use App\Models\Building;
+use App\Rules\BuildingAcceptsWrites;
 use App\Models\Ticket;
 use App\Models\User;
 use BackedEnum;
@@ -55,7 +56,8 @@ class TicketResource extends Resource
                     ->label('Building')
                     ->searchable()
                     ->preload()
-                    ->options(fn (): array => self::accessibleBuildingOptions())
+                    ->rules([new BuildingAcceptsWrites()])
+                    ->options(fn (): array => Building::writableSelectOptions(Auth::user()))
                     ->live(),
                 Select::make('apartment_id')
                     ->label('Apartment')

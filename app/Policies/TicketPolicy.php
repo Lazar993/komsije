@@ -9,9 +9,12 @@ use App\Enums\TicketStatus;
 use App\Models\Building;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Policies\Concerns\ChecksBuildingStatus;
 
 final class TicketPolicy
 {
+    use ChecksBuildingStatus;
+
     public function viewAny(User $user): bool
     {
         return $user->buildings()->exists() || $user->is_super_admin;
@@ -47,6 +50,10 @@ final class TicketPolicy
 
     public function create(User $user, ?Building $building = null): bool
     {
+        if (! $this->buildingAllowsWrites($building)) {
+            return false;
+        }
+
         if ($building === null) {
             return $user->isSuperAdmin() || $user->buildings()->exists();
         }
@@ -56,6 +63,10 @@ final class TicketPolicy
 
     public function update(User $user, Ticket $ticket): bool
     {
+        if (! $this->buildingAllowsWrites($ticket->building)) {
+            return false;
+        }
+
         if ($user->isBuildingAdmin($ticket->building_id)) {
             return true;
         }
@@ -65,6 +76,10 @@ final class TicketPolicy
 
     public function comment(User $user, Ticket $ticket): bool
     {
+        if (! $this->buildingAllowsWrites($ticket->building)) {
+            return false;
+        }
+
         // Anonymous public-visibility viewers (other tenants in the building who
         // are neither reporter, assignee, nor manager) can browse public tickets
         // but cannot post on them — comments are reserved for participants.
@@ -88,6 +103,10 @@ final class TicketPolicy
      */
     public function markAffected(User $user, Ticket $ticket): bool
     {
+        if (! $this->buildingAllowsWrites($ticket->building)) {
+            return false;
+        }
+
         if (! $ticket->isPublic()) {
             return false;
         }

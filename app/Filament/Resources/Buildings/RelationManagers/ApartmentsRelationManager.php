@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ApartmentsRelationManager extends RelationManager
 {
@@ -69,6 +70,7 @@ class ApartmentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->visible(fn (): bool => $this->getBuilding()->allowsWrites() || (Auth::user()?->isSuperAdmin() ?? false))
                     ->using(fn (array $data): Apartment => app(ApartmentService::class)->create($this->getBuilding(), $data)),
             ])
             ->recordActions([

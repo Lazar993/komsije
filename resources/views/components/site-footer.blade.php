@@ -51,7 +51,7 @@
         </div>
 
         <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-500 md:text-left">
-            &copy; {{ $year }} Komšije. {{ __('Sva prava zadržana.') }}
+            &copy; {{ $year }} T&B Solutions. {{ __('Sva prava zadržana.') }}
         </div>
     </div>
 </footer>

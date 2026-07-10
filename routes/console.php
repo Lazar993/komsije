@@ -23,3 +23,7 @@ Schedule::command('app:prune-old-content')
 Schedule::command('polls:send-reminders')
     ->hourly()
     ->withoutOverlapping();
+
+Schedule::command('buildings:process-trials')
+    ->dailyAt('07:00')
+    ->withoutOverlapping();

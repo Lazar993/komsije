@@ -8,9 +8,12 @@ use App\Enums\BuildingRole;
 use App\Models\Announcement;
 use App\Models\Building;
 use App\Models\User;
+use App\Policies\Concerns\ChecksBuildingStatus;
 
 final class AnnouncementPolicy
 {
+    use ChecksBuildingStatus;
+
     public function viewAny(User $user): bool
     {
         return $user->buildings()->exists() || $user->is_super_admin;
@@ -35,6 +38,10 @@ final class AnnouncementPolicy
 
     public function create(User $user, ?Building $building = null): bool
     {
+        if (! $this->buildingAllowsWrites($building)) {
+            return false;
+        }
+
         if ($building === null) {
             return $user->buildings()->exists();
         }
@@ -44,6 +51,10 @@ final class AnnouncementPolicy
 
     public function update(User $user, Announcement $announcement): bool
     {
+        if (! $this->buildingAllowsWrites($announcement->building)) {
+            return false;
+        }
+
         if ($user->isBuildingAdmin($announcement->building_id)) {
             return true;
         }
@@ -54,6 +65,10 @@ final class AnnouncementPolicy
 
     public function approve(User $user, Announcement $announcement): bool
     {
+        if (! $this->buildingAllowsWrites($announcement->building)) {
+            return false;
+        }
+
         return $user->isBuildingAdmin($announcement->building_id);
     }
 
