@@ -213,7 +213,7 @@
                     $steps = [
                         [__('Kontaktirajte nas'), __('Javite nam se i dogovorimo osnovne detalje o zgradi.')],
                         [__('Kreiramo vašu zgradu'), __('Postavljamo zgradu, stanove i vaš upravnički nalog.')],
-                        [__('Pozovite stanare'), __('Stanari dobijaju pozivnicu i pristupaju svojoj zgradi.')],
+                        [__('Pozovite stanare'), __('Stanari dobijaju pozivnicu ili QR kod za brzu prijavu i pristup svojoj zgradi.')],
                         [__('Koristite Komšije 30 dana'), __('Isprobajte sve funkcionalnosti u realnom radu.')],
                         [__('Odaberite da li nastavljate'), __('Bez pritiska odlučujete da li ostajete na platformi.')],
                     ];
@@ -342,7 +342,7 @@
 
             <div class="mt-8 sm:mt-10 divide-y divide-[var(--komsije-border)] overflow-hidden rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80">
                 @foreach ([
-                    [__('Kako se stanari pridružuju?'), __('Stanari dobijaju pozivnicu putem koje kreiraju nalog i odmah pristupaju svojoj zgradi. Nije potrebna nikakva tehnička priprema.')],
+                    [__('Kako se stanari pridružuju?'), __('Stanari se mogu prijaviti putem pozivnice ili skeniranjem QR koda i odmah pristupaju svojoj zgradi. Nije potrebna nikakva tehnička priprema.')],
                     [__('Da li radi na iPhone uređajima?'), __('Da. Komšije radi na iPhone uređajima kroz veb pregledač i može se dodati na početni ekran kao aplikacija.')],
                     [__('Da li radi na Android uređajima?'), __('Da. Na Android uređajima Komšije se instalira kao PWA aplikacija i podržava push notifikacije.')],
                     [__('Da li stanari plaćaju?'), __('Ne. Stanari ne plaćaju korišćenje platforme; ona je namenjena upravniku zgrade.')],
