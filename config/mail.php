@@ -122,4 +122,9 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    'join_komsije' => [
+        'address' => env('MAIL_JOIN_KOMSJE_ADDRESS', 'komsije.podrska@gmail.com'),
+        'name' => env('MAIL_JOIN_KOMSJE_NAME', 'Komšije Podrška'),
+    ],
+
 ];

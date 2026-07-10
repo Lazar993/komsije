@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web;
 
+use Illuminate\Support\Facades\Config;
+
 use App\Models\Page;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Config;
 
 class PageController
 {
@@ -19,7 +20,7 @@ class PageController
 
     public function professionals(): View
     {
-        $contactEmail = (string) Config::get('mail.from.address');
+        $contactEmail = (string) Config::get('mail.join_komsije.address');
 
         $subject = rawurlencode('Prijava zgrade za probni period - Komšije');
         $contactUrl = 'mailto:'.$contactEmail.'?subject='.$subject;
