@@ -102,7 +102,7 @@ class Ticket extends Model
      * Both private and public tickets are now fully transparent to anyone who
      * is allowed to view them: private tickets are only ever visible to the
      * reporter, assignee and building managers, while public tickets are
-     * intentionally open to the whole building — including who reported them
+     * intentionally open to the whole building - including who reported them
      * and their conversation with the manager.
      */
     public function viewerCanSeeIdentity(?User $viewer): bool

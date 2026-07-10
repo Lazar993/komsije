@@ -148,7 +148,7 @@ final class TicketController extends PortalController
         return redirect()
             ->route('portal.tickets.show', $ticket)
             ->with('status', $isAffected
-                ? __('Thanks — your manager will see that you are also affected.')
+                ? __('Thanks - your manager will see that you are also affected.')
                 : __('Removed from affected residents.'));
     }
 

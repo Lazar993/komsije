@@ -44,7 +44,7 @@ trait ResolvesChannels
 
         $channels = ['database'];
 
-        // Non-User notifiables can't have preferences — push only (we have no
+        // Non-User notifiables can't have preferences - push only (we have no
         // way to tell whether emailing this address is appropriate).
         if (! $notifiable instanceof User) {
             $channels[] = FcmChannel::class;
@@ -58,8 +58,8 @@ trait ResolvesChannels
 
         // Email is opt-in only. wantsEmailFor() returns true when either the
         // master 'notify_email' toggle is on, or the per-category toggle for
-        // this event is on. Without an opt-in, we never send mail — even for
-        // "critical" events — so tenants stop receiving links to /admin.
+        // this event is on. Without an opt-in, we never send mail - even for
+        // "critical" events - so tenants stop receiving links to /admin.
         if ($notifiable->wantsEmailFor($category)) {
             $channels[] = 'mail';
         }

@@ -33,7 +33,7 @@ Route::get('za-upravnike', [PageController::class, 'professionals'])->name('page
 
 Route::get('page/{slug}', [PageController::class, 'show'])->name('pages.show');
 
-// Public, unauthenticated route — Firebase Messaging requires the SW to live at site root.
+// Public, unauthenticated route - Firebase Messaging requires the SW to live at site root.
 Route::get('firebase-messaging-sw.js', FirebaseMessagingServiceWorkerController::class)
     ->name('firebase-messaging-sw');
 

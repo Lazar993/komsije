@@ -57,7 +57,7 @@ final class PollClosedNotification extends Notification implements ShouldQueue
     {
         return [
             'title' => __('Poll closed'),
-            'body' => __(':title — view the results.', ['title' => $this->poll->title]),
+            'body' => __(':title - view the results.', ['title' => $this->poll->title]),
             'data' => [
                 'type' => 'poll_closed',
                 'poll_id' => $this->poll->getKey(),

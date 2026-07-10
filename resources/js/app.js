@@ -879,7 +879,7 @@ async function registerServiceWorker() {
             }
 
             // Only reload if the new controller is OUR app shell SW.
-            // The Firebase messaging SW must never trigger a reload — that
+            // The Firebase messaging SW must never trigger a reload - that
             // would cause an infinite loop with the main SW.
             const controllerUrl = navigator.serviceWorker.controller?.scriptURL || '';
 
@@ -1014,7 +1014,7 @@ function rememberInstallPromptDismissal() {
         window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, 'true');
         window.localStorage.setItem(INSTALL_PROMPT_DISMISSED_AT_KEY, String(Date.now()));
     } catch {
-        // Storage unavailable (e.g. private mode) — non-fatal.
+        // Storage unavailable (e.g. private mode) - non-fatal.
     }
 }
 
@@ -1023,7 +1023,7 @@ function clearInstallPromptDismissal() {
         window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_KEY);
         window.localStorage.removeItem(INSTALL_PROMPT_DISMISSED_AT_KEY);
     } catch {
-        // Storage unavailable — non-fatal.
+        // Storage unavailable - non-fatal.
     }
 }
 

@@ -133,7 +133,7 @@ class PollResource extends Resource
                 ->label(__('Title')),
             TextEntry::make('description')
                 ->label(__('Description'))
-                ->placeholder('—'),
+                ->placeholder('-'),
             IconEntry::make('is_active')
                 ->label(__('Active'))
                 ->boolean(),
@@ -173,9 +173,9 @@ class PollResource extends Resource
                     ->get()
                     ->map(fn ($vote): array => [
                         'voter' => $vote->user?->name ?? __('Unknown user'),
-                        'email' => $vote->user?->email ?? '—',
-                        'option' => $vote->option?->text ?? '—',
-                        'voted_at' => $vote->created_at?->translatedFormat('d M Y, H:i') ?? '—',
+                        'email' => $vote->user?->email ?? '-',
+                        'option' => $vote->option?->text ?? '-',
+                        'voted_at' => $vote->created_at?->translatedFormat('d M Y, H:i') ?? '-',
                     ])
                     ->all())
                 ->schema([

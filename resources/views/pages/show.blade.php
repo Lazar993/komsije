@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $page->title.' — Komšije')
+@section('title', $page->title.' - Komšije')
 
 @if (! empty($page->meta_description))
     @section('meta_description', $page->meta_description)

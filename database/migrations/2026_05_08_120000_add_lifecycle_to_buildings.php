@@ -31,7 +31,7 @@ return new class extends Migration
         });
 
         // Existing production buildings predate the lifecycle system and must
-        // never be suspended retroactively — mark them as active subscriptions.
+        // never be suspended retroactively - mark them as active subscriptions.
         DB::table('buildings')->update([
             'status' => BuildingStatus::Active->value,
             'subscription_started_at' => DB::raw('created_at'),

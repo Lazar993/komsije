@@ -95,7 +95,7 @@ final class SendNotificationDigest extends Command
             public function toMail(object $notifiable): MailMessage
             {
                 $message = (new MailMessage())
-                    ->subject(__('Komšije — your activity digest'));
+                    ->subject(__('Komšije - your activity digest'));
 
                 if ($this->announcements->isNotEmpty()) {
                     $message->line(__('Recent announcements:'));
@@ -107,7 +107,7 @@ final class SendNotificationDigest extends Command
                 if ($this->tickets->isNotEmpty()) {
                     $message->line(__('Updates on your tickets:'));
                     foreach ($this->tickets as $t) {
-                        $message->line('• ' . $t->title . ' — ' . (string) $t->status);
+                        $message->line('• ' . $t->title . ' - ' . (string) $t->status);
                     }
                 }
 

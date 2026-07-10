@@ -124,7 +124,7 @@
 <script>
 // Smart visibility suggestion: nudge users toward PUBLIC for shared/common-area issues
 // and PRIVATE for apartment- or person-specific issues. The user always remains in
-// control — we only set the default once, and only when the user has not interacted.
+// control - we only set the default once, and only when the user has not interacted.
 (function () {
     const form = document.currentScript.previousElementSibling;
     if (!form) return;

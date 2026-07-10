@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Fired when a ticket gets a new assignee (or the assignee changes).
- * Targeted only at the new assignee — much more actionable than the
+ * Targeted only at the new assignee - much more actionable than the
  * old generic "ticket updated" push.
  */
 final class TicketAssigned

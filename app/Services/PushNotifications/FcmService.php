@@ -90,8 +90,8 @@ final class FcmService
                             // The "86400s" duration syntax is only valid for
                             // android.ttl / apns headers and was causing FCM
                             // to reject every single message with
-                            // INVALID_ARGUMENT — "TTL must be a non-negative
-                            // integer" — which in turn pruned every device
+                            // INVALID_ARGUMENT - "TTL must be a non-negative
+                            // integer" - which in turn pruned every device
                             // token. Keep this as a string of digits only.
                             'TTL' => '86400',
                         ],

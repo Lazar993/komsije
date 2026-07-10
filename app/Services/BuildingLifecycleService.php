@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Notification;
 final class BuildingLifecycleService
 {
     /**
-     * Seed a fresh 30-day trial on a newly created building. Idempotent — safe
+     * Seed a fresh 30-day trial on a newly created building. Idempotent - safe
      * to call from the model boot hook and the service create path.
      */
     public function startTrial(Building $building, ?User $actor = null): Building

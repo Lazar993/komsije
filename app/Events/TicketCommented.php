@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Fired when a new comment is added to a ticket.
- * Audience: reporter, current assignee, previous commenters — minus the actor.
+ * Audience: reporter, current assignee, previous commenters - minus the actor.
  */
 final class TicketCommented
 {

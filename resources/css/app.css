@@ -244,7 +244,7 @@
         margin-top: 0.5rem;
     }
 
-    /* Blockquote — Notion-style left rule with soft tinted background */
+    /* Blockquote - Notion-style left rule with soft tinted background */
     .page-content blockquote {
         border-left: 3px solid var(--komsije-primary);
         background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), rgba(37, 99, 235, 0.02));
@@ -262,7 +262,7 @@
         margin-top: 0.75em;
     }
 
-    /* Horizontal rule — soft divider */
+    /* Horizontal rule - soft divider */
     .page-content hr {
         border: 0;
         border-top: 1px solid var(--pc-border);

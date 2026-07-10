@@ -89,7 +89,7 @@ final class ApartmentService
             ->values()
             ->all();
 
-        // Strip super admin IDs out — they should never be apartment tenants.
+        // Strip super admin IDs out - they should never be apartment tenants.
         $superAdminIds = User::query()
             ->whereIn('id', $tenantIds)
             ->where('is_super_admin', true)

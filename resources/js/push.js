@@ -53,7 +53,7 @@ export function initPushNotifications() {
     }
 
     // Already granted in the browser. The user might have explicitly turned
-    // notifications off from our UI on this device — in which case we keep the
+    // notifications off from our UI on this device - in which case we keep the
     // token unregistered and surface 'default' so they can opt back in.
     if (Notification.permission === 'granted') {
         if (isUserDisabled()) {
@@ -138,7 +138,7 @@ function emitStatus(status) {
     try {
         document.dispatchEvent(new CustomEvent(STATUS_EVENT, { detail: { status } }));
     } catch {
-        // CustomEvent unavailable (very old browsers) — safe to ignore.
+        // CustomEvent unavailable (very old browsers) - safe to ignore.
     }
 }
 
@@ -207,7 +207,7 @@ export async function enablePush(configOverride = null) {
         return null;
     }
 
-    // User explicitly opted back in — clear any prior soft-declines/back-offs.
+    // User explicitly opted back in - clear any prior soft-declines/back-offs.
     window.localStorage.removeItem(PROMPT_DECLINED_KEY);
     window.localStorage.removeItem(PROMPT_DEFER_KEY);
     window.localStorage.removeItem(USER_DISABLED_KEY);
@@ -297,7 +297,7 @@ export async function enablePush(configOverride = null) {
             window.localStorage.setItem(TOKEN_CACHE_KEY, token);
             window.localStorage.setItem(TOKEN_SYNCED_AT_KEY, String(Date.now()));
         } catch (error) {
-            // Don't poison the cache on transient network failures — we'll
+            // Don't poison the cache on transient network failures - we'll
             // try again on the next page load.
             console.warn('Token sync failed', error);
         }

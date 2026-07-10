@@ -67,7 +67,7 @@ final class PushDiagnose extends Command
         );
 
         if ($invalid === []) {
-            $this->info('FCM accepted all tokens. Check the device — notification should arrive within seconds.');
+            $this->info('FCM accepted all tokens. Check the device - notification should arrive within seconds.');
 
             return self::SUCCESS;
         }
@@ -80,7 +80,7 @@ final class PushDiagnose extends Command
 
     private function checkConfig(): void
     {
-        $this->info('— FCM server configuration —');
+        $this->info('- FCM server configuration -');
 
         $projectId = (string) config('services.fcm.project_id');
         $credsJson = (string) config('services.fcm.credentials_json');
@@ -95,7 +95,7 @@ final class PushDiagnose extends Command
         }
 
         $this->newLine();
-        $this->info('— FCM web SDK configuration (exposed to the browser) —');
+        $this->info('- FCM web SDK configuration (exposed to the browser) -');
 
         $web = (array) config('services.fcm.web', []);
 
@@ -112,7 +112,7 @@ final class PushDiagnose extends Command
     private function checkTokens(): void
     {
         $this->newLine();
-        $this->info('— Device tokens registered —');
+        $this->info('- Device tokens registered -');
 
         $total = DeviceToken::query()->count();
         $byType = DeviceToken::query()

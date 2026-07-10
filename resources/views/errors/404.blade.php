@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', __('Page not found').' — Komšije')
+@section('title', __('Page not found').' - Komšije')
 @section('meta_description', __('The page you are looking for may have been moved, deleted, or the address is incorrect.'))
 @section('hide_footer', '1')
 

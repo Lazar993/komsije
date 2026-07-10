@@ -36,7 +36,7 @@ final class PollEndingSoonNotification extends Notification implements ShouldQue
                 'title' => $this->poll->title,
                 'ends' => $this->poll->ends_at?->format('Y-m-d H:i') ?? '',
             ]))
-            ->line(__('You haven\'t voted yet — make your voice heard.'))
+            ->line(__('You haven\'t voted yet - make your voice heard.'))
             ->action(__('Vote now'), route('portal.dashboard'));
     }
 
@@ -62,7 +62,7 @@ final class PollEndingSoonNotification extends Notification implements ShouldQue
     {
         return [
             'title' => __('Poll ending soon'),
-            'body' => __(':title — vote before it closes.', ['title' => $this->poll->title]),
+            'body' => __(':title - vote before it closes.', ['title' => $this->poll->title]),
             'data' => [
                 'type' => 'poll_ending_soon',
                 'poll_id' => $this->poll->getKey(),

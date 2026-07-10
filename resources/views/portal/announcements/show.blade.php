@@ -88,7 +88,7 @@
                                         {{ __('Preuzmi') }}
                                     </a>
                                     <span class="text-xs text-slate-400">
-                                        {{ $attachment->size > 0 ? number_format($attachment->size / 1024, 1) . ' KB' : '—' }}
+                                        {{ $attachment->size > 0 ? number_format($attachment->size / 1024, 1) . ' KB' : '-' }}
                                     </span>
                                 </div>
                             </li>

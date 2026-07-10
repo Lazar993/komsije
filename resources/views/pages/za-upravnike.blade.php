@@ -7,7 +7,7 @@
     $ogImage = asset('icons/logo-icon-v3.svg');
 @endphp
 
-@section('title', $pageTitle.' — Komšije')
+@section('title', $pageTitle.' - Komšije')
 @section('meta_description', $pageDescription)
 
 @section('head')
@@ -15,14 +15,14 @@
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Komšije">
-    <meta property="og:title" content="{{ $pageTitle }} — Komšije">
+    <meta property="og:title" content="{{ $pageTitle }} - Komšije">
     <meta property="og:description" content="{{ $pageDescription }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $ogImage }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{{ $pageTitle }} — Komšije">
+    <meta name="twitter:title" content="{{ $pageTitle }} - Komšije">
     <meta name="twitter:description" content="{{ $pageDescription }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
 
@@ -59,7 +59,7 @@
                         {{ __('Digitalizujte komunikaciju sa stanarima') }}
                     </h1>
                     <p class="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-slate-600">
-                        {{ __('Komšije je platforma koja upravnicima zgrada i upravljačkim firmama omogućava da na jednom mestu vode kvarove, obaveštenja, ankete i svakodnevnu komunikaciju sa stanarima — jasno, transparentno i bez haosa.') }}
+                        {{ __('Komšije je platforma koja upravnicima zgrada i upravljačkim firmama omogućava da na jednom mestu vode kvarove, obaveštenja, ankete i svakodnevnu komunikaciju sa stanarima - jasno, transparentno i bez haosa.') }}
                     </p>
 
                     <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -86,7 +86,7 @@
                         </div>
                         <div class="mt-6 space-y-3">
                             @foreach ([
-                                ['tickets', __('Nova prijava kvara — lift'), __('U obradi')],
+                                ['tickets', __('Nova prijava kvara - lift'), __('U obradi')],
                                 ['announcements', __('Obaveštenje: čišćenje fasade'), __('Objavljeno')],
                                 ['bell', __('Push podsetnik za anketu'), __('Poslato')],
                             ] as [$icon, $label, $status])

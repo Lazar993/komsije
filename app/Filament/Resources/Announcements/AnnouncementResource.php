@@ -103,7 +103,7 @@ class AnnouncementResource extends Resource
             TextEntry::make('building.name'),
             TextEntry::make('author.name')
                 ->label('Created by')
-                ->placeholder('—'),
+                ->placeholder('-'),
             TextEntry::make('title'),
             TextEntry::make('content'),
             IconEntry::make('is_important')
@@ -121,7 +121,7 @@ class AnnouncementResource extends Resource
                         ->label('File'),
                     TextEntry::make('size')
                         ->label('Size')
-                        ->formatStateUsing(fn (?int $state): string => $state ? round($state / 1024, 1) . ' KB' : '—'),
+                        ->formatStateUsing(fn (?int $state): string => $state ? round($state / 1024, 1) . ' KB' : '-'),
                     TextEntry::make('mime_type')
                         ->label('Type'),
                 ])
@@ -140,7 +140,7 @@ class AnnouncementResource extends Resource
                 TextColumn::make('author.name')
                     ->label('Created by')
                     ->searchable()
-                    ->placeholder('—'),
+                    ->placeholder('-'),
                 TextColumn::make('title')
                     ->searchable(),
                 IconColumn::make('is_important')

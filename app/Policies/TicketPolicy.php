@@ -82,7 +82,7 @@ final class TicketPolicy
 
         // Anonymous public-visibility viewers (other tenants in the building who
         // are neither reporter, assignee, nor manager) can browse public tickets
-        // but cannot post on them — comments are reserved for participants.
+        // but cannot post on them - comments are reserved for participants.
         if ($user->isBuildingAdmin($ticket->building_id)) {
             return true;
         }

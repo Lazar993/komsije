@@ -92,7 +92,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
      *
      * Returns at most one token per device (user_agent), preferring the most
      * recently used. FCM rotates tokens over time and pre-cleanup migrations
-     * left some users with stale duplicates — dedup here so a single push
+     * left some users with stale duplicates - dedup here so a single push
      * never goes to the same physical device twice.
      *
      * @return array<int, string>

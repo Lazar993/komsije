@@ -55,7 +55,7 @@ class AuditLogsRelationManager extends RelationManager
                     ->label(__('Details'))
                     ->formatStateUsing(function (BuildingAuditLog $record): string {
                         if (empty($record->meta)) {
-                            return '—';
+                            return '-';
                         }
 
                         return collect($record->meta)

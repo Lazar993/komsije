@@ -11,7 +11,7 @@ use App\Models\Building;
  *
  * Suspended and archived buildings are read-only for managers and tenants;
  * super admins bypass all policies via Gate::before, so they can still manage
- * subscriptions. Reading history is never blocked here — only mutating
+ * subscriptions. Reading history is never blocked here - only mutating
  * abilities should consult this guard.
  */
 trait ChecksBuildingStatus

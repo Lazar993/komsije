@@ -78,7 +78,7 @@ class BuildingResource extends Resource
                 TextEntry::make('address'),
                 TextEntry::make('billing_customer_reference')
                     ->label(__('Billing reference'))
-                    ->placeholder('—'),
+                    ->placeholder('-'),
                 TextEntry::make('managers.name')
                     ->label(__('Admins'))
                     ->listWithLineBreaks(),
@@ -92,27 +92,27 @@ class BuildingResource extends Resource
                 TextEntry::make('trial_ends_at')
                     ->label(__('Trial ends'))
                     ->dateTime()
-                    ->placeholder('—')
+                    ->placeholder('-')
                     ->helperText(fn (Building $record): ?string => $record->isTrial() && $record->daysRemaining() !== null
                         ? __(':days days remaining', ['days' => max(0, (int) $record->daysRemaining())])
                         : null),
                 TextEntry::make('subscription_started_at')
                     ->label(__('Subscription started'))
                     ->dateTime()
-                    ->placeholder('—'),
+                    ->placeholder('-'),
                 TextEntry::make('subscription_ends_at')
                     ->label(__('Subscription ends'))
                     ->dateTime()
-                    ->placeholder('—'),
+                    ->placeholder('-'),
                 TextEntry::make('suspended_at')
                     ->label(__('Suspended at'))
                     ->dateTime()
-                    ->placeholder('—')
+                    ->placeholder('-')
                     ->visible(fn (Building $record): bool => $record->suspended_at !== null),
                 TextEntry::make('archived_at')
                     ->label(__('Archived at'))
                     ->dateTime()
-                    ->placeholder('—')
+                    ->placeholder('-')
                     ->visible(fn (Building $record): bool => $record->archived_at !== null),
             ])->columns(2),
             Section::make(__('Engagement & health'))->schema([
@@ -150,7 +150,7 @@ class BuildingResource extends Resource
                     ->state(function (Building $record): string {
                         $hours = app(\App\Services\BuildingAnalyticsService::class)->metrics($record)['avg_resolution_hours'];
 
-                        return $hours === null ? '—' : __(':hours h', ['hours' => $hours]);
+                        return $hours === null ? '-' : __(':hours h', ['hours' => $hours]);
                     }),
                 TextEntry::make('push_delivery_rate')
                     ->label(__('Push reachability'))
@@ -160,7 +160,7 @@ class BuildingResource extends Resource
                     ->state(function (Building $record): string {
                         $at = app(\App\Services\BuildingAnalyticsService::class)->metrics($record)['last_activity_at'];
 
-                        return $at === null ? '—' : \Illuminate\Support\Carbon::parse($at)->diffForHumans();
+                        return $at === null ? '-' : \Illuminate\Support\Carbon::parse($at)->diffForHumans();
                     }),
             ])->columns(3)
                 ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false),
@@ -188,7 +188,7 @@ class BuildingResource extends Resource
                 TextColumn::make('trial_ends_at')
                     ->label(__('Trial ends'))
                     ->date()
-                    ->placeholder('—')
+                    ->placeholder('-')
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('managers.name')

@@ -32,7 +32,7 @@ final class BuildingPolicy
 
     /*
     |--------------------------------------------------------------------------
-    | Subscription lifecycle — super admin only.
+    | Subscription lifecycle - super admin only.
     |
     | Gate::before grants super admins every ability, so these methods only
     | ever execute for non-super-admins and therefore always deny. Managers
