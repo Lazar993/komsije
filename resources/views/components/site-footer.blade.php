@@ -21,16 +21,17 @@
                 </p>
             </div>
 
-            @if ($footerPages->isNotEmpty())
-                <nav aria-label="{{ __('Footer') }}" class="flex flex-col gap-2 text-sm">
-                    <span class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Informacije') }}</span>
-                    @foreach ($footerPages as $page)
-                        <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
-                            {{ $page->title }}
-                        </a>
-                    @endforeach
-                </nav>
-            @endif
+            <nav aria-label="{{ __('Footer') }}" class="flex flex-col gap-2 text-sm">
+                <span class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Informacije') }}</span>
+                <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
+                    {{ __('Za profesionalne upravnike') }}
+                </a>
+                @foreach ($footerPages as $page)
+                    <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
+                        {{ $page->title }}
+                    </a>
+                @endforeach
+            </nav>
         </div>
 
         {{-- Mobile layout: stacked, centered --}}
@@ -39,15 +40,16 @@
                 <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-9 w-9 rounded-2xl bg-white/5" width="36" height="36">
                 <span class="text-lg font-semibold text-white">Komšije</span>
             </a>
-            @if ($footerPages->isNotEmpty())
-                <nav aria-label="{{ __('Footer') }}" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-                    @foreach ($footerPages as $page)
-                        <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
-                            {{ $page->title }}
-                        </a>
-                    @endforeach
-                </nav>
-            @endif
+            <nav aria-label="{{ __('Footer') }}" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+                <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
+                    {{ __('Za profesionalne upravnike') }}
+                </a>
+                @foreach ($footerPages as $page)
+                    <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
+                        {{ $page->title }}
+                    </a>
+                @endforeach
+            </nav>
         </div>
 
         <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-500 md:text-left">

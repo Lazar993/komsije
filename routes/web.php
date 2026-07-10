@@ -29,6 +29,8 @@ Route::get('/', function () {
 
 Route::post('locale', SetSiteLocaleController::class)->name('locale.update');
 
+Route::get('za-upravnike', [PageController::class, 'professionals'])->name('pages.professionals');
+
 Route::get('page/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 // Public, unauthenticated route — Firebase Messaging requires the SW to live at site root.
