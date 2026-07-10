@@ -69,4 +69,16 @@ final class BuildingPolicy
     {
         return false;
     }
+
+    public function viewOnboardingQr(User $user, Building $building): bool
+    {
+        return $user->isBuildingAdmin($building->getKey());
+    }
+
+    public function regenerateOnboardingToken(User $user, Building $building): bool
+    {
+        unset($user, $building);
+
+        return false;
+    }
 }

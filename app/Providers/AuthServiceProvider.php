@@ -7,12 +7,14 @@ namespace App\Providers;
 use App\Models\Announcement;
 use App\Models\Apartment;
 use App\Models\Building;
+use App\Models\BuildingJoinRequest;
 use App\Models\Poll;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Policies\AnnouncementPolicy;
 use App\Policies\ApartmentPolicy;
 use App\Policies\BuildingPolicy;
+use App\Policies\BuildingJoinRequestPolicy;
 use App\Policies\PollPolicy;
 use App\Policies\TicketPolicy;
 use App\Policies\UserPolicy;
@@ -26,6 +28,7 @@ final class AuthServiceProvider extends ServiceProvider
         Gate::before(static fn ($user, string $ability): ?bool => $user->isSuperAdmin() ? true : null);
 
         Gate::policy(Building::class, BuildingPolicy::class);
+        Gate::policy(BuildingJoinRequest::class, BuildingJoinRequestPolicy::class);
         Gate::policy(Apartment::class, ApartmentPolicy::class);
         Gate::policy(Ticket::class, TicketPolicy::class);
         Gate::policy(Announcement::class, AnnouncementPolicy::class);

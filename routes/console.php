@@ -27,3 +27,7 @@ Schedule::command('polls:send-reminders')
 Schedule::command('buildings:process-trials')
     ->dailyAt('07:00')
     ->withoutOverlapping();
+
+Schedule::command('join-requests:send-reminders')
+    ->hourly()
+    ->withoutOverlapping();

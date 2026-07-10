@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * Length of the automatically granted free trial, in days.
@@ -25,6 +26,7 @@ use Illuminate\Support\Carbon;
     'address',
     'created_by',
     'billing_customer_reference',
+    'onboarding_token',
     'status',
     'trial_started_at',
     'trial_ends_at',
@@ -108,6 +110,11 @@ class Building extends Model
     public function invites(): HasMany
     {
         return $this->hasMany(Invite::class);
+    }
+
+    public function joinRequests(): HasMany
+    {
+        return $this->hasMany(BuildingJoinRequest::class);
     }
 
     public function auditLogs(): HasMany
@@ -257,6 +264,15 @@ class Building extends Model
         }
 
         return $query->pluck('name', 'id')->all();
+    }
+
+    public static function generateOnboardingToken(): string
+    {
+        do {
+            $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        } while (self::query()->where('onboarding_token', $token)->exists());
+
+        return Str::lower($token);
     }
 
     /**

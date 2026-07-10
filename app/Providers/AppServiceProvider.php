@@ -13,6 +13,9 @@ use App\Repositories\Eloquent\ApartmentRepository;
 use App\Repositories\Eloquent\BuildingRepository;
 use App\Repositories\Eloquent\TicketRepository;
 use App\Support\Tenancy\TenantContext;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +38,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        RateLimiter::for('join-onboarding', static function (Request $request): array {
+            $email = mb_strtolower(trim((string) $request->input('email', '')));
+            $token = (string) $request->route('token', 'missing');
+
+            return [
+                Limit::perMinute(8)->by('join-ip:' . $request->ip()),
+                Limit::perHour(20)->by('join-token:' . $token . '|' . $request->ip()),
+                Limit::perHour(10)->by('join-email:' . $email . '|' . $request->ip()),
+            ];
+        });
     }
 }

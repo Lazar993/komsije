@@ -82,6 +82,11 @@ class BuildingResource extends Resource
                 TextEntry::make('managers.name')
                     ->label(__('Admins'))
                     ->listWithLineBreaks(),
+                TextEntry::make('onboarding_token')
+                    ->label(__('QR onboarding token'))
+                    ->placeholder('-')
+                    ->copyable()
+                    ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false),
             ])->columns(2),
             Section::make(__('Subscription lifecycle'))->schema([
                 TextEntry::make('status')
@@ -162,6 +167,15 @@ class BuildingResource extends Resource
 
                         return $at === null ? '-' : \Illuminate\Support\Carbon::parse($at)->diffForHumans();
                     }),
+                TextEntry::make('join_requests_pending')
+                    ->label(__('Pending join requests'))
+                    ->state(fn (Building $record): int => $record->joinRequests()->where('status', \App\Enums\BuildingJoinRequestStatus::Pending->value)->count()),
+                TextEntry::make('join_requests_approved')
+                    ->label(__('Approved join requests'))
+                    ->state(fn (Building $record): int => $record->joinRequests()->where('status', \App\Enums\BuildingJoinRequestStatus::Approved->value)->count()),
+                TextEntry::make('join_requests_rejected')
+                    ->label(__('Rejected join requests'))
+                    ->state(fn (Building $record): int => $record->joinRequests()->where('status', \App\Enums\BuildingJoinRequestStatus::Rejected->value)->count()),
             ])->columns(3)
                 ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false),
         ]);

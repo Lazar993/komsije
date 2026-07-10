@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\InviteRegistrationController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\NotificationLaunchController;
+use App\Http\Controllers\Web\JoinBuildingController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\SetSiteLocaleController;
@@ -41,6 +42,8 @@ Route::get('notifications/open', NotificationLaunchController::class)
 	->name('notification.launch');
 
 Route::middleware('guest')->group(function (): void {
+	Route::get('join/{token}', [JoinBuildingController::class, 'show'])->name('join.show');
+	Route::post('join/{token}', [JoinBuildingController::class, 'store'])->middleware('throttle:join-onboarding')->name('join.store');
 	Route::get('invite/{token}', [InviteRegistrationController::class, 'show'])->name('invite.show');
 	Route::post('invite/{token}', [InviteRegistrationController::class, 'store'])->middleware('throttle:10,1')->name('invite.store');
 	Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
