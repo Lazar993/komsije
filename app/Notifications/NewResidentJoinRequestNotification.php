@@ -39,7 +39,7 @@ final class NewResidentJoinRequestNotification extends Notification implements S
             'building_id' => $this->joinRequest->building_id,
             'join_request_id' => $this->joinRequest->getKey(),
             'apartment_number' => $this->joinRequest->apartment_number,
-            'message' => __('New resident request'),
+            'message' => 'Nova prijava stanara',
             'url' => route('filament.admin.resources.building-join-requests.view', ['record' => $this->joinRequest], false),
         ]);
     }
@@ -52,8 +52,8 @@ final class NewResidentJoinRequestNotification extends Notification implements S
         unset($notifiable);
 
         return [
-            'title' => __('New resident request'),
-            'body' => __('Apartment :apartment • Tap to review.', ['apartment' => $this->joinRequest->apartment_number]),
+            'title' => 'Nova prijava stanara',
+            'body' => 'Stan ' . $this->joinRequest->apartment_number . ' • Dodirnite za pregled.',
             'data' => NotificationLaunchUrl::wrap([
                 'type' => 'building_join_request_created',
                 'join_request_id' => $this->joinRequest->getKey(),
