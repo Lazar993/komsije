@@ -7,6 +7,7 @@ namespace App\Filament\Resources\BuildingJoinRequests;
 use App\Enums\BuildingJoinRequestStatus;
 use App\Filament\Resources\BuildingJoinRequests\Pages\ListBuildingJoinRequests;
 use App\Filament\Resources\BuildingJoinRequests\Pages\ViewBuildingJoinRequest;
+use App\Models\Building;
 use App\Models\BuildingJoinRequest;
 use App\Services\BuildingJoinRequestService;
 use BackedEnum;
@@ -89,6 +90,10 @@ class BuildingJoinRequestResource extends Resource
                     ->since(),
             ])
             ->filters([
+                SelectFilter::make('building_id')
+                    ->label(__('Building'))
+                    ->options(self::accessibleBuildingOptions())
+                    ->searchable(),
                 SelectFilter::make('status')
                     ->options(collect(BuildingJoinRequestStatus::cases())
                         ->mapWithKeys(fn (BuildingJoinRequestStatus $status): array => [$status->value => $status->label()])
@@ -144,6 +149,21 @@ class BuildingJoinRequestResource extends Resource
         }
 
         return $query->whereIn('building_id', $user->managedBuildingIds());
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function accessibleBuildingOptions(): array
+    {
+        $user = Auth::user();
+        $query = Building::query()->orderBy('name');
+
+        if ($user !== null && ! $user->is_super_admin) {
+            $query->whereIn('id', $user->managedBuildingIds());
+        }
+
+        return $query->pluck('name', 'id')->all();
     }
 
     public static function getPages(): array
