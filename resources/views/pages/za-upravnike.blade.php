@@ -2,7 +2,7 @@
 
 @php
     $pageTitle = __('Za profesionalne upravnike');
-    $pageDescription = __('Komšije je platforma za profesionalne upravnike zgrada i upravljačke firme: kvarovi, obaveštenja, ankete i komunikacija sa stanarima na jednom mestu, uz 30 dana besplatnog perioda.');
+    $pageDescription = __('Komšije je platforma za profesionalne upravnike zgrada i upravljačke firme: kvarovi, obaveštenja, ankete, komšijska tabla i komunikacija sa stanarima na jednom mestu, uz 30 dana besplatnog perioda.');
     $canonical = route('pages.professionals');
     $ogImage = asset('icons/logo-icon-v3.svg');
 @endphp
@@ -59,7 +59,7 @@
                         {{ __('Digitalizujte komunikaciju sa stanarima') }}
                     </h1>
                     <p class="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-slate-600">
-                        {{ __('Komšije je platforma koja upravnicima zgrada i upravljačkim firmama omogućava da na jednom mestu vode kvarove, obaveštenja, ankete i svakodnevnu komunikaciju sa stanarima - jasno, transparentno i bez haosa.') }}
+                        {{ __('Komšije je platforma koja upravnicima zgrada i upravljačkim firmama omogućava da na jednom mestu vode kvarove, obaveštenja, ankete, komšijsku tablu i svakodnevnu komunikaciju sa stanarima - jasno, transparentno i bez haosa.') }}
                     </p>
 
                     <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -89,6 +89,7 @@
                                 ['tickets', __('Nova prijava kvara - lift'), __('U obradi')],
                                 ['announcements', __('Obaveštenje: čišćenje fasade'), __('Objavljeno')],
                                 ['bell', __('Push podsetnik za anketu'), __('Poslato')],
+                                ['neighbor-board', __('Komšije, moje mesto u garaži je slobodno u naredna tri dana.'), __('Komšijska tabla')],
                             ] as [$icon, $label, $status])
                                 <div class="flex items-center gap-3 rounded-[1.25rem] border border-[var(--komsije-border)] bg-white/80 px-4 py-3">
                                     <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-[var(--komsije-primary)]">
@@ -178,6 +179,11 @@
                             'svg' => '<path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6A2.5 2.5 0 0 1 16.5 15H9l-4 4v-4H7.5" /><path d="M8.5 8.5h7" /><path d="M8.5 11.5h4" />',
                         ],
                         [
+                            'title' => __('Komšijska tabla'),
+                            'desc' => __('Kratke objave između komšija: jednostavno, jasno i bez nereda.'),
+                            'svg' => '<path d="M12 3 3.5 6.5l8.5 3.5 8.5-3.5L12 3Z" /><path d="M3.5 11.25 12 14.75l8.5-3.5" /><path d="M3.5 16 12 19.5l8.5-3.5" />',
+                        ],
+                        [
                             'title' => __('PWA mobilno iskustvo'),
                             'desc' => __('Komšije se instalira kao aplikacija na telefon, bez potrebe za prodavnicom aplikacija.'),
                             'svg' => '<rect x="7" y="3" width="10" height="18" rx="2.5" /><path d="M11 18h2" />',
@@ -192,6 +198,35 @@
                         </span>
                         <h3 class="mt-5 text-lg font-semibold text-[var(--komsije-dark)]">{{ $feature['title'] }}</h3>
                         <p class="mt-2 text-sm leading-6 text-slate-600">{{ $feature['desc'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        {{-- ===================== NEIGHBOR BOARD USE CASES ===================== --}}
+        <section class="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:py-20">
+            <div class="max-w-2xl">
+                <h2 class="text-3xl font-semibold tracking-tight text-[var(--komsije-dark)] sm:text-4xl">
+                    {{ __('Praktični primeri Komšijske table') }}
+                </h2>
+                <p class="mt-4 text-lg leading-relaxed text-slate-600">
+                    {{ __('Objave koje stanari najčešće razmenjuju, uz manje poziva ka upravniku i jasniju komunikaciju u zgradi.') }}
+                </p>
+            </div>
+
+            <div class="mt-8 sm:mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                @foreach ([
+                    [__('Privremeno slobodno parking mesto'), __('Stanari brzo dele informacije o dostupnim mestima u garaži, bez zatrpavanja grupnih poruka.')],
+                    [__('Preporuke za majstore'), __('Proverene preporuke ostaju dostupne celoj zgradi i lako se pretražuju.')],
+                    [__('Mikro-obaveštenja među stanarima'), __('Sitne informacije (paket, buka, lift, čišćenje) dele se na jednom mestu umesto kroz više kanala.')],
+                    [__('Razmena i zajedničke akcije'), __('Poklanjanje stvari, pozajmice i dogovori oko zajedničkih aktivnosti postaju pregledni i transparentni.')],
+                ] as [$title, $desc])
+                    <div class="rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/70 p-6 transition hover:border-cyan-200 hover:shadow-[0_18px_50px_-30px_rgba(15,23,42,0.35)]">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
+                            <x-portal.app-icon name="neighbor-board" class="h-5 w-5" />
+                        </span>
+                        <h3 class="mt-5 text-base font-semibold text-[var(--komsije-dark)]">{{ $title }}</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">{{ $desc }}</p>
                     </div>
                 @endforeach
             </div>
@@ -343,9 +378,10 @@
             <div class="mt-8 sm:mt-10 divide-y divide-[var(--komsije-border)] overflow-hidden rounded-[1.5rem] border border-[var(--komsije-border)] bg-white/80">
                 @foreach ([
                     [__('Kako se stanari pridružuju?'), __('Stanari se mogu prijaviti putem pozivnice ili skeniranjem QR koda i odmah pristupaju svojoj zgradi. Nije potrebna nikakva tehnička priprema.')],
+                    [__('Da li je Komšijska tabla pod kontrolom upravnika?'), __('Da. Upravnik i ovlašćeni članovi tima mogu moderirati objave, zaključati komentare i arhivirati sadržaj kada je potrebno.')],
                     [__('Da li radi na iPhone uređajima?'), __('Da. Komšije radi na iPhone uređajima kroz veb pregledač i može se dodati na početni ekran kao aplikacija.')],
                     [__('Da li radi na Android uređajima?'), __('Da. Na Android uređajima Komšije se instalira kao PWA aplikacija i podržava push notifikacije.')],
-                    [__('Da li stanari plaćaju?'), __('Ne. Stanari ne plaćaju korišćenje platforme; ona je namenjena upravniku zgrade.')],
+                    [__('Da li stanari plaćaju?'), __('Ne. Stanari ne plaćaju direktno; za sada se plaćanje vrši iz zajedničke kase same zgrade.')],
                     [__('Šta se dešava nakon probnog perioda?'), __('Nakon 30 dana birate da li nastavljate. Vaši podaci se čuvaju čak i ako probni period istekne.')],
                     [__('Možemo li kasnije ponovo aktivirati nalog?'), __('Da. Nalog i podaci se mogu ponovo aktivirati u bilo kom trenutku, bez gubitka istorije.')],
                 ] as [$question, $answer])
