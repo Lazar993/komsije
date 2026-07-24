@@ -31,3 +31,7 @@ Schedule::command('buildings:process-trials')
 Schedule::command('join-requests:send-reminders')
     ->hourly()
     ->withoutOverlapping();
+
+Schedule::command('neighbor-board:archive-posts')
+    ->dailyAt('02:30')
+    ->withoutOverlapping();

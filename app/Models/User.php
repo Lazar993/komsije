@@ -67,6 +67,11 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         return $this->hasMany(Announcement::class, 'author_id');
     }
 
+    public function authoredNeighborBoardPosts(): HasMany
+    {
+        return $this->hasMany(NeighborBoardPost::class, 'author_id');
+    }
+
     public function announcementReads(): HasMany
     {
         return $this->hasMany(AnnouncementRead::class);

@@ -7,10 +7,12 @@ namespace App\Providers;
 use App\Repositories\Contracts\AnnouncementRepositoryInterface;
 use App\Repositories\Contracts\ApartmentRepositoryInterface;
 use App\Repositories\Contracts\BuildingRepositoryInterface;
+use App\Repositories\Contracts\NeighborBoardPostRepositoryInterface;
 use App\Repositories\Contracts\TicketRepositoryInterface;
 use App\Repositories\Eloquent\AnnouncementRepository;
 use App\Repositories\Eloquent\ApartmentRepository;
 use App\Repositories\Eloquent\BuildingRepository;
+use App\Repositories\Eloquent\NeighborBoardPostRepository;
 use App\Repositories\Eloquent\TicketRepository;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -31,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ApartmentRepositoryInterface::class, ApartmentRepository::class);
         $this->app->bind(TicketRepositoryInterface::class, TicketRepository::class);
         $this->app->bind(AnnouncementRepositoryInterface::class, AnnouncementRepository::class);
+        $this->app->bind(NeighborBoardPostRepositoryInterface::class, NeighborBoardPostRepository::class);
     }
 
     /**

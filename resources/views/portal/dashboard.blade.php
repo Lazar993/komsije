@@ -42,17 +42,21 @@
                     <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                         @if (auth()->user()->can('create', [App\Models\Ticket::class, $currentBuilding]))
                             <a href="{{ route('portal.tickets.create') }}" class="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-[var(--komsije-primary)] px-5 py-4 text-base font-medium text-white shadow-lg shadow-blue-600/30 transition hover:bg-blue-700">
-                                <x-portal.app-icon name="plus" class="h-5 w-5" />
+                                <span aria-hidden="true" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[13px]">🚨</span>
                                 <span>{{ __('Prijavi kvar') }}</span>
                             </a>
                         @endif
                         <a href="{{ route('portal.tickets.index') }}" class="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-white/15 bg-white/8 px-5 py-4 text-sm font-medium text-white transition hover:bg-white/12">
-                            <x-portal.app-icon name="tickets" class="h-5 w-5" />
+                            <span aria-hidden="true" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-[13px]">🛠️</span>
                             <span>{{ __('Moji kvarovi') }}</span>
                         </a>
                         <a href="{{ route('portal.announcements.index') }}" class="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-white/15 bg-white/8 px-5 py-4 text-sm font-medium text-white transition hover:bg-white/12">
-                            <x-portal.app-icon name="announcements" class="h-5 w-5" />
+                            <span aria-hidden="true" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-[13px]">📣</span>
                             <span>{{ __('Obaveštenja') }}</span>
+                        </a>
+                        <a href="{{ route('portal.neighbor-board.index') }}" class="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-emerald-200/40 bg-gradient-to-r from-emerald-400/25 via-cyan-400/20 to-sky-400/20 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:from-emerald-400/35 hover:to-sky-400/30">
+                            <span aria-hidden="true" class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[13px]">🤝</span>
+                            <span>{{ __('Komšijska tabla') }}</span>
                         </a>
                     </div>
 

@@ -27,6 +27,14 @@
         </svg>
         @break
 
+    @case('neighbor-board')
+        <svg {{ $attributes->merge(['class' => $class, 'viewBox' => '0 0 24 24', 'fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '1.8', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round']) }}>
+            <path d="M12 3 3.5 6.5l8.5 3.5 8.5-3.5L12 3Z" />
+            <path d="M3.5 11.25 12 14.75l8.5-3.5" />
+            <path d="M3.5 16 12 19.5l8.5-3.5" />
+        </svg>
+        @break
+
     @case('profile')
         <svg {{ $attributes->merge(['class' => $class, 'viewBox' => '0 0 24 24', 'fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '1.8', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round']) }}>
             <path d="M19.25 20a7.25 7.25 0 0 0-14.5 0" />

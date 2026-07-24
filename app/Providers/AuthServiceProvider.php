@@ -8,6 +8,7 @@ use App\Models\Announcement;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\BuildingJoinRequest;
+use App\Models\NeighborBoardPost;
 use App\Models\Poll;
 use App\Models\Ticket;
 use App\Models\User;
@@ -15,6 +16,7 @@ use App\Policies\AnnouncementPolicy;
 use App\Policies\ApartmentPolicy;
 use App\Policies\BuildingPolicy;
 use App\Policies\BuildingJoinRequestPolicy;
+use App\Policies\NeighborBoardPostPolicy;
 use App\Policies\PollPolicy;
 use App\Policies\TicketPolicy;
 use App\Policies\UserPolicy;
@@ -32,6 +34,7 @@ final class AuthServiceProvider extends ServiceProvider
         Gate::policy(Apartment::class, ApartmentPolicy::class);
         Gate::policy(Ticket::class, TicketPolicy::class);
         Gate::policy(Announcement::class, AnnouncementPolicy::class);
+        Gate::policy(NeighborBoardPost::class, NeighborBoardPostPolicy::class);
         Gate::policy(Poll::class, PollPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
     }

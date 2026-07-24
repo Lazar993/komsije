@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\SetSiteLocaleController;
 use App\Http\Controllers\Web\Portal\AnnouncementController;
 use App\Http\Controllers\Web\Portal\BuildingContextController;
 use App\Http\Controllers\Web\Portal\DashboardController;
+use App\Http\Controllers\Web\Portal\NeighborBoardController;
 use App\Http\Controllers\Web\Portal\PollVoteController;
 use App\Http\Controllers\Web\Portal\ProfileController;
 use App\Http\Controllers\Web\Portal\TicketController;
@@ -68,6 +69,20 @@ Route::middleware('auth')->group(function (): void {
 		Route::post('buildings/{building}/switch', BuildingContextController::class)->name('buildings.switch');
 
 		Route::middleware(EnsurePortalBuildingContext::class)->group(function (): void {
+			Route::get('neighbor-board', [NeighborBoardController::class, 'index'])->name('neighbor-board.index');
+			Route::get('neighbor-board/create', [NeighborBoardController::class, 'create'])->name('neighbor-board.create');
+			Route::post('neighbor-board', [NeighborBoardController::class, 'store'])->name('neighbor-board.store');
+			Route::get('neighbor-board/{post}', [NeighborBoardController::class, 'show'])->name('neighbor-board.show');
+			Route::get('neighbor-board/{post}/edit', [NeighborBoardController::class, 'edit'])->name('neighbor-board.edit');
+			Route::put('neighbor-board/{post}', [NeighborBoardController::class, 'update'])->name('neighbor-board.update');
+			Route::delete('neighbor-board/{post}', [NeighborBoardController::class, 'destroy'])->name('neighbor-board.destroy');
+			Route::post('neighbor-board/{post}/resolve', [NeighborBoardController::class, 'markResolved'])->name('neighbor-board.resolve');
+			Route::post('neighbor-board/{post}/comments', [NeighborBoardController::class, 'comment'])->name('neighbor-board.comments.store');
+			Route::post('neighbor-board/{post}/archive', [NeighborBoardController::class, 'archive'])->name('neighbor-board.archive');
+			Route::post('neighbor-board/{post}/restore', [NeighborBoardController::class, 'restore'])->name('neighbor-board.restore');
+			Route::post('neighbor-board/{post}/pin', [NeighborBoardController::class, 'togglePin'])->name('neighbor-board.pin');
+			Route::post('neighbor-board/{post}/lock-comments', [NeighborBoardController::class, 'toggleCommentsLock'])->name('neighbor-board.lock-comments');
+
 			Route::get('tickets', [TicketController::class, 'index'])->name('tickets.index');
 			Route::get('tickets/create', [TicketController::class, 'create'])->name('tickets.create');
 			Route::post('tickets', [TicketController::class, 'store'])->name('tickets.store');

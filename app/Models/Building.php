@@ -60,6 +60,7 @@ class Building extends Model
             if (! $building->isForceDeleting()) {
                 $building->tickets()->update(['deleted_at' => now()]);
                 $building->announcements()->update(['deleted_at' => now()]);
+                $building->neighborBoardPosts()->update(['deleted_at' => now()]);
             }
         });
     }
@@ -105,6 +106,11 @@ class Building extends Model
     public function polls(): HasMany
     {
         return $this->hasMany(Poll::class);
+    }
+
+    public function neighborBoardPosts(): HasMany
+    {
+        return $this->hasMany(NeighborBoardPost::class);
     }
 
     public function invites(): HasMany
