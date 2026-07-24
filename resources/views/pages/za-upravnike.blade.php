@@ -1,8 +1,8 @@
 @extends('layouts.presentation')
 
 @php
-    $pageTitle = __('Za profesionalne upravnike');
-    $pageDescription = __('Komšije je platforma za profesionalne upravnike zgrada i upravljačke firme: kvarovi, obaveštenja, ankete, komšijska tabla i komunikacija sa stanarima na jednom mestu, uz 30 dana besplatnog perioda.');
+    $pageTitle = __('Digitalna prezentacija aplikacije');
+    $pageDescription = __('Digitalna prezentacija aplikacije Komšije za profesionalne upravnike: prijave kvarova, obaveštenja, ankete, komšijska tabla i transparentna komunikacija sa stanarima.');
     $canonical = route('pages.professionals');
     $ogImage = asset('icons/logo-icon-v3.svg');
 @endphp
@@ -12,6 +12,7 @@
 
 @section('head')
     <link rel="canonical" href="{{ $canonical }}">
+    <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Komšije">
@@ -19,21 +20,26 @@
     <meta property="og:description" content="{{ $pageDescription }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:alt" content="Komšije - {{ $pageTitle }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <meta property="og:locale:alternate" content="en">
 
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{ $pageTitle }} - Komšije">
     <meta name="twitter:description" content="{{ $pageDescription }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:url" content="{{ $canonical }}">
 
     <script type="application/ld+json">
         {!! json_encode([
             '@context' => 'https://schema.org',
-            '@type' => 'Product',
+            '@type' => 'SoftwareApplication',
             'name' => 'Komšije',
             'applicationCategory' => 'BusinessApplication',
+            'operatingSystem' => 'Web, iOS (PWA), Android (PWA)',
             'description' => $pageDescription,
             'url' => $canonical,
+            'inLanguage' => str_replace('_', '-', app()->getLocale()),
             'offers' => [
                 '@type' => 'Offer',
                 'price' => '0',
