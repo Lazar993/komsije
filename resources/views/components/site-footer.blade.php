@@ -23,9 +23,9 @@
 
             <nav aria-label="{{ __('Footer') }}" class="flex flex-col gap-2 text-sm">
                 <span class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Informacije') }}</span>
-                <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
+                {{-- <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
                     {{ __('Za profesionalne upravnike') }}
-                </a>
+                </a> --}}
                 @foreach ($footerPages as $page)
                     <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
                         {{ $page->title }}
@@ -41,9 +41,9 @@
                 <span class="text-lg font-semibold text-white">Komšije</span>
             </a>
             <nav aria-label="{{ __('Footer') }}" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-                <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
+                {{-- <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
                     {{ __('Za profesionalne upravnike') }}
-                </a>
+                </a> --}}
                 @foreach ($footerPages as $page)
                     <a href="{{ url('/page/'.$page->slug) }}" class="text-slate-300 transition hover:text-white">
                         {{ $page->title }}
