@@ -31,7 +31,8 @@ Route::get('/', function () {
 
 Route::post('locale', SetSiteLocaleController::class)->name('locale.update');
 
-Route::get('za-upravnike', [PageController::class, 'professionals'])->name('pages.professionals');
+Route::get('digital-presentation', [PageController::class, 'professionals'])->name('pages.professionals');
+Route::redirect('za-upravnike', '/digital-presentation', 301);
 
 Route::get('page/{slug}', [PageController::class, 'show'])->name('pages.show');
 
