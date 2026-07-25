@@ -21,6 +21,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -65,6 +66,12 @@ class AnnouncementResource extends Resource
                     ->required()
                     ->rows(6)
                     ->maxLength(10000),
+                TextInput::make('link_url')
+                    ->label(__('External link'))
+                    ->url()
+                    ->maxLength(2048)
+                    ->placeholder('https://example.com')
+                    ->helperText(__('Optional URL shown on the announcement details page.')),
                 Toggle::make('is_important')
                     ->label('Important')
                     ->helperText('Important announcements also send an email to all residents.')
@@ -106,6 +113,10 @@ class AnnouncementResource extends Resource
                 ->placeholder('-'),
             TextEntry::make('title'),
             TextEntry::make('content'),
+            TextEntry::make('link_url')
+                ->label(__('External link'))
+                ->url(fn (?string $state): ?string => $state)
+                ->placeholder('-'),
             IconEntry::make('is_important')
                 ->boolean()
                 ->label('Important'),

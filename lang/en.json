@@ -628,5 +628,11 @@
     "Vrati iz arhive": "Restore from archive",
     "Zakačeno": "Pinned",
     "Zakači objavu": "Pin post",
-    "Zaključaj komentare": "Lock comments"
+    "Zaključaj komentare": "Lock comments",
+    "External link": "External link",
+    "Optional URL shown on the announcement details page.": "Optional URL shown on the announcement details page.",
+    "Link (optional)": "Link (optional)",
+    "If provided, this link will be shown with the announcement.": "If provided, this link will be shown with the announcement.",
+    "Leave empty to publish immediately. Set a future date to schedule publication.": "Leave empty to publish immediately. Set a future date to schedule publication.",
+    "Link": "Link"
 }

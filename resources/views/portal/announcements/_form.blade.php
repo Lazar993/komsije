@@ -24,11 +24,18 @@
         @error('content')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
     </div>
 
+    <div>
+        <label for="link_url" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Link (optional)') }}</label>
+        <input id="link_url" name="link_url" type="url" value="{{ old('link_url', $announcement->link_url ?? '') }}" placeholder="https://example.com" class="komsije-input w-full rounded-2xl px-4 py-3">
+        <p class="mt-2 text-sm text-slate-500">{{ __('If provided, this link will be shown with the announcement.') }}</p>
+        @error('link_url')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+    </div>
+
     @if ($isAdmin)
         <div>
             <label for="published_at" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Publish at') }}</label>
             <input id="published_at" name="published_at" type="datetime-local" value="{{ old('published_at', isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}" class="komsije-input block min-w-0 w-full max-w-full overflow-hidden rounded-2xl px-4 py-3">
-            <p class="mt-2 text-sm text-slate-500">{{ __('Leave empty to keep it as a draft.') }}</p>
+            <p class="mt-2 text-sm text-slate-500">{{ __('Leave empty to publish immediately. Set a future date to schedule publication.') }}</p>
             @error('published_at')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
         </div>
 

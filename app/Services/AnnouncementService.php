@@ -51,12 +51,19 @@ final class AnnouncementService
     public function create(Building $building, User $author, array $data): Announcement
     {
         return DB::transaction(function () use ($building, $author, $data): Announcement {
+            $publishedAt = $data['published_at'] ?? null;
+
+            if ($publishedAt === null && $author->isBuildingAdmin((int) $building->getKey())) {
+                $publishedAt = now();
+            }
+
             $announcement = $this->announcements->create([
                 'author_id' => $author->getKey(),
                 'building_id' => $building->getKey(),
                 'content' => $data['content'],
+                'link_url' => $data['link_url'] ?? null,
                 'is_important' => (bool) ($data['is_important'] ?? false),
-                'published_at' => $data['published_at'] ?? null,
+                'published_at' => $publishedAt,
                 'title' => $data['title'],
             ]);
 
@@ -84,6 +91,9 @@ final class AnnouncementService
 
             $updatedAnnouncement = $this->announcements->update($announcement, [
                 'content' => $data['content'] ?? $announcement->content,
+                'link_url' => array_key_exists('link_url', $data)
+                    ? $data['link_url']
+                    : $announcement->link_url,
                 'is_important' => array_key_exists('is_important', $data)
                     ? (bool) $data['is_important']
                     : $announcement->is_important,
@@ -134,6 +144,7 @@ final class AnnouncementService
                     'id' => (int) $announcement->getKey(),
                     'title' => $announcement->title,
                     'content' => $announcement->content,
+                    'link_url' => $announcement->link_url,
                     'published_at' => $announcement->published_at?->toIso8601String(),
                     'author' => $announcement->author !== null
                         ? ['id' => (int) $announcement->author->getKey(), 'name' => $announcement->author->name]
@@ -155,6 +166,7 @@ final class AnnouncementService
                 'id' => (int) $announcement['id'],
                 'title' => (string) $announcement['title'],
                 'content' => (string) $announcement['content'],
+                'link_url' => isset($announcement['link_url']) ? $announcement['link_url'] : null,
                 'published_at' => isset($announcement['published_at']) && $announcement['published_at'] !== null
                     ? CarbonImmutable::parse((string) $announcement['published_at'])
                     : null,

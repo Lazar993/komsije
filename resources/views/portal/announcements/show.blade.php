@@ -36,6 +36,16 @@
                 {!! nl2br(e($announcement->content)) !!}
             </div>
 
+            @if (!empty($announcement->link_url))
+                <div class="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-5 py-4">
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-800">{{ __('Link') }}</p>
+                    <a href="{{ $announcement->link_url }}" target="_blank" rel="noopener noreferrer"
+                       class="mt-2 inline-flex items-center gap-2 break-all text-sm font-medium text-blue-900 hover:underline">
+                        {{ $announcement->link_url }}
+                    </a>
+                </div>
+            @endif
+
             @if ($announcement->attachments->isNotEmpty())
                 <div class="mt-6 rounded-[1.5rem] border border-slate-200 bg-white p-6">
                     <h2 class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">{{ __('Prilozi') }}</h2>

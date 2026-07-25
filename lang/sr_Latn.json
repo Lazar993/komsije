@@ -669,5 +669,11 @@
     "Data is retained only as long as required for operational, legal, and security purposes.": "Podaci se čuvaju samo onoliko dugo koliko je potrebno za operativne, pravne i bezbednosne svrhe.",
     "Contact": "Kontakt",
     "For privacy-related questions, contact the building manager or platform support.": "Za pitanja u vezi privatnosti kontaktirajte upravnika zgrade ili podršku platforme.",
-    "Last updated: :date": "Poslednje ažuriranje: :date"
+    "Last updated: :date": "Poslednje ažuriranje: :date",
+    "External link": "Spoljni link",
+    "Optional URL shown on the announcement details page.": "Opcioni URL koji se prikazuje na stranici detalja obaveštenja.",
+    "Link (optional)": "Link (opciono)",
+    "If provided, this link will be shown with the announcement.": "Ako je unet, ovaj link će biti prikazan uz obaveštenje.",
+    "Leave empty to publish immediately. Set a future date to schedule publication.": "Ostavite prazno za trenutno objavljivanje. Postavite budući datum za zakazivanje objave.",
+    "Link": "Link"
 }

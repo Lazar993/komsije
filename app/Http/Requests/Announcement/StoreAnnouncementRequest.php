@@ -22,6 +22,7 @@ final class StoreAnnouncementRequest extends FormRequest
             'building_id' => ['required', 'integer'],
             'content' => ['required', 'string', 'max:10000'],
             'is_important' => ['nullable', 'boolean'],
+            'link_url' => ['nullable', 'url', 'max:2048'],
             'published_at' => ['nullable', 'date'],
             'title' => ['required', 'string', 'max:255'],
             'attachments' => ['nullable', 'array', 'max:10'],

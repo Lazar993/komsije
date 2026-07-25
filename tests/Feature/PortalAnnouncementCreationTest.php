@@ -12,14 +12,13 @@ use App\Notifications\AnnouncementCreatedNotification;
 use App\Notifications\AnnouncementPublishedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class AnnouncementApiTest extends TestCase
+class PortalAnnouncementCreationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_manager_created_announcement_is_published_immediately_when_publish_time_is_not_provided(): void
+    public function test_manager_creation_without_publish_at_is_published_immediately(): void
     {
         Notification::fake();
 
@@ -30,21 +29,19 @@ class AnnouncementApiTest extends TestCase
         $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
         $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
 
-        Sanctum::actingAs($manager);
-
-        $response = $this->postJson('/api/announcements', [
-            'building_id' => $building->getKey(),
-            'title' => 'Lift maintenance notice',
-            'content' => 'Lift maintenance starts at 11:00 and should finish by noon.',
-            'link_url' => 'https://example.com/lift-maintenance',
-        ]);
-
-        $response->assertCreated();
+        $this->actingAs($manager)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->post(route('portal.announcements.store'), [
+                'building_id' => $building->getKey(),
+                'title' => 'Garage cleaning reminder',
+                'content' => 'Garage cleaning starts at 08:00 tomorrow.',
+            ])
+            ->assertRedirect();
 
         $announcement = Announcement::query()
             ->where('building_id', $building->getKey())
             ->where('author_id', $manager->getKey())
-            ->where('title', 'Lift maintenance notice')
+            ->where('title', 'Garage cleaning reminder')
             ->firstOrFail();
 
         $this->assertNotNull($announcement->published_at);
@@ -53,7 +50,7 @@ class AnnouncementApiTest extends TestCase
         Notification::assertSentTo($tenant, AnnouncementPublishedNotification::class);
     }
 
-    public function test_tenant_can_create_announcement_and_manager_is_notified_for_approval(): void
+    public function test_tenant_creation_stays_draft_and_notifies_manager_for_approval(): void
     {
         Notification::fake();
 
@@ -64,29 +61,27 @@ class AnnouncementApiTest extends TestCase
         $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
         $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
 
-        Sanctum::actingAs($tenant);
+        $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->post(route('portal.announcements.store'), [
+                'building_id' => $building->getKey(),
+                'title' => 'Hallway painting suggestion',
+                'content' => 'Would it be possible to repaint hallway walls next month?',
+                'published_at' => now()->addDay()->format('Y-m-d H:i:s'),
+                'is_important' => true,
+            ])
+            ->assertRedirect();
 
-        $response = $this->postJson('/api/announcements', [
-            'building_id' => $building->getKey(),
-            'title' => 'Water shutdown notice',
-            'content' => 'Water will be unavailable between 10:00 and 12:00.',
-            'link_url' => 'https://example.com/water-maintenance',
-            'published_at' => now()->toIso8601String(),
-            'is_important' => true,
-        ]);
+        $announcement = Announcement::query()
+            ->where('building_id', $building->getKey())
+            ->where('author_id', $tenant->getKey())
+            ->where('title', 'Hallway painting suggestion')
+            ->firstOrFail();
 
-        $response->assertCreated();
-
-        $this->assertDatabaseHas('announcements', [
-            'building_id' => $building->getKey(),
-            'author_id' => $tenant->getKey(),
-            'title' => 'Water shutdown notice',
-            'link_url' => 'https://example.com/water-maintenance',
-            'is_important' => false,
-            'published_at' => null,
-        ]);
-
+        $this->assertNull($announcement->published_at);
+        $this->assertFalse((bool) $announcement->is_important);
         Notification::assertSentTo($manager, AnnouncementCreatedNotification::class);
         Notification::assertNotSentTo($tenant, AnnouncementCreatedNotification::class);
+        Notification::assertNotSentTo($tenant, AnnouncementPublishedNotification::class);
     }
 }
