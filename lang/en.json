@@ -633,6 +633,10 @@
     "Optional URL shown on the announcement details page.": "Optional URL shown on the announcement details page.",
     "Link (optional)": "Link (optional)",
     "If provided, this link will be shown with the announcement.": "If provided, this link will be shown with the announcement.",
+    "Links (optional)": "Links (optional)",
+    "If provided, these links will be shown with the announcement.": "If provided, these links will be shown with the announcement.",
+    "Links": "Links",
+    "Add link": "Add link",
     "Leave empty to publish immediately. Set a future date to schedule publication.": "Leave empty to publish immediately. Set a future date to schedule publication.",
     "Link": "Link"
 }

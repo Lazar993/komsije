@@ -52,6 +52,7 @@ final class AnnouncementService
     {
         return DB::transaction(function () use ($building, $author, $data): Announcement {
             $publishedAt = $data['published_at'] ?? null;
+            $resolvedLinks = $this->resolveLinksFromPayload($data, null, null);
 
             if ($publishedAt === null && $author->isBuildingAdmin((int) $building->getKey())) {
                 $publishedAt = now();
@@ -61,7 +62,8 @@ final class AnnouncementService
                 'author_id' => $author->getKey(),
                 'building_id' => $building->getKey(),
                 'content' => $data['content'],
-                'link_url' => $data['link_url'] ?? null,
+                'link_url' => $resolvedLinks[0] ?? null,
+                'links' => $resolvedLinks !== [] ? $resolvedLinks : null,
                 'is_important' => (bool) ($data['is_important'] ?? false),
                 'published_at' => $publishedAt,
                 'title' => $data['title'],
@@ -88,12 +90,12 @@ final class AnnouncementService
     {
         return DB::transaction(function () use ($announcement, $data, $actor): Announcement {
             $wasPublished = $announcement->published_at !== null;
+            $resolvedLinks = $this->resolveLinksFromPayload($data, $announcement->links, $announcement->link_url);
 
             $updatedAnnouncement = $this->announcements->update($announcement, [
                 'content' => $data['content'] ?? $announcement->content,
-                'link_url' => array_key_exists('link_url', $data)
-                    ? $data['link_url']
-                    : $announcement->link_url,
+                'link_url' => $resolvedLinks[0] ?? null,
+                'links' => $resolvedLinks !== [] ? $resolvedLinks : null,
                 'is_important' => array_key_exists('is_important', $data)
                     ? (bool) $data['is_important']
                     : $announcement->is_important,
@@ -145,6 +147,7 @@ final class AnnouncementService
                     'title' => $announcement->title,
                     'content' => $announcement->content,
                     'link_url' => $announcement->link_url,
+                    'links' => $announcement->resolvedLinks(),
                     'published_at' => $announcement->published_at?->toIso8601String(),
                     'author' => $announcement->author !== null
                         ? ['id' => (int) $announcement->author->getKey(), 'name' => $announcement->author->name]
@@ -167,6 +170,9 @@ final class AnnouncementService
                 'title' => (string) $announcement['title'],
                 'content' => (string) $announcement['content'],
                 'link_url' => isset($announcement['link_url']) ? $announcement['link_url'] : null,
+                'links' => isset($announcement['links']) && is_array($announcement['links'])
+                    ? $announcement['links']
+                    : [],
                 'published_at' => isset($announcement['published_at']) && $announcement['published_at'] !== null
                     ? CarbonImmutable::parse((string) $announcement['published_at'])
                     : null,
@@ -228,5 +234,56 @@ final class AnnouncementService
             $attachment->deleteFile();
             $attachment->delete();
         }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<int, mixed>|null $existingLinks
+     * @return array<int, string>
+     */
+    private function resolveLinksFromPayload(array $data, ?array $existingLinks, ?string $existingLegacyLink): array
+    {
+        $hasLinksInPayload = array_key_exists('links', $data) || array_key_exists('link_url', $data);
+
+        if (! $hasLinksInPayload) {
+            return $this->normalizeLinks($existingLinks ?? [], $existingLegacyLink);
+        }
+
+        return $this->normalizeLinks($data['links'] ?? [], $data['link_url'] ?? null);
+    }
+
+    /**
+     * @param array<int, mixed> $links
+     * @return array<int, string>
+     */
+    private function normalizeLinks(array $links, ?string $legacyLink): array
+    {
+        $normalized = [];
+
+        foreach ($links as $value) {
+            if (is_array($value)) {
+                $value = $value['url'] ?? null;
+            }
+
+            if (! is_string($value)) {
+                continue;
+            }
+
+            $url = trim($value);
+
+            if ($url === '') {
+                continue;
+            }
+
+            $normalized[] = $url;
+        }
+
+        $legacyLink = trim((string) $legacyLink);
+
+        if ($legacyLink !== '') {
+            array_unshift($normalized, $legacyLink);
+        }
+
+        return array_values(array_unique($normalized));
     }
 }

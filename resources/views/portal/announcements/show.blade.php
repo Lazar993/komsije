@@ -2,6 +2,10 @@
 
 @section('title', $announcement->title)
 
+@php
+    $announcementLinks = $announcement->resolvedLinks();
+@endphp
+
 @section('content')
     <section class="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <article class="min-w-0 rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/8 backdrop-blur sm:p-8">
@@ -36,13 +40,19 @@
                 {!! nl2br(e($announcement->content)) !!}
             </div>
 
-            @if (!empty($announcement->link_url))
+            @if ($announcementLinks !== [])
                 <div class="mt-4 rounded-[1.5rem] border border-blue-200 bg-blue-50 px-5 py-4">
-                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-800">{{ __('Link') }}</p>
-                    <a href="{{ $announcement->link_url }}" target="_blank" rel="noopener noreferrer"
-                       class="mt-2 inline-flex items-center gap-2 break-all text-sm font-medium text-blue-900 hover:underline">
-                        {{ $announcement->link_url }}
-                    </a>
+                    <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-800">{{ __('Links') }}</p>
+                    <ul class="mt-2 space-y-1.5">
+                        @foreach ($announcementLinks as $url)
+                            <li>
+                                <a href="{{ $url }}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center gap-2 break-all text-sm font-medium text-blue-900 hover:underline">
+                                    {{ $url }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 

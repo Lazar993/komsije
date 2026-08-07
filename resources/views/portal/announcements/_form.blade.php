@@ -2,6 +2,15 @@
     $editing = isset($announcement);
     $existingAttachments = $editing ? $announcement->attachments : collect();
     $isAdmin = auth()->user()->isBuildingAdmin($currentBuilding->getKey());
+    $linkInputs = old('links');
+
+    if (! is_array($linkInputs)) {
+        $linkInputs = $editing ? $announcement->resolvedLinks() : [];
+    }
+
+    if ($linkInputs === []) {
+        $linkInputs = [''];
+    }
 @endphp
 
 <form method="POST" action="{{ $editing ? route('portal.announcements.update', $announcement) : route('portal.announcements.store') }}" enctype="multipart/form-data" class="space-y-6">
@@ -24,11 +33,34 @@
         @error('content')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
     </div>
 
-    <div>
-        <label for="link_url" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Link (optional)') }}</label>
-        <input id="link_url" name="link_url" type="url" value="{{ old('link_url', $announcement->link_url ?? '') }}" placeholder="https://example.com" class="komsije-input w-full rounded-2xl px-4 py-3">
-        <p class="mt-2 text-sm text-slate-500">{{ __('If provided, this link will be shown with the announcement.') }}</p>
-        @error('link_url')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+    <div data-links-wrapper>
+        <div class="mb-2 flex items-center justify-between gap-3">
+            <label class="block text-sm font-medium text-slate-700">{{ __('Links (optional)') }}</label>
+            <button type="button" data-add-link class="inline-flex items-center gap-1 rounded-xl border border-[var(--komsije-border)] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]">
+                <span class="text-base leading-none">+</span>
+                <span>{{ __('Add link') }}</span>
+            </button>
+        </div>
+
+        <div data-links-list class="space-y-2">
+            @foreach ($linkInputs as $value)
+                <div data-link-row class="flex items-center gap-2">
+                    <input name="links[]" type="url" value="{{ $value }}" placeholder="https://example.com" class="komsije-input w-full rounded-2xl px-4 py-3">
+                    <button type="button" data-remove-link class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--komsije-border)] bg-white text-xl leading-none text-slate-500 transition hover:border-rose-200 hover:text-rose-600" aria-label="{{ __('Ukloni') }}">&minus;</button>
+                </div>
+            @endforeach
+        </div>
+
+        <template data-link-template>
+            <div data-link-row class="flex items-center gap-2">
+                <input name="links[]" type="url" placeholder="https://example.com" class="komsije-input w-full rounded-2xl px-4 py-3">
+                <button type="button" data-remove-link class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--komsije-border)] bg-white text-xl leading-none text-slate-500 transition hover:border-rose-200 hover:text-rose-600" aria-label="{{ __('Ukloni') }}">&minus;</button>
+            </div>
+        </template>
+
+        <p class="mt-2 text-sm text-slate-500">{{ __('If provided, these links will be shown with the announcement.') }}</p>
+        @error('links')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
+        @error('links.*')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
     </div>
 
     @if ($isAdmin)
@@ -117,3 +149,64 @@
         <a href="{{ $editing ? route('portal.announcements.show', $announcement) : route('portal.announcements.index') }}" class="rounded-[1.25rem] border border-[var(--komsije-border)] bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]">{{ __('Otkaži') }}</a>
     </div>
 </form>
+
+@once
+    <script>
+        (() => {
+            document.querySelectorAll('[data-links-wrapper]').forEach((wrapper) => {
+                const addButton = wrapper.querySelector('[data-add-link]');
+                const list = wrapper.querySelector('[data-links-list]');
+                const template = wrapper.querySelector('[data-link-template]');
+
+                if (!(addButton instanceof HTMLButtonElement) || !(list instanceof HTMLElement) || !(template instanceof HTMLTemplateElement)) {
+                    return;
+                }
+
+                const ensureAtLeastOneRow = () => {
+                    if (list.querySelector('[data-link-row]')) {
+                        return;
+                    }
+
+                    const fragment = template.content.cloneNode(true);
+                    list.appendChild(fragment);
+                };
+
+                addButton.addEventListener('click', () => {
+                    const fragment = template.content.cloneNode(true);
+                    list.appendChild(fragment);
+
+                    const lastInput = list.querySelector('[data-link-row]:last-child input[name="links[]"]');
+
+                    if (lastInput instanceof HTMLInputElement) {
+                        lastInput.focus();
+                    }
+                });
+
+                list.addEventListener('click', (event) => {
+                    const target = event.target;
+
+                    if (!(target instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    const removeButton = target.closest('[data-remove-link]');
+
+                    if (!(removeButton instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    const row = removeButton.closest('[data-link-row]');
+
+                    if (!(row instanceof HTMLElement)) {
+                        return;
+                    }
+
+                    row.remove();
+                    ensureAtLeastOneRow();
+                });
+
+                ensureAtLeastOneRow();
+            });
+        })();
+    </script>
+@endonce

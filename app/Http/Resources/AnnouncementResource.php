@@ -21,6 +21,7 @@ class AnnouncementResource extends JsonResource
             'title' => $this->title,
             'content' => $this->content,
             'link_url' => $this->link_url,
+            'links' => $this->resolvedLinks(),
             'published_at' => $this->published_at,
             'author' => new UserResource($this->whenLoaded('author')),
             'reads_count' => $this->whenCounted('reads'),

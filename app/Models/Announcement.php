@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['building_id', 'author_id', 'title', 'content', 'link_url', 'is_important', 'published_at'])]
+#[Fillable(['building_id', 'author_id', 'title', 'content', 'link_url', 'links', 'is_important', 'published_at'])]
 class Announcement extends Model
 {
     use HasFactory;
@@ -44,7 +44,42 @@ class Announcement extends Model
     {
         return [
             'is_important' => 'boolean',
+            'links' => 'array',
             'published_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function resolvedLinks(): array
+    {
+        $links = [];
+
+        foreach ((array) $this->links as $value) {
+            if (is_array($value)) {
+                $value = $value['url'] ?? null;
+            }
+
+            if (! is_string($value)) {
+                continue;
+            }
+
+            $url = trim($value);
+
+            if ($url === '') {
+                continue;
+            }
+
+            $links[] = $url;
+        }
+
+        $legacyLink = trim((string) ($this->link_url ?? ''));
+
+        if ($legacyLink !== '') {
+            array_unshift($links, $legacyLink);
+        }
+
+        return array_values(array_unique($links));
     }
 }

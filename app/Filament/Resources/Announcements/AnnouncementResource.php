@@ -19,6 +19,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -66,12 +67,59 @@ class AnnouncementResource extends Resource
                     ->required()
                     ->rows(6)
                     ->maxLength(10000),
-                TextInput::make('link_url')
-                    ->label(__('External link'))
-                    ->url()
-                    ->maxLength(2048)
-                    ->placeholder('https://example.com')
-                    ->helperText(__('Optional URL shown on the announcement details page.')),
+                Repeater::make('links')
+                    ->label(__('Links'))
+                    ->schema([
+                        TextInput::make('url')
+                            ->label(__('Link'))
+                            ->url()
+                            ->maxLength(2048)
+                            ->required(),
+                    ])
+                    ->addActionLabel(__('Add link'))
+                    ->columnSpanFull()
+                    ->defaultItems(1)
+                    ->reorderable(false)
+                    ->afterStateHydrated(function (Repeater $component, mixed $state, ?Announcement $record): void {
+                        $urls = [];
+
+                        foreach ((array) $state as $value) {
+                            if (is_array($value) && is_string($value['url'] ?? null)) {
+                                $url = trim($value['url']);
+
+                                if ($url !== '') {
+                                    $urls[] = $url;
+                                }
+
+                                continue;
+                            }
+
+                            if (is_string($value)) {
+                                $url = trim($value);
+
+                                if ($url !== '') {
+                                    $urls[] = $url;
+                                }
+                            }
+                        }
+
+                        if ($record !== null && $urls === []) {
+                            $urls = $record->resolvedLinks();
+                        }
+
+                        $component->state(collect($urls)
+                            ->map(fn (string $url): array => ['url' => $url])
+                            ->values()
+                            ->all());
+                    })
+                    ->dehydrateStateUsing(fn (mixed $state): array => collect((array) $state)
+                        ->map(fn (mixed $value): ?string => is_array($value) && is_string($value['url'] ?? null)
+                            ? trim($value['url'])
+                            : null)
+                        ->filter(fn (?string $url): bool => is_string($url) && $url !== '')
+                        ->values()
+                        ->all())
+                    ->helperText(__('If provided, these links will be shown with the announcement.')),
                 Toggle::make('is_important')
                     ->label('Important')
                     ->helperText('Important announcements also send an email to all residents.')
@@ -113,10 +161,18 @@ class AnnouncementResource extends Resource
                 ->placeholder('-'),
             TextEntry::make('title'),
             TextEntry::make('content'),
-            TextEntry::make('link_url')
-                ->label(__('External link'))
-                ->url(fn (?string $state): ?string => $state)
-                ->placeholder('-'),
+            RepeatableEntry::make('links')
+                ->label(__('Links'))
+                ->state(fn (Announcement $record): array => collect($record->resolvedLinks())
+                    ->map(fn (string $url): array => ['url' => $url])
+                    ->all())
+                ->visible(fn (Announcement $record): bool => $record->resolvedLinks() !== [])
+                ->schema([
+                    TextEntry::make('url')
+                        ->label(__('Link'))
+                        ->url(fn (?string $state): ?string => $state),
+                ])
+                ->columns(1),
             IconEntry::make('is_important')
                 ->boolean()
                 ->label('Important'),

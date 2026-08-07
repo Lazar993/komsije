@@ -23,6 +23,8 @@ final class UpdateAnnouncementRequest extends FormRequest
             'content' => ['sometimes', 'string', 'max:10000'],
             'is_important' => ['nullable', 'boolean'],
             'link_url' => ['nullable', 'url', 'max:2048'],
+            'links' => ['nullable', 'array', 'max:20'],
+            'links.*' => ['nullable', 'url', 'max:2048'],
             'notify_residents' => ['nullable', 'boolean'],
             'published_at' => ['nullable', 'date'],
             'title' => ['sometimes', 'string', 'max:255'],

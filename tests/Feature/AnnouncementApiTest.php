@@ -89,4 +89,36 @@ class AnnouncementApiTest extends TestCase
         Notification::assertSentTo($manager, AnnouncementCreatedNotification::class);
         Notification::assertNotSentTo($tenant, AnnouncementCreatedNotification::class);
     }
+
+    public function test_announcement_can_store_multiple_links(): void
+    {
+        $manager = User::factory()->create();
+        $building = Building::factory()->create();
+
+        $building->users()->attach($manager, ['role' => BuildingRole::PropertyManager->value]);
+
+        Sanctum::actingAs($manager);
+
+        $response = $this->postJson('/api/announcements', [
+            'building_id' => $building->getKey(),
+            'title' => 'Links update',
+            'content' => 'Check all resources below.',
+            'links' => [
+                'https://example.com/one',
+                'https://example.com/two',
+                'https://example.com/three',
+            ],
+        ]);
+
+        $response->assertCreated();
+
+        $announcement = Announcement::query()->latest('id')->firstOrFail();
+
+        $this->assertSame('https://example.com/one', $announcement->link_url);
+        $this->assertSame([
+            'https://example.com/one',
+            'https://example.com/two',
+            'https://example.com/three',
+        ], $announcement->links);
+    }
 }
