@@ -49,15 +49,11 @@
     body[data-app-shell='standalone'] [data-standalone-datetime] {
         display: block;
         min-width: 0;
+        min-inline-size: 0;
+        inline-size: 100%;
         width: 100%;
         max-width: 100%;
-    }
-
-    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-datetime-edit,
-    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-datetime-edit-fields-wrapper,
-    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-date-and-time-value {
-        min-width: 0;
-        max-width: 100%;
+        box-sizing: border-box;
     }
 
     img {
