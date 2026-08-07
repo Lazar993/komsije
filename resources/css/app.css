@@ -43,6 +43,23 @@
         min-height: 100dvh;
     }
 
+    /* iOS standalone/PWA can render datetime-local controls with an intrinsic
+       width larger than their parent; force the control to stay constrained. */
+    body[data-app-shell='standalone'] input[type='datetime-local'],
+    body[data-app-shell='standalone'] [data-standalone-datetime] {
+        display: block;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-datetime-edit,
+    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-datetime-edit-fields-wrapper,
+    body[data-app-shell='standalone'] [data-standalone-datetime]::-webkit-date-and-time-value {
+        min-width: 0;
+        max-width: 100%;
+    }
+
     img {
         height: auto;
     }

@@ -66,7 +66,9 @@
     @if ($isAdmin)
         <div>
             <label for="published_at" class="mb-2 block text-sm font-medium text-slate-700">{{ __('Publish at') }}</label>
-            <input id="published_at" name="published_at" type="datetime-local" value="{{ old('published_at', isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}" class="komsije-input block min-w-0 w-full max-w-full overflow-hidden rounded-2xl px-4 py-3">
+            <div class="max-w-full overflow-x-hidden rounded-2xl">
+                <input id="published_at" name="published_at" type="datetime-local" value="{{ old('published_at', isset($announcement) && $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}" data-standalone-datetime class="komsije-input block min-w-0 w-full max-w-full rounded-2xl px-4 py-3">
+            </div>
             <p class="mt-2 text-sm text-slate-500">{{ __('Leave empty to publish immediately. Set a future date to schedule publication.') }}</p>
             @error('published_at')<p class="mt-2 text-sm text-rose-600">{{ $message }}</p>@enderror
         </div>
