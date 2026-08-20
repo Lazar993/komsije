@@ -76,13 +76,11 @@
         from {
             opacity: 0;
             transform: translate3d(0, 6px, 0);
-            filter: blur(1.8px);
         }
 
         to {
             opacity: 1;
             transform: translate3d(0, 0, 0);
-            filter: blur(0);
         }
     }
 
@@ -90,26 +88,22 @@
         from {
             opacity: 1;
             transform: translate3d(0, 0, 0);
-            filter: blur(0);
         }
 
         to {
             opacity: 0;
             transform: translate3d(0, -3px, 0);
-            filter: blur(1.2px);
         }
     }
 
     @keyframes komsije-view-old {
         from {
             opacity: 1;
-            filter: blur(0);
             transform: translate3d(0, 0, 0);
         }
 
         to {
             opacity: 0;
-            filter: blur(1.1px);
             transform: translate3d(0, -2px, 0);
         }
     }
@@ -117,13 +111,11 @@
     @keyframes komsije-view-new {
         from {
             opacity: 0;
-            filter: blur(1.6px);
             transform: translate3d(0, 4px, 0);
         }
 
         to {
             opacity: 1;
-            filter: blur(0);
             transform: translate3d(0, 0, 0);
         }
     }
