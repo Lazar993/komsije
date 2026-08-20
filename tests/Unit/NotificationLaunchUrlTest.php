@@ -14,11 +14,12 @@ class NotificationLaunchUrlTest extends TestCase
         $wrapped = NotificationLaunchUrl::wrap([
             'type' => 'announcement_created',
             'url' => '/portal/announcements/42?tab=details',
+            'building_id' => 7,
         ]);
 
-        $this->assertSame('/portal/announcements/42?tab=details', $wrapped['target_url']);
+        $this->assertSame('/portal/announcements/42?tab=details&building_id=7', $wrapped['target_url']);
         $this->assertSame(
-            route('notification.launch', ['target' => '/portal/announcements/42?tab=details'], false),
+            route('notification.launch', ['target' => '/portal/announcements/42?tab=details&building_id=7'], false),
             $wrapped['url']
         );
     }

@@ -64,7 +64,7 @@ self.addEventListener('push', (event) => {
         badge: notification.badge || '/icons/notification-badge-96.png',
         tag: data.type ? `${data.type}-${data.ticket_id || data.announcement_id || ''}` : undefined,
         data: {
-            url: data.url || data.click_action || '/',
+            url: data.url || data.target_url || data.click_action || '/',
             ...data,
         },
         renotify: false,
@@ -82,23 +82,40 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const launchUrl = event.notification.data?.url || '/';
+    const launchUrl = event.notification.data?.url || event.notification.data?.target_url || '/';
     const targetUrl = event.notification.data?.target_url || launchUrl;
 
     event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (clientList) => {
             const wantedUrl = new URL(targetUrl, self.location.origin);
 
             for (const client of clientList) {
                 const clientUrl = new URL(client.url);
 
-                if (clientUrl.origin === wantedUrl.origin && 'focus' in client) {
-                    client.navigate(wantedUrl.toString()).catch(() => { });
-                    return client.focus();
+                if (clientUrl.origin !== wantedUrl.origin || !('focus' in client)) {
+                    continue;
+                }
+
+                try {
+                    const navigatedClient = 'navigate' in client
+                        ? await client.navigate(wantedUrl.toString())
+                        : client;
+
+                    if (navigatedClient && 'focus' in navigatedClient) {
+                        await navigatedClient.focus();
+
+                        return;
+                    }
+
+                    await client.focus();
+
+                    return;
+                } catch {
+                    // Try the next client and open a new window as a fallback.
                 }
             }
 
-            return self.clients.openWindow(launchUrl);
+            await self.clients.openWindow(launchUrl);
         })
     );
 });

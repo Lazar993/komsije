@@ -114,4 +114,31 @@ class NeighborBoardPortalTest extends TestCase
             ->get(route('portal.neighbor-board.show', $post))
             ->assertNotFound();
     }
+
+    public function test_notification_link_can_switch_context_to_the_post_building(): void
+    {
+        $tenant = User::factory()->create();
+        $buildingA = Building::factory()->create();
+        $buildingB = Building::factory()->create();
+
+        $buildingA->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $buildingB->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+
+        $post = NeighborBoardPost::factory()->create([
+            'building_id' => $buildingA->getKey(),
+            'author_id' => $tenant->getKey(),
+            'status' => NeighborBoardPostStatus::Active,
+            'title' => 'Komsijska tabla obavestenje',
+        ]);
+
+        $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $buildingB->getKey()])
+            ->get(route('portal.neighbor-board.show', [
+                'post' => $post,
+                'building_id' => $buildingA->getKey(),
+            ]))
+            ->assertOk()
+            ->assertSee('Komsijska tabla obavestenje')
+            ->assertSessionHas('current_building_id', $buildingA->getKey());
+    }
 }

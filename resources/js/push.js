@@ -272,7 +272,7 @@ export async function enablePush(configOverride = null) {
                 badge: '/icons/notification-badge-96.png',
                 tag,
                 renotify: false,
-                data: { url: data.url || '/', ...data },
+                data: { url: data.url || data.target_url || '/', ...data },
                 // Android-only extras (no-op on iOS/desktop).
                 vibrate: [120, 60, 120],
                 lang: 'sr-Latn',

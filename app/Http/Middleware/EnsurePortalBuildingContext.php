@@ -29,8 +29,15 @@ final class EnsurePortalBuildingContext
             $buildingQuery->whereHas('users', fn ($query) => $query->whereKey($user->getKey()));
         }
 
-        $currentBuildingId = $request->session()->get('current_building_id');
-        $building = $currentBuildingId !== null ? (clone $buildingQuery)->find($currentBuildingId) : null;
+        // Notification links can carry ?building_id=... so we open the target
+        // in the correct tenant context even when another building is active.
+        $requestedBuildingId = $this->resolveRequestedBuildingId($request);
+        $building = $requestedBuildingId !== null ? (clone $buildingQuery)->find($requestedBuildingId) : null;
+
+        if ($building === null) {
+            $currentBuildingId = $request->session()->get('current_building_id');
+            $building = $currentBuildingId !== null ? (clone $buildingQuery)->find($currentBuildingId) : null;
+        }
 
         if ($building === null) {
             $building = (clone $buildingQuery)->first();
@@ -46,5 +53,22 @@ final class EnsurePortalBuildingContext
         $request->attributes->set('currentBuilding', $building);
 
         return $next($request);
+    }
+
+    private function resolveRequestedBuildingId(Request $request): ?int
+    {
+        $raw = $request->query('building_id');
+
+        if (is_int($raw)) {
+            return $raw > 0 ? $raw : null;
+        }
+
+        if (! is_string($raw) || ! ctype_digit($raw)) {
+            return null;
+        }
+
+        $buildingId = (int) $raw;
+
+        return $buildingId > 0 ? $buildingId : null;
     }
 }
