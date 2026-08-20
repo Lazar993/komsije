@@ -13,6 +13,7 @@ import { initPushNotifications, enablePush, disablePush, getPushStatus } from '.
 window.komsijePush = { enablePush, disablePush, getPushStatus };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    setupGlobalMicroInteractions();
     applyStandaloneMode();
     upgradeImagesForPerformance();
     setupFileInputPreviews();
@@ -28,6 +29,110 @@ document.addEventListener('DOMContentLoaded', async () => {
     await registerServiceWorker();
     initPushNotifications();
 });
+
+function setupGlobalMicroInteractions() {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const supportsNativePageTransitions = typeof document.startViewTransition === 'function';
+
+    if (prefersReducedMotion) {
+        return;
+    }
+
+    // Fallback entrance animation for browsers without cross-document transitions.
+    document.body.classList.add('komsije-page-enter');
+    window.setTimeout(() => {
+        document.body.classList.remove('komsije-page-enter');
+    }, 320);
+
+    document.addEventListener('pointerdown', (event) => {
+        if (!(event instanceof PointerEvent) || event.button !== 0 || !event.isPrimary) {
+            return;
+        }
+
+        const target = event.target instanceof Element
+            ? event.target.closest('a, button, [role="button"], input[type="submit"], input[type="button"], label[for]')
+            : null;
+
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        const pulse = document.createElement('span');
+        pulse.className = 'komsije-click-pulse';
+        pulse.style.left = `${event.clientX}px`;
+        pulse.style.top = `${event.clientY}px`;
+
+        document.body.appendChild(pulse);
+        pulse.addEventListener('animationend', () => {
+            pulse.remove();
+        }, { once: true });
+    }, { passive: true });
+
+    if (!supportsNativePageTransitions) {
+        let isNavigatingAway = false;
+
+        const handleSoftPageExit = (event) => {
+            if (event.defaultPrevented || !(event.target instanceof Element)) {
+                return;
+            }
+
+            if (event instanceof MouseEvent) {
+                if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                    return;
+                }
+            }
+
+            const link = event.target.closest('a[href]');
+            if (!(link instanceof HTMLAnchorElement)) {
+                return;
+            }
+
+            if (link.target && link.target !== '_self') {
+                return;
+            }
+
+            if (link.hasAttribute('download') || link.dataset.noPageExit === 'true') {
+                return;
+            }
+
+            if (link.closest('[data-lightbox-trigger], [data-pdf-preview-trigger], [data-portal-download]')) {
+                return;
+            }
+
+            const url = new URL(link.href, window.location.origin);
+
+            if (url.origin !== window.location.origin || !['http:', 'https:'].includes(url.protocol)) {
+                return;
+            }
+
+            const sameDocumentAnchor = url.pathname === window.location.pathname
+                && url.search === window.location.search
+                && url.hash;
+
+            if (sameDocumentAnchor) {
+                return;
+            }
+
+            if (isNavigatingAway) {
+                event.preventDefault();
+                return;
+            }
+
+            isNavigatingAway = true;
+            event.preventDefault();
+            document.body.classList.add('komsije-page-exit');
+
+            window.setTimeout(() => {
+                window.location.assign(url.toString());
+            }, 140);
+        };
+
+        // Register late so feature handlers can cancel links first.
+        window.setTimeout(() => {
+            document.addEventListener('click', handleSoftPageExit);
+        }, 0);
+    }
+}
 
 function setupFileInputPreviews(root = document) {
     const inputs = root.querySelectorAll('[data-file-preview-input]');

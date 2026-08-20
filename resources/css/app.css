@@ -11,6 +11,10 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+@view-transition {
+    navigation: auto;
+}
+
 @layer base {
     :root {
         --komsije-primary: #2563eb;
@@ -37,6 +41,109 @@
             radial-gradient(circle at top, rgba(37, 99, 235, 0.14), transparent 34%),
             linear-gradient(180deg, #f8fafc 0%, #eef4ff 48%, #f8fafc 100%);
         color: var(--komsije-dark);
+    }
+
+    body.komsije-page-enter {
+        animation: komsije-page-enter 0.32s cubic-bezier(0.22, 0.78, 0.2, 1) both;
+    }
+
+    body.komsije-page-exit {
+        animation: komsije-page-exit 0.14s ease-in both;
+    }
+
+    ::view-transition-old(root) {
+        animation: komsije-view-old 0.2s ease-out both;
+    }
+
+    ::view-transition-new(root) {
+        animation: komsije-view-new 0.28s cubic-bezier(0.22, 0.78, 0.2, 1) both;
+    }
+
+    .komsije-click-pulse {
+        position: fixed;
+        z-index: 9999;
+        width: 16px;
+        height: 16px;
+        border-radius: 9999px;
+        border: 2px solid rgba(37, 99, 235, 0.38);
+        background: rgba(37, 99, 235, 0.1);
+        pointer-events: none;
+        transform: translate(-50%, -50%) scale(0.5);
+        animation: komsije-click-pulse 0.3s ease-out forwards;
+    }
+
+    @keyframes komsije-page-enter {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 6px, 0);
+            filter: blur(1.8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            filter: blur(0);
+        }
+    }
+
+    @keyframes komsije-page-exit {
+        from {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+            filter: blur(0);
+        }
+
+        to {
+            opacity: 0;
+            transform: translate3d(0, -3px, 0);
+            filter: blur(1.2px);
+        }
+    }
+
+    @keyframes komsije-view-old {
+        from {
+            opacity: 1;
+            filter: blur(0);
+            transform: translate3d(0, 0, 0);
+        }
+
+        to {
+            opacity: 0;
+            filter: blur(1.1px);
+            transform: translate3d(0, -2px, 0);
+        }
+    }
+
+    @keyframes komsije-view-new {
+        from {
+            opacity: 0;
+            filter: blur(1.6px);
+            transform: translate3d(0, 4px, 0);
+        }
+
+        to {
+            opacity: 1;
+            filter: blur(0);
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes komsije-click-pulse {
+        to {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(2.2);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        ::view-transition-old(root),
+        ::view-transition-new(root),
+        body.komsije-page-enter,
+        body.komsije-page-exit,
+        .komsije-click-pulse {
+            animation: none !important;
+        }
     }
 
     body[data-app-shell='standalone'] {
