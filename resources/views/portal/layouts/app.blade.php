@@ -5,11 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>@yield('title', 'Komšije')</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="min-h-screen bg-[var(--komsije-background)] font-sans text-slate-900 antialiased overscroll-y-none">
+        <a href="#main-content" class="komsije-skip-link">{{ __('Skip to main content') }}</a>
         @php
             $user = auth()->user();
             $currentRoute = request()->route()?->getName();
@@ -111,7 +112,7 @@
                     </div>
                 @endif
 
-                <main class="flex-1">@yield('content')</main>
+                <main id="main-content" class="flex-1">@yield('content')</main>
             </div>
 
             <x-site-footer />

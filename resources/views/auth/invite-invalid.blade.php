@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ __('Poziv nije dostupan') }} | Komšije</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700&display=swap" rel="stylesheet" />
+        @vite('resources/css/app.css')
     </head>
     <body class="min-h-screen bg-[linear-gradient(135deg,#1f2937_0%,#0f766e_42%,#f59e0b_100%)] text-slate-950 antialiased">
         <div class="relative isolate min-h-screen overflow-hidden">

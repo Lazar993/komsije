@@ -8,11 +8,12 @@
         <meta name="description" content="@yield('meta_description')">
     @endif
     @yield('head')
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+    @vite('resources/css/app.css')
 </head>
 <body class="min-h-screen bg-[var(--komsije-background)] font-sans text-slate-900 antialiased">
+    <a href="#main-content" class="komsije-skip-link">{{ __('Skip to main content') }}</a>
     <div class="flex min-h-screen flex-col">
         <header class="border-b border-[var(--komsije-border)] bg-white/80 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
@@ -24,7 +25,7 @@
             </div>
         </header>
 
-        <main class="flex-1">
+        <main id="main-content" class="flex-1">
             @yield('content')
         </main>
 
@@ -51,7 +52,7 @@
                     @endisset
                 </div>
 
-                <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-500 md:text-left">
+                <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-300 md:text-left">
                     &copy; {{ now()->year }} T&B Solutions. {{ __('Sva prava zadržana.') }}
                 </div>
             </div>

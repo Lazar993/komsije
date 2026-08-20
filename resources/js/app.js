@@ -20,15 +20,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTicketFilters();
     setupTicketConversation();
     setupAnnouncementPagination();
-    setupCardDecks();
-    setupLightbox();
-    setupPortalDownloads();
-    setupPdfPreview();
-    setupInstallPrompt();
-    setupPushSettings();
-    await registerServiceWorker();
-    initPushNotifications();
+    runWhenIdle(() => {
+        setupCardDecks();
+        setupLightbox();
+        setupPortalDownloads();
+        setupPdfPreview();
+        setupInstallPrompt();
+        setupPushSettings();
+    });
+
+    runWhenIdle(async () => {
+        await registerServiceWorker();
+        initPushNotifications();
+    }, { delay: 120 });
 });
+
+function runWhenIdle(callback, { timeout = 1200, delay = 0 } = {}) {
+    const invoke = () => {
+        void callback();
+    };
+
+    const schedule = () => {
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(() => invoke(), { timeout });
+
+            return;
+        }
+
+        window.setTimeout(invoke, 1);
+    };
+
+    if (delay > 0) {
+        window.setTimeout(schedule, delay);
+
+        return;
+    }
+
+    schedule();
+}
 
 function setupGlobalMicroInteractions() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1226,9 +1255,18 @@ function applyStandaloneMode() {
 }
 
 function upgradeImagesForPerformance() {
+    const foldHeight = window.innerHeight || 900;
+
     document.querySelectorAll('img').forEach((image) => {
         if (!image.hasAttribute('loading')) {
-            image.loading = 'lazy';
+            const rect = image.getBoundingClientRect();
+            const likelyAboveFold = rect.top < foldHeight * 1.25;
+
+            image.loading = likelyAboveFold ? 'eager' : 'lazy';
+
+            if (likelyAboveFold && !image.hasAttribute('fetchpriority')) {
+                image.fetchPriority = 'high';
+            }
         }
 
         if (!image.hasAttribute('decoding')) {

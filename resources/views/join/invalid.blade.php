@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ __('Stranica nije pronađena') }} | Komšije</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=space-grotesk:500,600,700|manrope:400,500,600" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=space-grotesk:500,600,700|manrope:400,500,600&display=swap" rel="stylesheet" />
+        @vite('resources/css/app.css')
     </head>
     <body class="min-h-screen bg-[linear-gradient(135deg,#0f172a_0%,#0e7490_45%,#f59e0b_100%)] text-slate-900 antialiased">
         <div class="mx-auto flex min-h-screen max-w-3xl items-center px-4 py-8 sm:px-6 lg:px-8">

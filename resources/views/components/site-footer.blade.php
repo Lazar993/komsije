@@ -22,7 +22,7 @@
             </div>
 
             <nav aria-label="{{ __('Footer') }}" class="flex flex-col gap-2 text-sm">
-                <span class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{{ __('Informacije') }}</span>
+                <span class="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">{{ __('Informacije') }}</span>
                 {{-- <a href="{{ route('pages.professionals') }}" class="text-slate-300 transition hover:text-white">
                     {{ __('Za profesionalne upravnike') }}
                 </a> --}}
@@ -52,7 +52,7 @@
             </nav>
         </div>
 
-        <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-500 md:text-left">
+        <div class="mt-8 border-t border-white/10 pt-5 text-center text-xs text-slate-300 md:text-left">
             &copy; {{ $year }} T&B Solutions. {{ __('Sva prava zadržana.') }}
         </div>
     </div>

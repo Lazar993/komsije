@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ __('Prihvatanje poziva') }} | Komšije</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+        @vite('resources/css/app.css')
     </head>
     <body class="min-h-screen font-sans text-slate-900 antialiased overscroll-y-none" data-app-shell="standalone">
         <div class="relative isolate min-h-screen overflow-x-hidden">

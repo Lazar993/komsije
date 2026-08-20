@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ __('Pridružite se zgradi') }} | Komšije</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700|manrope:400,500,600,700" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700|manrope:400,500,600,700&display=swap" rel="stylesheet" />
+        @vite('resources/css/app.css')
     </head>
     <body class="min-h-screen bg-[radial-gradient(circle_at_top_left,#fef3c7_0%,#f8fafc_35%,#e0f2fe_100%)] text-slate-900 antialiased">
         <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">

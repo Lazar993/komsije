@@ -84,7 +84,7 @@
                 <div class="relative min-w-0">
                     <div class="komsije-surface rounded-[2rem] p-6 sm:p-8">
                         <div class="flex items-center gap-3">
-                            <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-11 w-11 rounded-2xl" width="44" height="44" loading="lazy">
+                            <img src="{{ asset('icons/logo-icon-v3.svg') }}" alt="" class="h-11 w-11 rounded-2xl" width="44" height="44" loading="eager" fetchpriority="high" decoding="async">
                             <div>
                                 <p class="text-base font-semibold text-[var(--komsije-dark)]">Komšije</p>
                                 <p class="text-sm text-slate-500">{{ __('Sve u vezi zgrade, na jednom mestu.') }}</p>

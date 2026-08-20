@@ -15,12 +15,14 @@
     $selectClasses = $compact
         ? 'w-14 bg-transparent text-xs font-medium text-slate-700 outline-none sm:w-auto sm:text-sm'
         : 'bg-transparent text-sm font-medium text-slate-700 outline-none';
+
+    $fieldId = 'site-locale-'.($compact ? 'compact-' : 'default-').\Illuminate\Support\Str::random(6);
 @endphp
 
 <form method="POST" action="{{ route('locale.update') }}" class="{{ $wrapperClasses }}">
     @csrf
-    <label for="site-locale-{{ $compact ? 'compact' : 'default' }}" class="{{ $labelClasses }}">{{ __('Language') }}</label>
-    <select id="site-locale-{{ $compact ? 'compact' : 'default' }}" name="locale" class="{{ $selectClasses }}" onchange="this.form.submit()" aria-label="{{ __('Language') }}">
+    <label for="{{ $fieldId }}" class="{{ $labelClasses }}">{{ __('Language') }}</label>
+    <select id="{{ $fieldId }}" name="locale" class="{{ $selectClasses }}" onchange="this.form.submit()" aria-label="{{ __('Language') }}">
         @foreach ($siteLocaleOptions as $localeCode => $localeOption)
             <option value="{{ $localeCode }}" @selected($siteLocale === $localeCode)>{{ $localeOption['label'] ?? strtoupper($localeCode) }}</option>
         @endforeach

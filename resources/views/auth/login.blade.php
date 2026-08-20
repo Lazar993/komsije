@@ -5,11 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <title>{{ __('Portal Login') }}</title>
         @include('partials.pwa-head')
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+        <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
+        @vite('resources/css/app.css')
     </head>
     <body class="min-h-screen font-sans text-slate-900 antialiased overscroll-y-none" data-app-shell="standalone">
+        <a href="#main-content" class="komsije-skip-link">{{ __('Skip to main content') }}</a>
         <div class="relative isolate min-h-screen overflow-x-hidden">
             <div class="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.18),transparent_58%)]"></div>
 
@@ -30,7 +31,7 @@
                     </div>
                 </header>
 
-                <main class="flex flex-1 items-center py-4 md:py-8">
+                <main id="main-content" class="flex flex-1 items-center py-4 md:py-8">
                     <div class="grid w-full gap-6 lg:grid-cols-[1.1fr_0.9fr] xl:gap-8">
                         <section class="komsije-surface rounded-[2rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(239,246,255,0.96))] p-6 sm:p-8 lg:p-10">
                             <p class="inline-flex rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--komsije-primary)]">{{ __('Resident Portal') }}</p>
