@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTicketFilters();
     setupTicketConversation();
     setupAnnouncementPagination();
+    setupBuildingSwitcher();
     runWhenIdle(() => {
         setupCardDecks();
         setupLightbox();
@@ -612,6 +613,104 @@ function setupTicketFilters() {
         formSelector: '[data-ticket-filters]',
         resultsSelector: '[data-ticket-results]',
         resetSelector: '[data-ticket-filters-reset]',
+    });
+}
+
+function setupBuildingSwitcher() {
+    const form = document.querySelector('[data-building-switcher]');
+
+    if (!(form instanceof HTMLFormElement)) {
+        return;
+    }
+
+    const trigger = form.querySelector('[data-building-switcher-trigger]');
+    const panel = form.querySelector('[data-building-switcher-panel]');
+    const search = form.querySelector('[data-building-switcher-search]');
+    const list = form.querySelector('[data-building-switcher-list]');
+    const empty = form.querySelector('[data-building-switcher-empty]');
+    const input = form.querySelector('[data-building-switcher-input]');
+    const label = form.querySelector('[data-building-switcher-label]');
+    const switchUrlBase = form.dataset.switchUrlBase;
+    const options = list ? Array.from(list.querySelectorAll('[data-building-switcher-option]')) : [];
+
+    if (!(trigger instanceof HTMLElement) || !(panel instanceof HTMLElement) || !(search instanceof HTMLInputElement)) {
+        return;
+    }
+
+    const openPanel = () => {
+        panel.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        search.value = '';
+        options.forEach((option) => option.classList.remove('hidden'));
+        if (empty instanceof HTMLElement) {
+            empty.classList.add('hidden');
+        }
+        window.setTimeout(() => search.focus(), 0);
+    };
+
+    const closePanel = () => {
+        panel.classList.add('hidden');
+        trigger.setAttribute('aria-expanded', 'false');
+    };
+
+    trigger.addEventListener('click', () => {
+        if (panel.classList.contains('hidden')) {
+            openPanel();
+        } else {
+            closePanel();
+        }
+    });
+
+    search.addEventListener('input', () => {
+        const query = search.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        options.forEach((option) => {
+            const matches = (option.dataset.search || '').includes(query);
+            option.classList.toggle('hidden', !matches);
+            if (matches) {
+                visibleCount += 1;
+            }
+        });
+
+        if (empty instanceof HTMLElement) {
+            empty.classList.toggle('hidden', visibleCount > 0);
+        }
+    });
+
+    options.forEach((option) => {
+        option.addEventListener('click', () => {
+            const value = option.dataset.value;
+
+            if (!value || !(input instanceof HTMLInputElement)) {
+                return;
+            }
+
+            input.value = value;
+
+            if (label instanceof HTMLElement) {
+                label.textContent = option.textContent.trim();
+            }
+
+            if (switchUrlBase) {
+                form.action = `${switchUrlBase}/${value}/switch`;
+            }
+
+            closePanel();
+            form.submit();
+        });
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!form.contains(event.target)) {
+            closePanel();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closePanel();
+        }
     });
 }
 

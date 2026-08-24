@@ -27,7 +27,7 @@
         <div class="relative isolate flex min-h-screen flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] md:pb-0">
             <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_58%)]"></div>
             <div class="relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
-                <header class="komsije-surface mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
+                <header class="komsije-surface relative z-20 mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
                     <div class="flex flex-col gap-4">
                         <div class="flex items-start justify-between gap-3">
                             <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-3">
@@ -68,15 +68,52 @@
 
                             <div class="flex flex-col gap-3 sm:min-w-0 sm:flex-row sm:flex-nowrap sm:items-center sm:justify-end">
                                 @if ($accessibleBuildings->isNotEmpty())
-                                    <form method="POST" action="{{ route('portal.buildings.switch', $currentBuilding ?? $accessibleBuildings->first()) }}" class="komsije-pill flex items-center gap-3 rounded-2xl px-4 py-3 sm:min-w-0 sm:max-w-44 md:max-w-52 xl:max-w-none">
+                                    <form
+                                        method="POST"
+                                        action="{{ route('portal.buildings.switch', $currentBuilding ?? $accessibleBuildings->first()) }}"
+                                        class="komsije-pill relative flex items-center gap-3 rounded-2xl px-4 py-3 sm:min-w-0 sm:max-w-44 md:max-w-52 xl:max-w-none"
+                                        data-building-switcher
+                                        data-switch-url-base="{{ url('/portal/buildings') }}"
+                                    >
                                         @csrf
+                                        <input type="hidden" name="building" value="{{ $currentBuilding?->getKey() }}" data-building-switcher-input>
                                         <div class="flex min-w-0 flex-1 flex-col">
                                             <span class="text-xs font-medium uppercase tracking-[0.22em] text-slate-400">{{ __('Aktivna zgrada') }}</span>
-                                            <select name="building" class="w-full min-w-0 truncate bg-transparent pt-1 text-sm font-medium text-slate-700 outline-none" onchange="this.form.action='{{ url('/portal/buildings') }}/' + this.value + '/switch'; this.form.submit();">
+                                            <button
+                                                type="button"
+                                                class="flex w-full min-w-0 items-center justify-between gap-2 truncate bg-transparent pt-1 text-left text-sm font-medium text-slate-700 outline-none"
+                                                data-building-switcher-trigger
+                                                aria-haspopup="listbox"
+                                                aria-expanded="false"
+                                            >
+                                                <span class="truncate" data-building-switcher-label>{{ $currentBuilding?->name ?? __('Izaberi zgradu') }}</span>
+                                                <x-portal.app-icon name="chevron-down" class="h-4 w-4 shrink-0 text-slate-400" />
+                                            </button>
+                                        </div>
+
+                                        <div class="absolute left-0 top-full z-30 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-[var(--komsije-border)] bg-white p-2 shadow-xl" data-building-switcher-panel role="listbox">
+                                            <input
+                                                type="text"
+                                                class="w-full rounded-xl border border-[var(--komsije-border)] bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-300"
+                                                placeholder="{{ __('Pretraži zgrade...') }}"
+                                                data-building-switcher-search
+                                                autocomplete="off"
+                                            >
+                                            <ul class="mt-2 max-h-64 overflow-y-auto" data-building-switcher-list>
                                                 @foreach ($accessibleBuildings as $buildingOption)
-                                                    <option value="{{ $buildingOption->getKey() }}" @selected($currentBuilding?->is($buildingOption))>{{ $buildingOption->name }}</option>
+                                                    <li
+                                                        data-building-switcher-option
+                                                        data-value="{{ $buildingOption->getKey() }}"
+                                                        data-search="{{ \Illuminate\Support\Str::lower($buildingOption->name) }}"
+                                                        class="cursor-pointer truncate rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-[var(--komsije-primary)] {{ $currentBuilding?->is($buildingOption) ? 'bg-blue-50 text-[var(--komsije-primary)]' : '' }}"
+                                                        role="option"
+                                                        @selected($currentBuilding?->is($buildingOption))
+                                                    >
+                                                        {{ $buildingOption->name }}
+                                                    </li>
                                                 @endforeach
-                                            </select>
+                                            </ul>
+                                            <p class="hidden px-3 py-2 text-sm text-slate-400" data-building-switcher-empty>{{ __('Nema rezultata.') }}</p>
                                         </div>
                                     </form>
                                 @endif
