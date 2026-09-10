@@ -75,7 +75,7 @@
                         </div>
                         <div class="rounded-[1.5rem] border border-white/10 bg-white/6 p-4">
                             <p class="text-xs uppercase tracking-[0.22em] text-slate-300">{{ __('Komšijska tabla') }}</p>
-                            <p class="mt-3 text-3xl font-semibold text-white">{{ $currentBuilding->neighborBoardPosts_count ?? 0 }}</p>
+                            <p class="mt-3 text-3xl font-semibold text-white">{{ $currentBuilding->neighbor_board_posts_count ?? 0 }}</p>
                         </div>
                     </div>
                 </div>
