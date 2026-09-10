@@ -12,6 +12,7 @@ use App\Filament\Resources\Tickets\Pages\CreateTicket;
 use App\Filament\Resources\Tickets\Pages\EditTicket;
 use App\Filament\Resources\Tickets\Pages\ListTickets;
 use App\Filament\Resources\Tickets\Pages\ViewTicket;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Rules\BuildingAcceptsWrites;
@@ -39,28 +40,34 @@ use UnitEnum;
 
 class TicketResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Ticket::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::WrenchScrewdriver;
 
     protected static string | UnitEnum | null $navigationGroup = 'Operations';
 
+    protected static ?string $navigationLabel = 'Tickets';
+
+    protected static ?string $pluralModelLabel = 'Tickets';
+
     protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Ticket')->schema([
+            Section::make(__('Ticket'))->schema([
                 Select::make('building_id')
                     ->required()
-                    ->label('Building')
+                    ->label(__('Building'))
                     ->searchable()
                     ->preload()
                     ->rules([new BuildingAcceptsWrites()])
                     ->options(fn (): array => Building::writableSelectOptions(Auth::user()))
                     ->live(),
                 Select::make('apartment_id')
-                    ->label('Apartment')
+                    ->label(__('Apartment'))
                     ->searchable()
                     ->options(fn (Get $get): array => Apartment::query()
                         ->when($get('building_id'), fn ($query, $buildingId) => $query->where('building_id', $buildingId))
@@ -68,7 +75,7 @@ class TicketResource extends Resource
                         ->pluck('number', 'id')
                         ->all()),
                 Select::make('assigned_to')
-                    ->label('Assigned manager')
+                    ->label(__('Assigned manager'))
                     ->searchable()
                     ->options(fn (Get $get): array => User::query()
                         ->when(
@@ -81,26 +88,32 @@ class TicketResource extends Resource
                         ->pluck('name', 'id')
                         ->all()),
                 Select::make('priority')
+                    ->label(__('Priority'))
                     ->required()
                     ->options(self::priorityOptions()),
                 Select::make('status')
+                    ->label(__('Status'))
                     ->required()
                     ->options(self::statusOptions())
                     ->default(TicketStatus::New->value),
                 Select::make('visibility')
+                    ->label(__('Visibility'))
                     ->required()
                     ->options(self::visibilityOptions())
                     ->default(TicketVisibility::Private->value)
-                    ->helperText('Public tickets are visible to all residents of the same building, anonymized.'),
+                    ->helperText(__('Public tickets are visible to all residents of the same building, anonymized.')),
                 Textarea::make('title')
+                    ->label(__('Title'))
                     ->rows(2)
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->label(__('Description'))
                     ->required()
                     ->rows(5)
                     ->maxLength(5000),
                 Textarea::make('status_note')
+                    ->label(__('Status note'))
                     ->rows(2)
                     ->maxLength(255),
             ]),
@@ -110,20 +123,29 @@ class TicketResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            TextEntry::make('title'),
-            TextEntry::make('building.name'),
-            TextEntry::make('apartment.number'),
+            TextEntry::make('title')
+                ->label(__('Title')),
+            TextEntry::make('building.name')
+                ->label(__('Building')),
+            TextEntry::make('apartment.number')
+                ->label(__('Apartment')),
             TextEntry::make('status')
+                ->label(__('Status'))
                 ->badge(),
             TextEntry::make('priority')
+                ->label(__('Priority'))
                 ->badge(),
             TextEntry::make('visibility')
+                ->label(__('Visibility'))
                 ->badge(),
             TextEntry::make('affected_count')
-                ->label('Affected residents'),
-            TextEntry::make('reporter.name'),
-            TextEntry::make('assignee.name'),
-            TextEntry::make('description'),
+                    ->label(__('Affected residents')),
+            TextEntry::make('reporter.name')
+                ->label(__('Reporter')),
+            TextEntry::make('assignee.name')
+                ->label(__('Manager')),
+            TextEntry::make('description')
+                ->label(__('Description')),
         ]);
     }
 
@@ -134,25 +156,31 @@ class TicketResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['building', 'apartment', 'assignee', 'reporter']))
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('building.name')
+                    ->label(__('Building'))
                     ->sortable(),
-                TextColumn::make('apartment.number'),
+                TextColumn::make('apartment.number')
+                    ->label(__('Apartment')),
                 TextColumn::make('status')
+                    ->label(__('Status'))
                     ->badge(),
                 TextColumn::make('priority')
+                    ->label(__('Priority'))
                     ->badge(),
                 TextColumn::make('visibility')
-                    ->badge()
-                    ->label('Visibility'),
+                    ->label(__('Visibility'))
+                    ->badge(),
                 TextColumn::make('affected_count')
-                    ->label('Affected')
+                    ->label(__('Affected'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('assignee.name')
-                    ->label('Manager'),
+                    ->label(__('Manager')),
                 TextColumn::make('updated_at')
+                    ->label(__('Updated At'))
                     ->since(),
             ])
             ->filters([
@@ -163,7 +191,7 @@ class TicketResource extends Resource
                 SelectFilter::make('visibility')
                     ->options(self::visibilityOptions()),
                 SelectFilter::make('building_id')
-                    ->label('Building')
+                    ->label(__('Building'))
                     ->options(self::accessibleBuildingOptions()),
             ])
             ->recordActions([

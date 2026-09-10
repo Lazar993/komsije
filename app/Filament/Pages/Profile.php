@@ -40,6 +40,10 @@ final class Profile extends Page
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::OutlinedUserCircle;
 
+    public static function getNavigationGroup(): string | UnitEnum | null
+    {
+        return __('Account');
+    }
     protected static ?int $navigationSort = 50;
 
     protected static ?string $slug = 'profile';

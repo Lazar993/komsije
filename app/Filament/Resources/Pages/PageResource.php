@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Pages;
 use App\Filament\Resources\Pages\Pages\CreatePage;
 use App\Filament\Resources\Pages\Pages\EditPage;
 use App\Filament\Resources\Pages\Pages\ListPages;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Page;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -31,6 +32,8 @@ use UnitEnum;
 
 class PageResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Page::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::DocumentText;
@@ -43,10 +46,12 @@ class PageResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Static pages';
 
+    protected static ?string $navigationLabel = 'Static pages';
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Page')->schema([
+            Section::make(__('Page'))->schema([
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255)
@@ -61,11 +66,11 @@ class PageResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true)
-                    ->helperText('Used in URL: /page/{slug}'),
+                    ->helperText(__('Used in URL: /page/{slug}')),
                 Textarea::make('meta_description')
                     ->maxLength(255)
                     ->rows(2)
-                    ->helperText('Optional. Shown in <meta name="description"> for SEO.'),
+                    ->helperText(__('Optional. Shown in <meta name="description"> for SEO.')),
                 RichEditor::make('content')
                     ->required()
                     ->columnSpanFull()
@@ -75,7 +80,7 @@ class PageResource extends Resource
                         'link', 'undo', 'redo',
                     ]),
                 Toggle::make('is_published')
-                    ->label('Published')
+                    ->label(__('Published'))
                     ->default(false),
             ]),
         ]);
@@ -93,7 +98,7 @@ class PageResource extends Resource
                     ->searchable()
                     ->copyable(),
                 IconColumn::make('is_published')
-                    ->label('Published')
+                    ->label(__('Published'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
@@ -101,7 +106,7 @@ class PageResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                TernaryFilter::make('is_published')->label('Published'),
+                TernaryFilter::make('is_published')->label(__('Published')),
             ])
             ->recordActions([
                 EditAction::make(),

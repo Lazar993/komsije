@@ -9,6 +9,7 @@ use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\User;
@@ -36,33 +37,43 @@ use UnitEnum;
 
 class UserResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = User::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::Users;
 
     protected static string | UnitEnum | null $navigationGroup = 'Administration';
 
+    protected static ?string $navigationLabel = 'Users';
+
+    protected static ?string $pluralModelLabel = 'Users';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('User')->schema([
+            Section::make(__('User'))->schema([
                 TextInput::make('name')
+                    ->label(__('Name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('email')
+                    ->label(__('Email'))
                     ->email()
                     ->required()
                     ->maxLength(255),
                 TextInput::make('password')
+                    ->label(__('Password'))
                     ->password()
                     ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? Hash::make($state) : null)
                     ->dehydrated(fn (?string $state): bool => filled($state))
                     ->required(fn (string $operation): bool => $operation === 'create'),
                 Toggle::make('is_super_admin')
+                    ->label(__('Super Admin'))
                     ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false)
-                    ->helperText('Only one super admin is allowed.')
+                    ->helperText(__('Only one super admin is allowed.'))
                     ->rules([
                         function (?User $record): \Closure {
                             return function (string $attribute, mixed $value, \Closure $fail) use ($record): void {
@@ -82,7 +93,7 @@ class UserResource extends Resource
                         },
                     ]),
                 Select::make('manager_building_ids')
-                    ->label('Admin buildings')
+                    ->label(__('Admin buildings'))
                     ->multiple()
                     ->preload()
                     ->searchable()
@@ -90,37 +101,37 @@ class UserResource extends Resource
                         && ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleBuildingOptions()),
                 Select::make('tenant_building_ids')
-                    ->label('Tenant buildings')
+                    ->label(__('Tenant buildings'))
                     ->multiple()
                     ->preload()
                     ->searchable()
                     ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleBuildingOptions()),
                 Select::make('apartment_ids')
-                    ->label('Apartments')
+                    ->label(__('Apartments'))
                     ->multiple()
                     ->preload()
                     ->searchable()
                     ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
                     ->options(fn (): array => self::accessibleApartmentOptions()),
             ]),
-            Section::make('Notification preferences')->schema([
+            Section::make(__('Notification preferences'))->schema([
                 Toggle::make('notify_push')
-                    ->label('Push notifications')
-                    ->helperText('Real-time alerts on the user\'s devices.')
+                    ->label(__('Push notifications'))
+                    ->helperText(__('Real-time alerts on the user\'s devices.'))
                     ->default(true),
                 Toggle::make('notify_email')
-                    ->label('Email (all events)')
-                    ->helperText('Master email opt-in. When off, the per-category toggles below apply.')
+                    ->label(__('Email (all events)'))
+                    ->helperText(__('Master email opt-in. When off, the per-category toggles below apply.'))
                     ->default(false),
                 Toggle::make('notify_email_announcements')
-                    ->label('Email for announcements')
+                    ->label(__('Email for announcements'))
                     ->default(false),
                 Toggle::make('notify_email_tickets')
-                    ->label('Email for ticket activity')
+                    ->label(__('Email for ticket activity'))
                     ->default(false),
                 Select::make('notify_digest')
-                    ->label('Email digest')
+                    ->label(__('Email digest'))
                     ->options([
                         'none' => 'Off',
                         'daily' => 'Daily',
@@ -135,11 +146,15 @@ class UserResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            TextEntry::make('name'),
-            TextEntry::make('email'),
-            IconEntry::make('is_super_admin')->boolean(),
+            TextEntry::make('name')
+                ->label(__('Name')),
+            TextEntry::make('email')
+                ->label(__('Email')),
+            IconEntry::make('is_super_admin')
+                ->label(__('Super Admin'))
+                ->boolean(),
             TextEntry::make('buildings.role')
-                ->label('Building roles')
+                ->label(__('Building roles'))
                 ->state(function (User $record): string {
                     if ($record->isSuperAdmin()) {
                         return 'Super Admin';
@@ -154,10 +169,10 @@ class UserResource extends Resource
                         ->join(', ');
                 }),
             TextEntry::make('buildings.name')
-                ->label('Buildings')
+                ->label(__('Buildings'))
                 ->listWithLineBreaks(),
             TextEntry::make('apartments.number')
-                ->label('Apartments')
+                ->label(__('Apartments'))
                 ->listWithLineBreaks(),
         ]);
     }
@@ -169,12 +184,14 @@ class UserResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['buildings', 'apartments']))
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('Name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('email')
+                    ->label(__('Email'))
                     ->searchable(),
                 TextColumn::make('access_role')
-                    ->label('Role')
+                    ->label(__('Role'))
                     ->state(function (User $record): string {
                         if ($record->isSuperAdmin()) {
                             return 'Super Admin';
@@ -184,10 +201,11 @@ class UserResource extends Resource
                     })
                     ->badge(),
                 TextColumn::make('buildings.name')
-                    ->label('Buildings')
+                    ->label(__('Buildings'))
                     ->badge()
                     ->separator(','),
                 IconColumn::make('is_super_admin')
+                    ->label(__('Super Admin'))
                     ->boolean(),
             ])
             ->recordActions([

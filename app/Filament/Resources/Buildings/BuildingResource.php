@@ -11,6 +11,7 @@ use App\Filament\Resources\Buildings\Pages\CreateBuilding;
 use App\Filament\Resources\Buildings\Pages\EditBuilding;
 use App\Filament\Resources\Buildings\Pages\ListBuildings;
 use App\Filament\Resources\Buildings\Pages\ViewBuilding;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Enums\BuildingStatus;
 use App\Models\Building;
 use App\Models\User;
@@ -36,6 +37,7 @@ use UnitEnum;
 class BuildingResource extends Resource
 {
     use BuildingLifecycleActions;
+    use TranslatesFilamentLabels;
 
     protected static ?string $model = Building::class;
 
@@ -43,20 +45,26 @@ class BuildingResource extends Resource
 
     protected static string | UnitEnum | null $navigationGroup = 'Portfolio';
 
+    protected static ?string $navigationLabel = 'Buildings';
+
+    protected static ?string $pluralModelLabel = 'Buildings';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Building details')->schema([
+            Section::make(__('Building details'))->schema([
                 TextInput::make('name')
+                    ->label(__('Name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('address')
+                    ->label(__('Address'))
                     ->required()
                     ->maxLength(255),
                 Select::make('manager_ids')
-                    ->label('Building admins')
+                    ->label(__('Building admins'))
                     ->multiple()
                     ->preload()
                     ->searchable()
@@ -74,11 +82,14 @@ class BuildingResource extends Resource
     {
         return $schema->components([
             Section::make(__('Building details'))->schema([
-                TextEntry::make('name'),
-                TextEntry::make('address'),
+                TextEntry::make('name')
+                    ->label(__('Name')),
+                TextEntry::make('address')
+                    ->label(__('Address')),
                 TextEntry::make('billing_customer_reference')
                     ->label(__('Billing reference'))
-                    ->placeholder('-'),
+                    ->placeholder('-')
+                    ->label(__('Billing reference')),
                 TextEntry::make('managers.name')
                     ->label(__('Admins'))
                     ->listWithLineBreaks(),
@@ -90,6 +101,7 @@ class BuildingResource extends Resource
             ])->columns(2),
             Section::make(__('Subscription lifecycle'))->schema([
                 TextEntry::make('status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (BuildingStatus $state): string => $state->label())
                     ->color(fn (BuildingStatus $state): string => $state->color())
@@ -188,12 +200,15 @@ class BuildingResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('managers')->withCount(['apartments', 'tickets']))
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('Name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('address')
+                    ->label(__('Address'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (BuildingStatus $state): string => $state->label())
                     ->color(fn (BuildingStatus $state): string => $state->color())
@@ -212,10 +227,12 @@ class BuildingResource extends Resource
                     ->limitList(2),
                 TextColumn::make('apartments_count')
                     ->counts('apartments')
-                    ->label(__('Apartments')),
+                    ->label(__('Apartments'))
+                    ->sortable(),
                 TextColumn::make('tickets_count')
                     ->counts('tickets')
-                    ->label(__('Tickets')),
+                    ->label(__('Tickets'))
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')

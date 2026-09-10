@@ -8,6 +8,7 @@ use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Permission;
 use App\Models\Role;
 use BackedEnum;
@@ -29,18 +30,24 @@ use UnitEnum;
 
 class RoleResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Role::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::ShieldCheck;
 
     protected static string | UnitEnum | null $navigationGroup = 'Access Control';
 
+    protected static ?string $navigationLabel = 'Roles';
+
+    protected static ?string $pluralModelLabel = 'Roles';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Role definition')->schema([
+            Section::make(__('Role definition'))->schema([
                 Hidden::make('building_id')
                     ->default(null),
                 Hidden::make('guard_name')
@@ -64,10 +71,10 @@ class RoleResource extends Resource
         return $schema->components([
             TextEntry::make('name'),
             TextEntry::make('permissions.name')
-                ->label('Permissions')
+                ->label(__('Permissions'))
                 ->listWithLineBreaks(),
             TextEntry::make('users_count')
-                ->label('Assigned users'),
+                ->label(__('Assigned users')),
         ]);
     }
 
@@ -81,9 +88,9 @@ class RoleResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('permissions_count')
-                    ->label('Permissions'),
+                    ->label(__('Permissions')),
                 TextColumn::make('users_count')
-                    ->label('Assigned users'),
+                    ->label(__('Assigned users')),
             ])
             ->recordActions([
                 ViewAction::make(),

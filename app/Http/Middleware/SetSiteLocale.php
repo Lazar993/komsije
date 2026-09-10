@@ -16,12 +16,6 @@ final class SetSiteLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($this->shouldForceEnglish($request)) {
-            App::setLocale('en');
-
-            return $next($request);
-        }
-
         $locale = SiteLocale::sanitize(
             $request->user()?->locale
             ?? ($request->hasSession() ? $request->session()->get(SiteLocale::SESSION_KEY) : null)
@@ -44,16 +38,5 @@ final class SetSiteLocale
         View::share('siteLocaleOptions', SiteLocale::supported());
 
         return $next($request);
-    }
-
-    private function shouldForceEnglish(Request $request): bool
-    {
-        $routeName = $request->route()?->getName();
-
-        if (is_string($routeName) && str_starts_with($routeName, 'filament.admin.')) {
-            return true;
-        }
-
-        return $request->is('admin') || $request->is('admin/*');
     }
 }

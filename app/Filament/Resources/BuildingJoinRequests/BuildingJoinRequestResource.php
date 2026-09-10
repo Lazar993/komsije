@@ -7,6 +7,7 @@ namespace App\Filament\Resources\BuildingJoinRequests;
 use App\Enums\BuildingJoinRequestStatus;
 use App\Filament\Resources\BuildingJoinRequests\Pages\ListBuildingJoinRequests;
 use App\Filament\Resources\BuildingJoinRequests\Pages\ViewBuildingJoinRequest;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Building;
 use App\Models\BuildingJoinRequest;
 use App\Services\BuildingJoinRequestService;
@@ -27,11 +28,17 @@ use UnitEnum;
 
 class BuildingJoinRequestResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = BuildingJoinRequest::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::UserPlus;
 
     protected static string | UnitEnum | null $navigationGroup = 'Portfolio';
+
+    protected static ?string $navigationLabel = 'Building join requests';
+
+    protected static ?string $pluralModelLabel = 'Building join requests';
 
     protected static ?string $recordTitleAttribute = 'email';
 
@@ -83,10 +90,11 @@ class BuildingJoinRequestResource extends Resource
                     ->label(__('Email'))
                     ->searchable(),
                 TextColumn::make('status')
+                    ->label(__('Status'))
                     ->badge()
                     ->formatStateUsing(fn (BuildingJoinRequestStatus $state): string => $state->label()),
                 TextColumn::make('created_at')
-                    ->label(__('Date'))
+                    ->label(__('Created at'))
                     ->since(),
             ])
             ->filters([
@@ -95,6 +103,7 @@ class BuildingJoinRequestResource extends Resource
                     ->options(self::accessibleBuildingOptions())
                     ->searchable(),
                 SelectFilter::make('status')
+                    ->label(__('Status'))
                     ->options(collect(BuildingJoinRequestStatus::cases())
                         ->mapWithKeys(fn (BuildingJoinRequestStatus $status): array => [$status->value => $status->label()])
                         ->all())

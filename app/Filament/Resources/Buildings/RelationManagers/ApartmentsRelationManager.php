@@ -29,19 +29,19 @@ class ApartmentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'apartments';
 
-    protected static ?string $title = 'Apartments';
+    protected static ?string $title = null;
 
     public function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Apartment')->schema([
+            Section::make(__('Apartment'))->schema([
                 TextInput::make('number')
                     ->required()
                     ->maxLength(50),
                 TextInput::make('floor')
                     ->maxLength(50),
                 Select::make('tenant_ids')
-                    ->label('Tenants')
+                    ->label(__('Tenants'))
                     ->multiple()
                     ->preload()
                     ->searchable()
@@ -62,7 +62,7 @@ class ApartmentsRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('floor'),
                 TextColumn::make('tenants.name')
-                    ->label('Tenants')
+                    ->label(__('Tenants'))
                     ->badge()
                     ->separator(','),
                 // IconColumn::make('available_for_marketplace')

@@ -10,6 +10,7 @@ use App\Filament\Resources\NeighborBoardPosts\Pages\CreateNeighborBoardPost;
 use App\Filament\Resources\NeighborBoardPosts\Pages\EditNeighborBoardPost;
 use App\Filament\Resources\NeighborBoardPosts\Pages\ListNeighborBoardPosts;
 use App\Filament\Resources\NeighborBoardPosts\Pages\ViewNeighborBoardPost;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Building;
 use App\Models\NeighborBoardPost;
 use Filament\Actions\Action;
@@ -37,11 +38,17 @@ use BackedEnum;
 
 class NeighborBoardPostResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = NeighborBoardPost::class;
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static string | UnitEnum | null $navigationGroup = 'Communications';
+
+    protected static ?string $navigationLabel = 'Neighbor board posts';
+
+    protected static ?string $pluralModelLabel = 'Neighbor board posts';
 
     protected static ?int $navigationSort = 25;
 
@@ -50,7 +57,7 @@ class NeighborBoardPostResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make(__('Komšijska tabla'))->schema([
+            Section::make(__('Neighbor board'))->schema([
                 Select::make('building_id')
                     ->label(__('Building'))
                     ->required()
@@ -58,16 +65,20 @@ class NeighborBoardPostResource extends Resource
                     ->preload()
                     ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 Select::make('category')
+                    ->label(__('Category'))
                     ->required()
                     ->options(NeighborBoardCategory::options()),
                 TextInput::make('title')
+                    ->label(__('Title'))
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->label(__('Description'))
                     ->required()
                     ->rows(6)
                     ->maxLength(5000),
                 Select::make('status')
+                    ->label(__('Status'))
                     ->required()
                     ->options(NeighborBoardPostStatus::options())
                     ->default(NeighborBoardPostStatus::Active->value),
@@ -111,11 +122,13 @@ class NeighborBoardPostResource extends Resource
                     ->label(__('Pinned'))
                     ->boolean(),
                 TextColumn::make('category')
+                    ->label(__('Category'))
                     ->badge()
                     ->formatStateUsing(fn (NeighborBoardCategory|string|null $state): string => $state instanceof NeighborBoardCategory
                         ? $state->label()
                         : (is_string($state) ? NeighborBoardCategory::from($state)->label() : '-')),
                 TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('author.name')
@@ -127,7 +140,7 @@ class NeighborBoardPostResource extends Resource
                         ? $state->label()
                         : (is_string($state) ? NeighborBoardPostStatus::from($state)->label() : '-')),
                 IconColumn::make('comments_locked')
-                    ->label(__('Locked'))
+                    ->label(__('Comments locked'))
                     ->boolean(),
                 TextColumn::make('comments_count')
                     ->label(__('Comments')),
@@ -135,13 +148,16 @@ class NeighborBoardPostResource extends Resource
                     ->label(__('Building'))
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('Created at'))
                     ->since(),
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label(__('Status'))
                     ->options(NeighborBoardPostStatus::options())
                     ->default(NeighborBoardPostStatus::Active->value),
                 SelectFilter::make('category')
+                    ->label(__('Category'))
                     ->options(NeighborBoardCategory::options()),
                 SelectFilter::make('building_id')
                     ->label(__('Building'))

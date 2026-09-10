@@ -8,6 +8,7 @@ use App\Filament\Resources\Announcements\Pages\CreateAnnouncement;
 use App\Filament\Resources\Announcements\Pages\EditAnnouncement;
 use App\Filament\Resources\Announcements\Pages\ListAnnouncements;
 use App\Filament\Resources\Announcements\Pages\ViewAnnouncement;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Announcement;
 use App\Models\Building;
 use App\Rules\BuildingAcceptsWrites;
@@ -41,29 +42,38 @@ use UnitEnum;
 
 class AnnouncementResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Announcement::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::Megaphone;
 
     protected static string | UnitEnum | null $navigationGroup = 'Communications';
 
+    protected static ?string $navigationLabel = 'Announcements';
+
+    protected static ?string $pluralModelLabel = 'Announcements';
+
     protected static ?string $recordTitleAttribute = 'title';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Announcement')->schema([
+            Section::make(__('Announcement'))->schema([
                 Select::make('building_id')
+                    ->label(__('Building'))
                     ->required()
                     ->searchable()
                     ->preload()
                     ->rules([new BuildingAcceptsWrites()])
                     ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 Textarea::make('title')
+                    ->label(__('Title'))
                     ->required()
                     ->rows(2)
                     ->maxLength(255),
                 Textarea::make('content')
+                    ->label(__('Content'))
                     ->required()
                     ->rows(6)
                     ->maxLength(10000),
@@ -121,13 +131,15 @@ class AnnouncementResource extends Resource
                         ->all())
                     ->helperText(__('If provided, these links will be shown with the announcement.')),
                 Toggle::make('is_important')
-                    ->label('Important')
-                    ->helperText('Important announcements also send an email to all residents.')
+                    ->label(__('Important'))
+                    ->helperText(__('Important announcements also send an email to all residents.'))
                     ->default(false),
-                DateTimePicker::make('published_at'),
+                DateTimePicker::make('published_at')
+                    ->label(__('Published at')),
+                
                 FileUpload::make('attachments_uploads')
-                    ->label('Attachments')
-                    ->helperText('Upload PDF or DOC/DOCX files (max 20 MB each, up to 10 files).')
+                    ->label(__('Attachments'))
+                    ->helperText(__('Upload PDF or DOC/DOCX files (max 20 MB each, up to 10 files).'))
                     ->multiple()
                     ->maxFiles(10)
                     ->maxSize(20480)
@@ -140,7 +152,7 @@ class AnnouncementResource extends Resource
                     ->dehydrated()
                     ->columnSpanFull(),
                 CheckboxList::make('remove_attachments')
-                    ->label('Remove existing attachments')
+                    ->label(__('Remove existing attachments'))
                     ->options(fn (?Announcement $record): array => $record
                         ? $record->attachments()->pluck('original_name', 'id')->all()
                         : [])
@@ -155,12 +167,18 @@ class AnnouncementResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            TextEntry::make('building.name'),
-            TextEntry::make('author.name')
-                ->label('Created by')
+            TextEntry::make('building.name')
+                ->label(__('Building'))
                 ->placeholder('-'),
-            TextEntry::make('title'),
-            TextEntry::make('content'),
+            TextEntry::make('author.name')
+                ->label(__('Created by'))
+                ->placeholder('-'),
+            TextEntry::make('title')
+                ->label(__('Title'))
+                ->placeholder('-'),
+            TextEntry::make('content')
+                ->label(__('Content'))
+                ->placeholder('-'),
             RepeatableEntry::make('links')
                 ->label(__('Links'))
                 ->state(fn (Announcement $record): array => collect($record->resolvedLinks())
@@ -175,22 +193,24 @@ class AnnouncementResource extends Resource
                 ->columns(1),
             IconEntry::make('is_important')
                 ->boolean()
-                ->label('Important'),
+                ->label(__('Important')),
             TextEntry::make('published_at')
+                ->label(__('Published at'))
                 ->dateTime(),
             TextEntry::make('reads_count')
-                ->label('Reads'),
+                ->label(__('Reads'))
+                ->placeholder('-'),
             RepeatableEntry::make('attachments')
-                ->label('Attachments')
+                ->label(__('Attachments'))
                 ->visible(fn (Announcement $record): bool => $record->attachments()->exists())
                 ->schema([
                     TextEntry::make('original_name')
-                        ->label('File'),
+                        ->label(__('File')),
                     TextEntry::make('size')
-                        ->label('Size')
+                        ->label(__('Size'))
                         ->formatStateUsing(fn (?int $state): string => $state ? round($state / 1024, 1) . ' KB' : '-'),
                     TextEntry::make('mime_type')
-                        ->label('Type'),
+                        ->label(__('Type')),
                 ])
                 ->columns(3),
         ]);
@@ -203,28 +223,32 @@ class AnnouncementResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['building', 'author'])->withCount('reads'))
             ->columns([
                 TextColumn::make('building.name')
+                    ->label(__('Building'))
                     ->sortable(),
                 TextColumn::make('author.name')
-                    ->label('Created by')
+                    ->label(__('Created by'))
                     ->searchable()
                     ->placeholder('-'),
                 TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable(),
                 IconColumn::make('is_important')
-                    ->label('Important')
+                    ->label(__('Important'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('published_at')
+                    ->label(__('Published at'))
                     ->dateTime()
                     ->sortable(),
                 TextColumn::make('reads_count')
-                    ->label('Reads'),
+                    ->label(__('Reads'))
+                    ->placeholder('-'),
             ])
             ->filters([
                 TernaryFilter::make('is_important')
-                    ->label('Important'),
+                    ->label(__('Important')),
                 TernaryFilter::make('published_at')
-                    ->label('Published')
+                    ->label(__('Published'))
                     ->nullable(),
             ])
             ->recordActions([

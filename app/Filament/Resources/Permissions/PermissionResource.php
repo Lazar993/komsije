@@ -8,6 +8,7 @@ use App\Filament\Resources\Permissions\Pages\CreatePermission;
 use App\Filament\Resources\Permissions\Pages\EditPermission;
 use App\Filament\Resources\Permissions\Pages\ListPermissions;
 use App\Filament\Resources\Permissions\Pages\ViewPermission;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Permission;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -29,18 +30,24 @@ use UnitEnum;
 
 class PermissionResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Permission::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::Key;
 
     protected static string | UnitEnum | null $navigationGroup = 'Access Control';
 
+    protected static ?string $navigationLabel = 'Permissions';
+
+    protected static ?string $pluralModelLabel = 'Permissions';
+
     protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Permission definition')->schema([
+            Section::make(__('Permission definition'))->schema([
                 Hidden::make('guard_name')
                     ->default('web'),
                 TextInput::make('name')
@@ -56,7 +63,7 @@ class PermissionResource extends Resource
         return $schema->components([
             TextEntry::make('name'),
             TextEntry::make('roles.name')
-                ->label('Roles')
+                ->label(__('Roles'))
                 ->listWithLineBreaks(),
         ]);
     }
@@ -71,7 +78,7 @@ class PermissionResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('roles_count')
-                    ->label('Roles using it'),
+                    ->label(__('Roles using it')),
             ])
             ->recordActions([
                 ViewAction::make(),

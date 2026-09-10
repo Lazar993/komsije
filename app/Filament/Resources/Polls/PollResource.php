@@ -8,6 +8,7 @@ use App\Filament\Resources\Polls\Pages\CreatePoll;
 use App\Filament\Resources\Polls\Pages\EditPoll;
 use App\Filament\Resources\Polls\Pages\ListPolls;
 use App\Filament\Resources\Polls\Pages\ViewPoll;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Building;
 use App\Models\Poll;
 use App\Rules\BuildingAcceptsWrites;
@@ -38,11 +39,17 @@ use UnitEnum;
 
 class PollResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Poll::class;
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected static string | UnitEnum | null $navigationGroup = 'Communications';
+
+    protected static ?string $navigationLabel = 'Polls';
+
+    protected static ?string $pluralModelLabel = 'Polls';
 
     protected static ?string $recordTitleAttribute = 'title';
 
@@ -58,16 +65,21 @@ class PollResource extends Resource
                     ->rules([new BuildingAcceptsWrites()])
                     ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 TextInput::make('title')
+                    ->label(__('Title'))
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->label(__('Description'))
+                    ->placeholder('-')
                     ->rows(4)
                     ->maxLength(2000),
                 Repeater::make('options')
+                    ->label(__('Options'))
                     ->relationship('options')
                     ->schema([
                         TextInput::make('text')
                             ->label(__('Option text'))
+                            ->placeholder('-')
                             ->required()
                             ->maxLength(500),
                     ])
@@ -95,10 +107,12 @@ class PollResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with('building'))
             ->columns([
                 TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('building.name')
                     ->label(__('Building'))
+                    ->placeholder('-')
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->label(__('Active'))
@@ -109,6 +123,8 @@ class PollResource extends Resource
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('ends_at')
+                    ->label(__('Ends at'))
+                    ->placeholder('-')
                     ->dateTime()
                     ->sortable(),
             ])

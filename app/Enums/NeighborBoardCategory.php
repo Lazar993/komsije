@@ -18,14 +18,14 @@ enum NeighborBoardCategory: string
     public function label(): string
     {
         return match ($this) {
-            self::Garage => '🚗 Garaža',
-            self::ContractorRecommendation => '🔧 Preporuka majstora',
-            self::NeighborHelp => '🤝 Pomoć komšiji',
-            self::LostFound => '📦 Izgubljeno / pronađeno',
-            self::GiveAway => '🎁 Poklanjam',
-            self::ForSale => '💰 Prodajem',
-            self::Wanted => '🛒 Kupujem',
-            self::Question => '❓ Pitanje',
+            self::Garage => '🚗 '.__('Garage'),
+            self::ContractorRecommendation => '🔧 '.__('Contractor recommendation'),
+            self::NeighborHelp => '🤝 '.__('Neighbor help'),
+            self::LostFound => '📦 '.__('Lost and found'),
+            self::GiveAway => '🎁 '.__('Give away'),
+            self::ForSale => '💰 '.__('For sale'),
+            self::Wanted => '🛒 '.__('Wanted'),
+            self::Question => '❓ '.__('Question'),
         };
     }
 

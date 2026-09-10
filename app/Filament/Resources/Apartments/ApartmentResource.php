@@ -8,6 +8,7 @@ use App\Filament\Resources\Apartments\Pages\CreateApartment;
 use App\Filament\Resources\Apartments\Pages\EditApartment;
 use App\Filament\Resources\Apartments\Pages\ListApartments;
 use App\Filament\Resources\Apartments\Pages\ViewApartment;
+use App\Filament\Concerns\TranslatesFilamentLabels;
 use App\Models\Apartment;
 use App\Models\Building;
 use App\Rules\BuildingAcceptsWrites;
@@ -38,29 +39,37 @@ use UnitEnum;
 
 class ApartmentResource extends Resource
 {
+    use TranslatesFilamentLabels;
+
     protected static ?string $model = Apartment::class;
 
     protected static string | BackedEnum | null $navigationIcon = Heroicon::HomeModern;
 
     protected static string | UnitEnum | null $navigationGroup = 'Portfolio';
 
+    protected static ?string $navigationLabel = 'Apartments';
+
+    protected static ?string $pluralModelLabel = 'Apartments';
+
     protected static ?string $recordTitleAttribute = 'number';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Apartment')->schema([
+            Section::make(__('Apartment'))->schema([
                 Select::make('building_id')
-                    ->label('Building')
+                    ->label(__('Building'))
                     ->required()
                     ->searchable()
                     ->preload()
                     ->rules([new BuildingAcceptsWrites()])
                     ->options(fn (): array => Building::writableSelectOptions(Auth::user())),
                 TextInput::make('number')
+                    ->label(__('Number'))
                     ->required()
                     ->maxLength(50),
                 TextInput::make('floor')
+                    ->label(__('Floor'))
                     ->maxLength(50),
                 // Toggle::make('available_for_marketplace'),
                 // TextInput::make('marketplace_listing_reference')
@@ -78,13 +87,16 @@ class ApartmentResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema->components([
-            TextEntry::make('building.name'),
-            TextEntry::make('number'),
-            TextEntry::make('floor'),
+            TextEntry::make('building.name')
+                ->label(__('Building')),
+            TextEntry::make('number')
+                ->label(__('Number')),
+            TextEntry::make('floor')
+                ->label(__('Floor')),
             // IconEntry::make('available_for_marketplace')
             //     ->boolean(),
             TextEntry::make('tenants.name')
-                ->label('Tenants')
+                ->label(__('Tenants'))
                 ->listWithLineBreaks(),
         ]);
     }
@@ -96,7 +108,7 @@ class ApartmentResource extends Resource
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['building', 'tenants']))
             ->groups([
                 Group::make('building.name')
-                    ->label('Building')
+                    ->label(__('Building'))
                     ->titlePrefixedWithLabel(false)
                     ->collapsible()
                     ->getDescriptionFromRecordUsing(fn (Apartment $record): ?string => $record->building?->address),
@@ -104,22 +116,26 @@ class ApartmentResource extends Resource
             ->defaultGroup('building.name')
             ->columns([
                 TextColumn::make('building.name')
+                    ->label(__('Building'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('number')
+                    ->label(__('Number'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('floor'),
+                TextColumn::make('floor')
+                    ->label(__('Floor')),
                 TextColumn::make('tenants.name')
-                    ->label('Tenants')
+                    ->label(__('Tenants'))
                     ->badge()
-                    ->separator(','),
+                    ->separator(',')
+                    ->label(__('Tenants')),
                 // IconColumn::make('available_for_marketplace')
                 //     ->boolean(),
             ])
             ->filters([
                 SelectFilter::make('building_id')
-                    ->label('Building')
+                    ->label(__('Building'))
                     ->options(self::accessibleBuildingOptions()),
             ])
             ->recordActions([

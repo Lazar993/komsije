@@ -16,7 +16,7 @@ class AuditLogsRelationManager extends RelationManager
 {
     protected static string $relationship = 'auditLogs';
 
-    protected static ?string $title = 'Audit log';
+    protected static ?string $title = null;
 
     protected static string | \BackedEnum | null $icon = 'heroicon-o-clipboard-document-list';
 
