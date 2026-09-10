@@ -37,7 +37,7 @@ final class DashboardController extends PortalController
         ];
 
         if ($currentBuilding !== null) {
-            $currentBuilding->loadCount(['apartments', 'tickets', 'announcements']);
+            $currentBuilding->loadCount(['apartments', 'tickets', 'announcements', 'neighborBoardPosts']);
 
             $dashboard = $this->dashboardService->getForUser($request->user(), $currentBuilding);
             $recentTickets = $dashboard['recent_tickets'];
