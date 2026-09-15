@@ -121,6 +121,55 @@ class PortalNotificationCenterTest extends TestCase
         $secondPage->assertOk()->assertJson(['has_more' => false, 'next_page' => null]);
     }
 
+    public function test_it_marks_a_single_notification_as_read(): void
+    {
+        [$tenant, $building] = $this->createTenantAndBuilding();
+
+        $notification = $this->createNotification($tenant, [
+            'type' => 'ticket_commented',
+            'building_id' => $building->getKey(),
+            'ticket_id' => 1,
+            'title' => 'A notification',
+            'message' => 'Message',
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->postJson(route('portal.notifications.read', $notification->getKey()));
+
+        $response->assertOk()->assertJson(['ok' => true]);
+        $this->assertNotNull($notification->fresh()->read_at);
+    }
+
+    public function test_it_marks_all_building_notifications_as_read(): void
+    {
+        [$tenant, $building] = $this->createTenantAndBuilding();
+        $otherBuilding = Building::factory()->create();
+
+        $mine = $this->createNotification($tenant, [
+            'type' => 'ticket_commented',
+            'building_id' => $building->getKey(),
+            'ticket_id' => 1,
+            'title' => 'Mine',
+            'message' => 'Message',
+        ]);
+        $other = $this->createNotification($tenant, [
+            'type' => 'ticket_commented',
+            'building_id' => $otherBuilding->getKey(),
+            'ticket_id' => 2,
+            'title' => 'Other building',
+            'message' => 'Message',
+        ]);
+
+        $response = $this->actingAs($tenant)
+            ->withSession(['current_building_id' => $building->getKey()])
+            ->postJson(route('portal.notifications.read-all'));
+
+        $response->assertOk()->assertJson(['ok' => true]);
+        $this->assertNotNull($mine->fresh()->read_at);
+        $this->assertNull($other->fresh()->read_at);
+    }
+
     /**
      * @return array{0: User, 1: Building}
      */
@@ -137,11 +186,11 @@ class PortalNotificationCenterTest extends TestCase
     /**
      * @param array<string, mixed> $data
      */
-    private function createNotification(User $user, array $data, ?\Illuminate\Support\Carbon $createdAt = null): void
+    private function createNotification(User $user, array $data, ?\Illuminate\Support\Carbon $createdAt = null): \Illuminate\Notifications\DatabaseNotification
     {
         $createdAt ??= now();
 
-        $user->notifications()->create([
+        return $user->notifications()->create([
             'id' => (string) Str::uuid(),
             'type' => 'App\\Notifications\\'.($data['type'] ?? 'Notification'),
             'data' => $data,

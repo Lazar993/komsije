@@ -39,4 +39,29 @@ final class NotificationController extends PortalController
             'next_page' => $feed['next_page'],
         ]);
     }
+
+    public function markAsRead(Request $request, string $notification): JsonResponse
+    {
+        $request->user()->notifications()
+            ->whereKey($notification)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function markAllAsRead(Request $request): JsonResponse
+    {
+        $currentBuilding = $this->resolveCurrentBuilding($request);
+
+        $query = $request->user()->unreadNotifications();
+
+        if ($currentBuilding !== null) {
+            $query->where('data->building_id', $currentBuilding->getKey());
+        }
+
+        $query->update(['read_at' => now()]);
+
+        return response()->json(['ok' => true]);
+    }
 }

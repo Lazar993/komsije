@@ -69,6 +69,8 @@ Route::middleware(['auth', 'active'])->group(function (): void {
 		Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 		Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 		Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+		Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+		Route::post('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 		Route::post('buildings/{building}/switch', BuildingContextController::class)->name('buildings.switch');
 
 		Route::middleware(EnsurePortalBuildingContext::class)->group(function (): void {

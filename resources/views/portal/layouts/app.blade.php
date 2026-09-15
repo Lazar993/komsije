@@ -57,12 +57,18 @@
                                     <div
                                         data-notification-panel
                                         data-notifications-url="{{ route('portal.notifications.index') }}"
-                                        class="absolute right-0 top-full z-40 mt-2 hidden w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[var(--komsije-border)] bg-white shadow-xl"
+                                        data-notifications-read-all-url="{{ route('portal.notifications.read-all') }}"
+                                        class="absolute right-0 top-full z-40 mt-2 hidden w-80 max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl border border-[var(--komsije-border)] bg-white opacity-0 shadow-2xl shadow-slate-900/10 ring-1 ring-slate-900/5 transition duration-150 ease-out scale-95"
                                         role="dialog"
                                         aria-label="{{ __('Notifikacije') }}"
                                     >
-                                        <div class="flex items-center justify-between border-b border-[var(--komsije-border)] px-4 py-3">
+                                        <div class="flex items-center justify-between gap-2 border-b border-[var(--komsije-border)] px-4 py-3">
                                             <span class="text-sm font-semibold text-[var(--komsije-dark)]">{{ __('Notifikacije') }}</span>
+                                            <button
+                                                type="button"
+                                                data-notification-read-all
+                                                class="hidden shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-[var(--komsije-primary)] transition hover:bg-blue-50"
+                                            >{{ __('Označi sve kao pročitano') }}</button>
                                         </div>
 
                                         <div data-notification-scroll class="max-h-96 overflow-y-auto">

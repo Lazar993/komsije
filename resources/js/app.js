@@ -728,18 +728,51 @@ function setupNotificationCenter() {
     const empty = root.querySelector('[data-notification-empty]');
     const loading = root.querySelector('[data-notification-loading]');
     const moreButton = root.querySelector('[data-notification-more]');
+    const readAllButton = root.querySelector('[data-notification-read-all]');
 
     if (!(toggle instanceof HTMLElement) || !(panel instanceof HTMLElement) || !(list instanceof HTMLElement)) {
         return;
     }
 
     const endpoint = panel.dataset.notificationsUrl;
+    const readAllEndpoint = panel.dataset.notificationsReadAllUrl;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let hasLoaded = false;
     let nextPage = 1;
     let isFetching = false;
+    let closeTimer = null;
 
     const setLoading = (state) => {
         loading?.classList.toggle('hidden', !state);
+    };
+
+    const updateReadAllVisibility = () => {
+        const hasUnread = list.querySelector('[data-notification-dot]') !== null;
+        readAllButton?.classList.toggle('hidden', !hasUnread);
+    };
+
+    const markItemRead = (item) => {
+        const dot = item.querySelector('[data-notification-dot]');
+        item.classList.remove('bg-blue-50/40');
+        dot?.remove();
+        updateReadAllVisibility();
+
+        const url = item.dataset.notificationReadUrl;
+
+        if (!url) {
+            return;
+        }
+
+        void fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+            keepalive: true,
+        }).catch(() => { });
     };
 
     const fetchPage = async (page) => {
@@ -789,6 +822,8 @@ function setupNotificationCenter() {
             if (page === 1 && list.children.length === 0) {
                 empty?.classList.remove('hidden');
             }
+
+            updateReadAllVisibility();
         } catch (error) {
             if (page === 1 && list.children.length === 0) {
                 empty?.classList.remove('hidden');
@@ -805,8 +840,24 @@ function setupNotificationCenter() {
     };
 
     const openPanel = () => {
+        if (closeTimer !== null) {
+            window.clearTimeout(closeTimer);
+            closeTimer = null;
+        }
+
         panel.classList.remove('hidden');
         toggle.setAttribute('aria-expanded', 'true');
+
+        const reveal = () => {
+            panel.classList.remove('opacity-0', 'scale-95');
+            panel.classList.add('opacity-100', 'scale-100');
+        };
+
+        if (reduceMotion) {
+            reveal();
+        } else {
+            window.requestAnimationFrame(reveal);
+        }
 
         if (!hasLoaded) {
             hasLoaded = true;
@@ -815,18 +866,68 @@ function setupNotificationCenter() {
     };
 
     const closePanel = () => {
-        panel.classList.add('hidden');
+        if (panel.classList.contains('hidden')) {
+            return;
+        }
+
         toggle.setAttribute('aria-expanded', 'false');
+        panel.classList.remove('opacity-100', 'scale-100');
+        panel.classList.add('opacity-0', 'scale-95');
+
+        if (reduceMotion) {
+            panel.classList.add('hidden');
+
+            return;
+        }
+
+        closeTimer = window.setTimeout(() => {
+            panel.classList.add('hidden');
+            closeTimer = null;
+        }, 150);
     };
+
+    const isOpen = () => !panel.classList.contains('hidden');
 
     toggle.addEventListener('click', (event) => {
         event.preventDefault();
 
-        if (panel.classList.contains('hidden')) {
-            openPanel();
-        } else {
+        if (isOpen()) {
             closePanel();
+        } else {
+            openPanel();
         }
+    });
+
+    list.addEventListener('click', (event) => {
+        const item = event.target instanceof Element
+            ? event.target.closest('[data-notification-item]')
+            : null;
+
+        if (item instanceof HTMLElement) {
+            markItemRead(item);
+        }
+    });
+
+    readAllButton?.addEventListener('click', () => {
+        list.querySelectorAll('[data-notification-item]').forEach((item) => {
+            item.classList.remove('bg-blue-50/40');
+        });
+        list.querySelectorAll('[data-notification-dot]').forEach((dot) => dot.remove());
+        updateReadAllVisibility();
+
+        if (!readAllEndpoint) {
+            return;
+        }
+
+        void fetch(readAllEndpoint, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+            keepalive: true,
+        }).catch(() => { });
     });
 
     moreButton?.addEventListener('click', () => {
