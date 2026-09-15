@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupTicketConversation();
     setupAnnouncementPagination();
     setupBuildingSwitcher();
+    setupNotificationCenter();
     runWhenIdle(() => {
         setupCardDecks();
         setupLightbox();
@@ -703,6 +704,137 @@ function setupBuildingSwitcher() {
 
     document.addEventListener('click', (event) => {
         if (!form.contains(event.target)) {
+            closePanel();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closePanel();
+        }
+    });
+}
+
+function setupNotificationCenter() {
+    const root = document.querySelector('[data-notification-center]');
+
+    if (!(root instanceof HTMLElement)) {
+        return;
+    }
+
+    const toggle = root.querySelector('[data-notification-toggle]');
+    const panel = root.querySelector('[data-notification-panel]');
+    const list = root.querySelector('[data-notification-list]');
+    const empty = root.querySelector('[data-notification-empty]');
+    const loading = root.querySelector('[data-notification-loading]');
+    const moreButton = root.querySelector('[data-notification-more]');
+
+    if (!(toggle instanceof HTMLElement) || !(panel instanceof HTMLElement) || !(list instanceof HTMLElement)) {
+        return;
+    }
+
+    const endpoint = panel.dataset.notificationsUrl;
+    let hasLoaded = false;
+    let nextPage = 1;
+    let isFetching = false;
+
+    const setLoading = (state) => {
+        loading?.classList.toggle('hidden', !state);
+    };
+
+    const fetchPage = async (page) => {
+        if (isFetching || !endpoint) {
+            return;
+        }
+
+        isFetching = true;
+
+        if (page === 1) {
+            setLoading(true);
+        }
+
+        if (moreButton instanceof HTMLButtonElement) {
+            moreButton.disabled = true;
+        }
+
+        try {
+            const url = new URL(endpoint, window.location.origin);
+            url.searchParams.set('page', String(page));
+
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Notification request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            const html = (data.html || '').trim();
+
+            if (html) {
+                list.insertAdjacentHTML('beforeend', html);
+            }
+
+            if (data.has_more && data.next_page) {
+                nextPage = data.next_page;
+                moreButton?.classList.remove('hidden');
+            } else {
+                moreButton?.classList.add('hidden');
+            }
+
+            if (page === 1 && list.children.length === 0) {
+                empty?.classList.remove('hidden');
+            }
+        } catch (error) {
+            if (page === 1 && list.children.length === 0) {
+                empty?.classList.remove('hidden');
+            }
+        } finally {
+            setLoading(false);
+
+            if (moreButton instanceof HTMLButtonElement) {
+                moreButton.disabled = false;
+            }
+
+            isFetching = false;
+        }
+    };
+
+    const openPanel = () => {
+        panel.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+
+        if (!hasLoaded) {
+            hasLoaded = true;
+            void fetchPage(1);
+        }
+    };
+
+    const closePanel = () => {
+        panel.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    toggle.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        if (panel.classList.contains('hidden')) {
+            openPanel();
+        } else {
+            closePanel();
+        }
+    });
+
+    moreButton?.addEventListener('click', () => {
+        void fetchPage(nextPage);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!root.contains(event.target)) {
             closePanel();
         }
     });

@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\Portal\AnnouncementController;
 use App\Http\Controllers\Web\Portal\BuildingContextController;
 use App\Http\Controllers\Web\Portal\DashboardController;
 use App\Http\Controllers\Web\Portal\NeighborBoardController;
+use App\Http\Controllers\Web\Portal\NotificationController;
 use App\Http\Controllers\Web\Portal\PollVoteController;
 use App\Http\Controllers\Web\Portal\ProfileController;
 use App\Http\Controllers\Web\Portal\TicketController;
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function (): void {
 		Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
 		Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 		Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+		Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
 		Route::post('buildings/{building}/switch', BuildingContextController::class)->name('buildings.switch');
 
 		Route::middleware(EnsurePortalBuildingContext::class)->group(function (): void {

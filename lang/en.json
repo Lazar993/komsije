@@ -1,4 +1,9 @@
 {
+    "Notifikacije": "Notifications",
+    "Trenutno nemate novih notifikacija.": "You have no new notifications right now.",
+    "Učitavanje...": "Loading...",
+    "Prikaži još": "Show more",
+    "Obaveštenje": "Notification",
     ":actor updated this ticket.": ":actor updated this ticket.",
     "New ticket in :building": "New ticket in :building",
     "New announcement in :building": "New announcement in :building",

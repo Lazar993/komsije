@@ -27,7 +27,7 @@
         <div class="relative isolate flex min-h-screen flex-col overflow-x-hidden pb-[calc(env(safe-area-inset-bottom,0px)+7.5rem)] md:pb-0">
             <div class="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_58%)]"></div>
             <div class="relative mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
-                <header class="komsije-surface relative z-20 mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
+                <header class="komsije-surface relative z-40 mb-6 rounded-[2rem] px-4 py-4 sm:px-6 sm:py-5">
                     <div class="flex flex-col gap-4">
                         <div class="flex items-start justify-between gap-3">
                             <a href="{{ route('portal.dashboard') }}" class="flex min-w-0 items-center gap-3">
@@ -39,12 +39,47 @@
                             </a>
 
                             <div class="flex items-center gap-2 sm:gap-3">
-                                <a href="{{ route('portal.announcements.index') }}" class="komsije-pill relative inline-flex h-11 w-11 items-center justify-center rounded-2xl text-slate-600 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]" aria-label="{{ __('Obaveštenja') }}">
-                                    <x-portal.app-icon name="bell" class="h-5 w-5" />
-                                    @if (($unreadAnnouncementsCount ?? 0) > 0)
-                                        <span class="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[var(--komsije-primary)] px-1.5 text-[11px] font-semibold text-white">{{ min($unreadAnnouncementsCount, 9) }}</span>
-                                    @endif
-                                </a>
+                                <div class="relative" data-notification-center>
+                                    <button
+                                        type="button"
+                                        data-notification-toggle
+                                        class="komsije-pill relative inline-flex h-11 w-11 items-center justify-center rounded-2xl text-slate-600 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]"
+                                        aria-haspopup="dialog"
+                                        aria-expanded="false"
+                                        aria-label="{{ __('Notifikacije') }}"
+                                    >
+                                        <x-portal.app-icon name="bell" class="h-5 w-5" />
+                                        @if (($unreadAnnouncementsCount ?? 0) > 0)
+                                            <span class="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[var(--komsije-primary)] px-1.5 text-[11px] font-semibold text-white">{{ min($unreadAnnouncementsCount, 9) }}</span>
+                                        @endif
+                                    </button>
+
+                                    <div
+                                        data-notification-panel
+                                        data-notifications-url="{{ route('portal.notifications.index') }}"
+                                        class="absolute right-0 top-full z-40 mt-2 hidden w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-[var(--komsije-border)] bg-white shadow-xl"
+                                        role="dialog"
+                                        aria-label="{{ __('Notifikacije') }}"
+                                    >
+                                        <div class="flex items-center justify-between border-b border-[var(--komsije-border)] px-4 py-3">
+                                            <span class="text-sm font-semibold text-[var(--komsije-dark)]">{{ __('Notifikacije') }}</span>
+                                        </div>
+
+                                        <div data-notification-scroll class="max-h-96 overflow-y-auto">
+                                            <ul data-notification-list class="divide-y divide-[var(--komsije-border)]"></ul>
+                                            <p data-notification-empty class="hidden px-4 py-10 text-center text-sm text-slate-500">{{ __('Trenutno nemate novih notifikacija.') }}</p>
+                                            <p data-notification-loading class="hidden px-4 py-10 text-center text-sm text-slate-400">{{ __('Učitavanje...') }}</p>
+                                        </div>
+
+                                        <div class="border-t border-[var(--komsije-border)] p-2">
+                                            <button
+                                                type="button"
+                                                data-notification-more
+                                                class="hidden w-full rounded-xl px-4 py-2 text-sm font-medium text-[var(--komsije-primary)] transition hover:bg-blue-50 disabled:opacity-50"
+                                            >{{ __('Prikaži još') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 @if ($user?->isSuperAdmin() || $user?->isBuildingAdmin())
                                     <a href="/admin" class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--komsije-dark)] text-white transition hover:bg-slate-800 sm:hidden" aria-label="{{ __('Admin') }}" title="{{ __('Admin') }}">
