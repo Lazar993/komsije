@@ -28,6 +28,7 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'is_super_admin' => false,
+            'is_active' => true,
             'locale' => 'sr',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
@@ -49,6 +50,13 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_super_admin' => true,
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
         ]);
     }
 }

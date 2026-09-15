@@ -14,6 +14,7 @@ use App\Models\Apartment;
 use App\Models\Building;
 use App\Models\User;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -92,6 +93,12 @@ class UserResource extends Resource
                             };
                         },
                     ]),
+                Toggle::make('is_active')
+                    ->label(__('Active'))
+                    ->default(true)
+                    ->helperText(__('Deactivated users cannot sign in to the portal or admin panel.'))
+                    ->visible(fn (?User $record, \Filament\Schemas\Components\Utilities\Get $get): bool => ! (bool) ($get('is_super_admin') ?? $record?->is_super_admin ?? false))
+                    ->disabled(fn (?User $record): bool => $record !== null && Auth::id() === $record->getKey()),
                 Select::make('manager_building_ids')
                     ->label(__('Admin buildings'))
                     ->multiple()
@@ -153,6 +160,9 @@ class UserResource extends Resource
             IconEntry::make('is_super_admin')
                 ->label(__('Super Admin'))
                 ->boolean(),
+            IconEntry::make('is_active')
+                ->label(__('Active'))
+                ->boolean(),
             TextEntry::make('buildings.role')
                 ->label(__('Building roles'))
                 ->state(function (User $record): string {
@@ -207,8 +217,24 @@ class UserResource extends Resource
                 IconColumn::make('is_super_admin')
                     ->label(__('Super Admin'))
                     ->boolean(),
+                IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
             ])
             ->recordActions([
+                Action::make('toggleActive')
+                    ->label(fn (User $record): string => $record->is_active ? __('Deactivate') : __('Activate'))
+                    ->icon(fn (User $record): Heroicon => $record->is_active ? Heroicon::LockClosed : Heroicon::LockOpen)
+                    ->color(fn (User $record): string => $record->is_active ? 'danger' : 'success')
+                    ->requiresConfirmation()
+                    ->visible(fn (User $record): bool => ! $record->is_super_admin && Auth::id() !== $record->getKey())
+                    ->action(function (User $record): void {
+                        $record->forceFill(['is_active' => ! $record->is_active])->save();
+
+                        if (! $record->is_active) {
+                            $record->tokens()->delete();
+                        }
+                    }),
                 ViewAction::make(),
                 EditAction::make(),
             ])

@@ -57,7 +57,7 @@ Route::middleware('guest')->group(function (): void {
 	Route::post('reset-password', [NewPasswordController::class, 'store'])->middleware('throttle:5,1')->name('password.update');
 });
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'active'])->group(function (): void {
 	Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 	Route::post('device-tokens', [DeviceTokenController::class, 'store'])->name('device-tokens.store');

@@ -24,6 +24,12 @@ final class AuthService
             ]);
         }
 
+        if (! $user->isActive()) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account has been deactivated. Please contact your building manager.'],
+            ]);
+        }
+
         $token = $user->createToken($credentials['device_name'] ?: 'api')->plainTextToken;
 
         return [

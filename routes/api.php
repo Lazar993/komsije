@@ -15,13 +15,13 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function (): void {
     Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
-    Route::middleware('auth:sanctum')->group(function (): void {
+    Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
     });
 });
 
-Route::middleware('auth:sanctum')->group(function (): void {
+Route::middleware(['auth:sanctum', 'active'])->group(function (): void {
     Route::post('device-tokens', [DeviceTokenController::class, 'store']);
     Route::delete('device-tokens', [DeviceTokenController::class, 'destroy']);
 

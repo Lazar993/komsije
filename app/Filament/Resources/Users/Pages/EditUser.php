@@ -39,6 +39,9 @@ class EditUser extends EditRecord
         $record->fill([
             'email' => $data['email'],
             'is_super_admin' => $actor?->isSuperAdmin() ? (bool) ($data['is_super_admin'] ?? false) : $record->is_super_admin,
+            'is_active' => Auth::id() === $record->getKey()
+                ? $record->is_active
+                : (bool) ($data['is_active'] ?? $record->is_active),
             'name' => $data['name'],
         ]);
 

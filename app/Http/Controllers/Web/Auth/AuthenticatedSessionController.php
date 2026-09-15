@@ -33,6 +33,16 @@ final class AuthenticatedSessionController
             ]);
         }
 
+        if (! ($request->user()?->isActive() ?? false)) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => [__('Your account has been deactivated. Please contact your building manager.')],
+            ]);
+        }
+
         $request->session()->regenerate();
 
         $user = $request->user();

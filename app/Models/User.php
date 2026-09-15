@@ -23,7 +23,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'is_super_admin', 'locale', 'profile_image_path', 'notify_push', 'notify_email', 'notify_email_announcements', 'notify_email_tickets', 'notify_digest'])]
+#[Fillable(['name', 'email', 'password', 'is_super_admin', 'is_active', 'locale', 'profile_image_path', 'notify_push', 'notify_email', 'notify_email_announcements', 'notify_email_tickets', 'notify_digest'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser, HasLocalePreference
 {
@@ -174,12 +174,21 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
             return false;
         }
 
+        if (! $this->isActive()) {
+            return false;
+        }
+
         return $this->isSuperAdmin() || $this->isBuildingAdmin();
     }
 
     public function isSuperAdmin(): bool
     {
         return $this->is_super_admin || $this->hasGlobalRole('super_admin');
+    }
+
+    public function isActive(): bool
+    {
+        return (bool) ($this->is_active ?? true);
     }
 
     public function isBuildingAdmin(?int $buildingId = null): bool
@@ -396,6 +405,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference
         return [
             'email_verified_at' => 'datetime',
             'is_super_admin' => 'boolean',
+            'is_active' => 'boolean',
             'password' => 'hashed',
             'notify_push' => 'boolean',
             'notify_email' => 'boolean',

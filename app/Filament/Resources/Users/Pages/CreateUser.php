@@ -21,6 +21,7 @@ class CreateUser extends CreateRecord
         $user = User::query()->create([
             'email' => $data['email'],
             'is_super_admin' => $actor?->isSuperAdmin() ? (bool) ($data['is_super_admin'] ?? false) : false,
+            'is_active' => (bool) ($data['is_active'] ?? true),
             'name' => $data['name'],
             'password' => $data['password'],
         ]);

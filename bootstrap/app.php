@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\SetSiteLocale;
 use Illuminate\Cookie\Middleware\EncryptCookies as BaseEncryptCookies;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 BaseEncryptCookies::class => EncryptCookies::class,
             ],
         );
+
+        $middleware->alias([
+            'active' => EnsureUserIsActive::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
