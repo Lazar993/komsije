@@ -2,7 +2,7 @@
 
 @php
     $pageTitle = __('Digitalna prezentacija aplikacije');
-    $pageDescription = __('Digitalna prezentacija aplikacije Komšije za profesionalne upravnike: prijave kvarova, obaveštenja, ankete, komšijska tabla i transparentna komunikacija sa stanarima.');
+    $pageDescription = __('Digitalna prezentacija aplikacije Komšije za profesionalne upravnike: prijave kvarova, obaveštenja, ankete, finansijski pregled prihoda i rashoda, komšijska tabla i transparentna komunikacija sa stanarima.');
     $canonical = route('pages.professionals');
     $ogImage = asset('icons/logo-icon-v3.svg');
 @endphp
@@ -168,6 +168,11 @@
                             'title' => __('Upravljanje prijavama'),
                             'desc' => __('Pratite kvarove kroz jasne statuse, komentare, zadužene osobe i kompletnu istoriju.'),
                             'svg' => '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v2a2 2 0 0 0 0 4v2A2.5 2.5 0 0 1 17.5 18h-11A2.5 2.5 0 0 1 4 15.5v-2a2 2 0 0 0 0-4v-2Z" /><path d="M9 9.5h6" /><path d="M9 14.5h4" />',
+                        ],
+                        [
+                            'title' => __('Finansijski pregled'),
+                            'desc' => __('Evidentirajte prihode i rashode zgrade, pratite evidentirano stanje po periodu i izvezite finansijski izveštaj u PDF.'),
+                            'svg' => '<rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6.5 9.5h.01" /><path d="M17.5 14.5h.01" />',
                         ],
                         [
                             'title' => __('Ankete'),
