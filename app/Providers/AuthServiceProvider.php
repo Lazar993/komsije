@@ -7,19 +7,25 @@ namespace App\Providers;
 use App\Models\Announcement;
 use App\Models\Apartment;
 use App\Models\Building;
+use App\Models\BuildingExpense;
+use App\Models\BuildingIncome;
 use App\Models\BuildingJoinRequest;
 use App\Models\NeighborBoardPost;
 use App\Models\Poll;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\Vendor;
 use App\Policies\AnnouncementPolicy;
 use App\Policies\ApartmentPolicy;
+use App\Policies\BuildingExpensePolicy;
+use App\Policies\BuildingIncomePolicy;
 use App\Policies\BuildingPolicy;
 use App\Policies\BuildingJoinRequestPolicy;
 use App\Policies\NeighborBoardPostPolicy;
 use App\Policies\PollPolicy;
 use App\Policies\TicketPolicy;
 use App\Policies\UserPolicy;
+use App\Policies\VendorPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,5 +43,8 @@ final class AuthServiceProvider extends ServiceProvider
         Gate::policy(NeighborBoardPost::class, NeighborBoardPostPolicy::class);
         Gate::policy(Poll::class, PollPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
+        Gate::policy(Vendor::class, VendorPolicy::class);
+        Gate::policy(BuildingIncome::class, BuildingIncomePolicy::class);
+        Gate::policy(BuildingExpense::class, BuildingExpensePolicy::class);
     }
 }

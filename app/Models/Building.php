@@ -108,6 +108,21 @@ class Building extends Model
         return $this->hasMany(Poll::class);
     }
 
+    public function incomes(): HasMany
+    {
+        return $this->hasMany(BuildingIncome::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(BuildingExpense::class);
+    }
+
+    public function vendors(): HasMany
+    {
+        return $this->hasMany(Vendor::class);
+    }
+
     public function neighborBoardPosts(): HasMany
     {
         return $this->hasMany(NeighborBoardPost::class);

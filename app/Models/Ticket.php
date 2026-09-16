@@ -74,6 +74,11 @@ class Ticket extends Model
         return $this->belongsToMany(User::class, 'ticket_affected_users')->withTimestamps();
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(BuildingExpense::class);
+    }
+
     public function isPrivate(): bool
     {
         return $this->visibility === TicketVisibility::Private;

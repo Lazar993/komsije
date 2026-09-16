@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\DeviceTokenController;
+use App\Http\Controllers\FinancialDocumentController;
 use App\Http\Controllers\FirebaseMessagingServiceWorkerController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\InviteRegistrationController;
@@ -59,6 +60,9 @@ Route::middleware('guest')->group(function (): void {
 
 Route::middleware(['auth', 'active'])->group(function (): void {
 	Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+	Route::get('finances/documents/{document}', [FinancialDocumentController::class, 'download'])
+		->name('finances.documents.download');
 
 	Route::post('device-tokens', [DeviceTokenController::class, 'store'])->name('device-tokens.store');
 	Route::delete('device-tokens', [DeviceTokenController::class, 'destroy'])->name('device-tokens.destroy');
