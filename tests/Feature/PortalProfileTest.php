@@ -14,6 +14,19 @@ class PortalProfileTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_form_includes_submit_loading_controls(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('portal.profile.show'))
+            ->assertOk()
+            ->assertSee('data-submit-loading', false)
+            ->assertSee('data-submit-loader', false)
+            ->assertSee('data-submit-label', false)
+            ->assertSee('animate-spin', false);
+    }
+
     public function test_user_can_upload_profile_image_from_portal(): void
     {
         Storage::fake('public');

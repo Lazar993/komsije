@@ -13,7 +13,7 @@
     }
 @endphp
 
-<form method="POST" action="{{ $editing ? route('portal.announcements.update', $announcement) : route('portal.announcements.store') }}" enctype="multipart/form-data" class="space-y-6">
+<form method="POST" action="{{ $editing ? route('portal.announcements.update', $announcement) : route('portal.announcements.store') }}" enctype="multipart/form-data" class="space-y-6" data-submit-loading>
     @csrf
     @if ($editing)
         @method('PUT')
@@ -145,7 +145,10 @@
     @endif
 
     <div class="flex flex-wrap items-center gap-3">
-        <button type="submit" class="rounded-[1.25rem] bg-[var(--komsije-primary)] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">{{ $editing ? __('Sačuvaj objavu') : __('Objavi / sačuvaj') }}</button>
+        <button type="submit" class="relative inline-flex items-center justify-center rounded-[1.25rem] bg-[var(--komsije-primary)] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70">
+            <x-filament::loading-indicator class="absolute hidden h-5 w-5 animate-spin" data-submit-loader aria-hidden="true" />
+            <span data-submit-label>{{ $editing ? __('Sačuvaj objavu') : __('Objavi / sačuvaj') }}</span>
+        </button>
         <a href="{{ $editing ? route('portal.announcements.show', $announcement) : route('portal.announcements.index') }}" class="rounded-[1.25rem] border border-[var(--komsije-border)] bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]">{{ __('Otkaži') }}</a>
     </div>
 </form>

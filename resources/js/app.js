@@ -13,6 +13,7 @@ import { initPushNotifications, enablePush, disablePush, getPushStatus } from '.
 window.komsijePush = { enablePush, disablePush, getPushStatus };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    setupSubmitLoading();
     setupGlobalMicroInteractions();
     applyStandaloneMode();
     upgradeImagesForPerformance();
@@ -36,6 +37,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         initPushNotifications();
     }, { delay: 120 });
 });
+
+function setupSubmitLoading() {
+    document.querySelectorAll('form[data-submit-loading]').forEach((form) => {
+        const buttons = Array.from(form.elements)
+            .filter((element) => element instanceof HTMLButtonElement && element.type === 'submit')
+            .map((button) => ({ button, disabled: button.disabled }));
+        let submitting = false;
+
+        const setSubmitting = (pending) => {
+            submitting = pending;
+            form.setAttribute('aria-busy', String(pending));
+
+            buttons.forEach(({ button, disabled }) => {
+                button.disabled = pending || disabled;
+                button.setAttribute('aria-busy', String(pending));
+                button.querySelector('[data-submit-loader]')?.classList.toggle('hidden', !pending);
+                button.querySelector('[data-submit-label]')?.classList.toggle('opacity-0', pending);
+            });
+        };
+
+        form.addEventListener('submit', (event) => {
+            if (event.defaultPrevented) {
+                return;
+            }
+
+            if (submitting) {
+                event.preventDefault();
+
+                return;
+            }
+
+            setSubmitting(true);
+        });
+
+        window.addEventListener('pageshow', () => setSubmitting(false));
+    });
+}
 
 function runWhenIdle(callback, { timeout = 1200, delay = 0 } = {}) {
     const invoke = () => {

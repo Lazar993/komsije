@@ -3,7 +3,7 @@
     $existingImages = $editing ? $post->images : collect();
 @endphp
 
-<form method="POST" action="{{ $editing ? route('portal.neighbor-board.update', $post) : route('portal.neighbor-board.store') }}" enctype="multipart/form-data" class="space-y-6">
+<form method="POST" action="{{ $editing ? route('portal.neighbor-board.update', $post) : route('portal.neighbor-board.store') }}" enctype="multipart/form-data" class="space-y-6" data-submit-loading>
     @csrf
     @if ($editing)
         @method('PUT')
@@ -71,7 +71,10 @@
     @endif
 
     <div class="flex flex-wrap items-center gap-3">
-        <button type="submit" class="rounded-[1.25rem] bg-[var(--komsije-primary)] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">{{ $editing ? __('Sačuvaj izmene') : __('Objavi') }}</button>
+        <button type="submit" class="relative inline-flex items-center justify-center rounded-[1.25rem] bg-[var(--komsije-primary)] px-5 py-3 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70">
+            <x-filament::loading-indicator class="absolute hidden h-5 w-5 animate-spin" data-submit-loader aria-hidden="true" />
+            <span data-submit-label>{{ $editing ? __('Sačuvaj izmene') : __('Objavi') }}</span>
+        </button>
         <a href="{{ $editing ? route('portal.neighbor-board.show', $post) : route('portal.neighbor-board.index') }}" class="rounded-[1.25rem] border border-[var(--komsije-border)] bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:text-[var(--komsije-primary)]">{{ __('Otkaži') }}</a>
     </div>
 </form>

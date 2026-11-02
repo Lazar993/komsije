@@ -17,6 +17,29 @@ class NeighborBoardPortalTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_neighbor_board_forms_include_submit_loading_controls(): void
+    {
+        $tenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+
+        $post = NeighborBoardPost::factory()->create([
+            'building_id' => $building->getKey(),
+            'author_id' => $tenant->getKey(),
+        ]);
+
+        foreach ([route('portal.neighbor-board.create'), route('portal.neighbor-board.edit', $post)] as $url) {
+            $this->actingAs($tenant)
+                ->withSession(['current_building_id' => $building->getKey()])
+                ->get($url)
+                ->assertOk()
+                ->assertSee('data-submit-loading', false)
+                ->assertSee('data-submit-loader', false)
+                ->assertSee('data-submit-label', false)
+                ->assertSee('animate-spin', false);
+        }
+    }
+
     public function test_tenant_can_create_neighbor_board_post(): void
     {
         $tenant = User::factory()->create();

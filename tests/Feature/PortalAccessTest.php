@@ -48,6 +48,27 @@ class PortalAccessTest extends TestCase
             ->assertSessionHas('current_building_id', $buildingB->getKey());
     }
 
+    public function test_creation_forms_include_submit_loading_controls(): void
+    {
+        $tenant = User::factory()->create();
+        $building = Building::factory()->create();
+        $apartment = Apartment::factory()->create(['building_id' => $building->getKey()]);
+
+        $building->users()->attach($tenant, ['role' => BuildingRole::Tenant->value]);
+        $apartment->tenants()->attach($tenant);
+
+        foreach (['portal.tickets.create', 'portal.announcements.create'] as $route) {
+            $this->actingAs($tenant)
+                ->withSession(['current_building_id' => $building->getKey()])
+                ->get(route($route))
+                ->assertOk()
+                ->assertSee('data-submit-loading', false)
+                ->assertSee('data-submit-loader', false)
+                ->assertSee('data-submit-label', false)
+                ->assertSee('animate-spin', false);
+        }
+    }
+
     public function test_tenant_can_create_ticket_from_the_portal(): void
     {
         $tenant = User::factory()->create();
