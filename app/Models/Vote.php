@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['poll_id', 'poll_option_id', 'user_id'])]
 class Vote extends Model
@@ -15,6 +16,11 @@ class Vote extends Model
     use HasFactory;
 
     public const UPDATED_AT = null;
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(PollAnswer::class);
+    }
 
     public function user(): BelongsTo
     {

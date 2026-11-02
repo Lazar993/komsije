@@ -23,6 +23,11 @@ final class PollPolicy
         return $user->belongsToBuilding((int) $poll->building_id);
     }
 
+    public function exportResults(User $user, Poll $poll): bool
+    {
+        return $user->isBuildingAdmin((int) $poll->building_id);
+    }
+
     public function create(User $user, ?Building $building = null): bool
     {
         if (! $this->buildingAllowsWrites($building)) {
@@ -60,6 +65,6 @@ final class PollPolicy
             return false;
         }
 
-        return $user->belongsToBuilding((int) $poll->building_id);
+        return $poll->eligibleVoters()->whereKey($user->getKey())->exists();
     }
 }

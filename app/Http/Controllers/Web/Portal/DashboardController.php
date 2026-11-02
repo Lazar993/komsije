@@ -9,8 +9,8 @@ use App\Models\Building;
 use App\Models\Poll;
 use App\Services\AnnouncementService;
 use App\Services\DashboardService;
-use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 final class DashboardController extends PortalController
@@ -18,8 +18,7 @@ final class DashboardController extends PortalController
     public function __construct(
         private readonly AnnouncementService $announcementService,
         private readonly DashboardService $dashboardService,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Request $request): View
     {
@@ -87,16 +86,12 @@ final class DashboardController extends PortalController
     {
         return Poll::query()
             ->where('building_id', $building->getKey())
-            ->open()
-            ->withCount('votes')
             ->withExists([
                 'votes as has_voted' => fn ($query) => $query->where('user_id', $userId),
             ])
             ->with([
-                'options' => fn ($query) => $query->withCount('votes')->orderBy('id'),
-                'votes' => fn ($query) => $query
-                    ->where('user_id', $userId)
-                    ->select(['id', 'poll_id', 'poll_option_id', 'user_id']),
+                'questions.options',
+                'options' => fn ($query) => $query->orderBy('id'),
             ])
             ->latest('created_at')
             ->limit(3)

@@ -15,6 +15,7 @@ class ViewPoll extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            PollResource::exportPdfAction(),
             EditAction::make(),
         ];
     }

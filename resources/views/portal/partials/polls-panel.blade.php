@@ -3,9 +3,9 @@
         <div class="flex items-center justify-between gap-4">
             <div class="min-w-0">
                 <p class="text-sm font-semibold text-[var(--komsije-primary)]">{{ __('Ankete') }}</p>
-                <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Aktivne ankete') }}</h2>
+                <h2 class="mt-1 text-2xl font-semibold tracking-tight text-slate-950">{{ __('Recent polls') }}</h2>
             </div>
-            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ __('Aktivno: :count', ['count' => $polls->count()]) }}</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ __('Aktivno: :count', ['count' => $polls->filter(fn ($poll) => $poll->isOpenForVoting())->count()]) }}</span>
         </div>
 
         <div class="mt-5 grid gap-4 lg:grid-cols-2">

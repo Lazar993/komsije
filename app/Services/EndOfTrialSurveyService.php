@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Generates the end-of-trial satisfaction survey.
  *
- * The existing Poll model represents a single question with a set of options,
- * so the survey is expressed as one satisfaction poll with a 1–5 star scale.
+ * The survey contains one satisfaction question with a 1–5 star scale.
  * The poll is dispatched through the existing PollCreated event so managers are
  * notified via the normal notification pipeline and can publish/share it.
  */
@@ -41,8 +40,10 @@ final class EndOfTrialSurveyService
                 'ends_at' => now()->addDays(7),
             ]);
 
+            $question = $poll->questions()->create(['text' => $this->title()]);
+
             foreach ($this->options() as $text) {
-                $poll->options()->create(['text' => $text]);
+                $question->options()->create(['text' => $text]);
             }
 
             return $poll;
@@ -64,11 +65,11 @@ final class EndOfTrialSurveyService
     private function options(): array
     {
         return [
-            '⭐ ' . __('Very dissatisfied'),
-            '⭐⭐ ' . __('Dissatisfied'),
-            '⭐⭐⭐ ' . __('Neutral'),
-            '⭐⭐⭐⭐ ' . __('Satisfied'),
-            '⭐⭐⭐⭐⭐ ' . __('Very satisfied'),
+            '⭐ '.__('Very dissatisfied'),
+            '⭐⭐ '.__('Dissatisfied'),
+            '⭐⭐⭐ '.__('Neutral'),
+            '⭐⭐⭐⭐ '.__('Satisfied'),
+            '⭐⭐⭐⭐⭐ '.__('Very satisfied'),
         ];
     }
 }

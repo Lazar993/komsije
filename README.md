@@ -38,6 +38,16 @@ Production-ready SaaS foundation for residential building management built with 
 
 Filament resources are generated and then customized so admin writes use the same services and authorization rules as the API. Property managers only see their assigned buildings. Super admins see everything.
 
+### Polls
+
+- Informational polls contain one or more questions, each with at least two options. Residents select one answer per question and submit all answers together, once per poll.
+- Enable **Decision-making poll** to require either a simple majority (strictly more than 50%) or a two-thirds majority (at least 2/3). The denominator is all currently active users with the tenant role in that building, including those who have not voted. Managers are not eligible voters.
+- A decision question succeeds when an option reaches the required majority. The whole decision poll succeeds only when every question succeeds. Informational polls have no success/failure status.
+- While voting is open, only turnout is shown, such as `6/15 residents voted`. Results and decision outcomes appear after the deadline or after the manager closes the poll by disabling **Active**.
+- Questions, options, building, majority rules, and anonymity are locked after the first vote. Anonymous polls never expose voter identities.
+- After voting closes, building managers and super admins can use **Download PDF** from the poll list or details. The localized A4 report includes the title, description, building, turnout, majority threshold, all question results, selected majority answers, and final outcome. Informational reports do not declare a decision, and no report lists voter identities.
+- Run `php artisan migrate` when upgrading. Existing polls become single-question informational polls, preserving option and vote IDs.
+
 ## API surface
 
 ### Auth
